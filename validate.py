@@ -39,7 +39,7 @@ Semántica implementada (subconjunto deliberado de ISO Schematron):
     patterns/reglas abstractos, diagnostics, xsl:key, sqf:fix (Quick Fixes de oXygen: no afectan
     a los veredictos).
 
-Requisitos: pip install saxonche lxml
+Requisitos: Python 3.15 o posterior; pip install saxonche lxml
             odds/extract-isosch.xsl + common/functions.xsl (TEI Stylesheets)
             junto a este script, solo si se usa -o.
 """
@@ -58,10 +58,18 @@ from collections import Counter
 from copy import deepcopy
 from pathlib import Path
 
+# Python 3.15 o posterior (como pide pyproject.toml). Se comprueba antes de
+# importar lxml y saxonche, para que con un Python más antiguo el mensaje
+# sea claro: error de entorno, código 3 (la extensión de VS Code lo muestra).
+if sys.version_info < (3, 15):
+    print(f"validate.py necesita Python 3.15 o posterior; este es Python "
+          f"{sys.version.split()[0]}.", file=sys.stderr)
+    sys.exit(3)
+
 from lxml import etree
 from saxonche import PySaxonProcessor
 
-__version__ = "1.10"
+__version__ = "1.11"
 
 SCH_NS = 'http://purl.oclc.org/dsdl/schematron'
 S = f'{{{SCH_NS}}}'

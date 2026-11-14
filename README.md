@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 1.10** (`validate.py --version`)
+**Version 1.11** (`validate.py --version`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -67,7 +67,7 @@ python3 tools/screenshots.py --python ~/.venvs/schematron/bin/python
 
 | Component | Version | Role |
 |---|---|---|
-| Python | ≥ 3.9 | interpreter |
+| Python | ≥ 3.15 | interpreter |
 | [saxonche](https://pypi.org/project/saxonche/) | ≥ 12 | XSLT 3.0 / XPath 3.1 engine (Saxon C) |
 | [lxml](https://pypi.org/project/lxml/) | ≥ 4.9 | line-number resolution |
 | `extract-isosch.xsl` + `common/functions.xsl` | TEI Stylesheets (`dev` branch) | ODD → `.sch` extraction (only with `-o`) |
@@ -438,7 +438,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **1.10** | 2026-11-14 | Python 3.15 or later is needed (it was 3.13); the validation is the same |
+| **1.11** | 2026-11-14 | validate.py checks that its Python is 3.15 or later and, if not, says so clearly (an environment error, exit code 3) instead of failing later; the requirements say 3.15 (they said 3.9). Bundled in the VS Code extension 0.5.6 |
+| 1.10 | 2026-11-14 | Python 3.15 or later is needed (it was 3.13); the validation is the same |
 | 1.9 | 2026-11-14 | Python 3.13 or later is needed (it was 3.11), as in the author's other programs; the validation is the same |
 | 1.8 | 2026-11-12 | `--as PATH`: validate a document as if it were located elsewhere (relative `xml-model` hrefs, report name); schema auto-detection now reads the `xml-model` PIs tolerantly, so a document that is not (yet) well-formed gets a normal "not well-formed" error with its line instead of an environment failure. Used by the VS Code extension 0.4.0 to validate as you type |
 | 1.7 | 2026-11-12 | Fix: concurrent runs (e.g. VS Code validating several files at once) could read a downloaded schema while another run was writing it, failing with "no es XML bien formado: Premature end of data". All cache writes (downloaded schemas, harvested and extracted `.sch`) are now **atomic** (temporary file + rename); a damaged cached copy left by older versions is detected and re-downloaded or regenerated; a download that is not well-formed XML is never cached; the harvest self-check now runs before writing |

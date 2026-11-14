@@ -2,7 +2,7 @@
 
 *(English: [README.md](README.md))*
 
-**Versión 1.10** (`validate.py --version`)
+**Versión 1.11** (`validate.py --version`)
 
 Validador de la capa Schematron del proyecto SMTrad. Extrae las reglas ISO
 Schematron embebidas en el ODD (`smed-schema.xml`) y las ejecuta contra uno o
@@ -69,7 +69,7 @@ python3 tools/screenshots.py --python ~/.venvs/schematron/bin/python
 
 | Componente | Versión | Papel |
 |---|---|---|
-| Python | ≥ 3.9 | intérprete |
+| Python | ≥ 3.15 | intérprete |
 | [saxonche](https://pypi.org/project/saxonche/) | ≥ 12 | motor XSLT 3.0 / XPath 3.1 (Saxon C) |
 | [lxml](https://pypi.org/project/lxml/) | ≥ 4.9 | resolución de números de línea |
 | `extract-isosch.xsl` + `common/functions.xsl` | TEI Stylesheets (rama `dev`) | extracción ODD → `.sch` (solo con `-o`) |
@@ -439,7 +439,8 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **1.10** | 2026-11-14 | Se necesita Python 3.15 o posterior (antes, 3.13); la validación es la misma |
+| **1.11** | 2026-11-14 | validate.py comprueba que su Python sea 3.15 o posterior y, si no, lo dice con claridad (error de entorno, código 3) en lugar de fallar más adelante; los requisitos dicen 3.15 (decían 3.9). Incluido en la extensión de VS Code 0.5.6 |
+| 1.10 | 2026-11-14 | Se necesita Python 3.15 o posterior (antes, 3.13); la validación es la misma |
 | 1.9 | 2026-11-14 | Se necesita Python 3.13 o posterior (antes, 3.11), como en los demás programas del autor; la validación es la misma |
 | 1.8 | 2026-11-12 | `--as RUTA`: valida un documento como si estuviera en otra ubicación (hrefs relativos de `xml-model`, nombre en el informe); la autodetección del esquema lee ahora las PIs `xml-model` de forma tolerante, de modo que un documento (aún) mal formado recibe un error normal de buena formación con su línea en lugar de un fallo de entorno. Lo usa la extensión de VS Code 0.4.0 para validar mientras se escribe |
 | 1.7 | 2026-11-12 | Corrección: corridas simultáneas (p. ej. VS Code validando varios archivos a la vez) podían leer un esquema descargado mientras otra lo escribía, y fallaban con "no es XML bien formado: Premature end of data". Todas las escrituras de caché (esquemas descargados, `.sch` cosechados y extraídos) son ahora **atómicas** (archivo temporal + renombrado); una copia dañada dejada por versiones anteriores se detecta y se vuelve a descargar o regenerar; una descarga que no sea XML bien formado nunca se guarda en caché; el self-check de la cosecha se hace antes de escribir |

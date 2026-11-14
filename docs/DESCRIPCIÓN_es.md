@@ -34,7 +34,7 @@ Para que el programa responda rápido, lo que se extrae, se cosecha o se descarg
 
 ## Implementación
 
-Está escrito en Python 3.9 o superior, con dos bibliotecas, saxonche y lxml; la extensión, en TypeScript. Son 12 archivos de código, unas 2450 líneas.
+Está escrito en Python 3.15 o superior, con dos bibliotecas, saxonche y lxml; la extensión, en TypeScript. Son 12 archivos de código, unas 2450 líneas.
 
 Antes se probaron implementaciones hechas. pyschematron tardaba minutos sobre el corpus, por las búsquedas `//*[@xml:id=…]` de las reglas; jing no admite `queryBinding="xslt2"`; SchXslt exigía administrar más archivos XSLT. Saxon, a través de saxonche, ya era una dependencia del proyecto, corre a la velocidad de C, y su XPath 3.1 es un superconjunto del de oXygen, de modo que `matches()`, `tokenize()`, `some`/`every` y `let` se comportan igual.
 
@@ -76,7 +76,7 @@ validate.py se comprueba con documentos y esquemas pequeños hechos para cada ca
 
 ## Plataforma
 
-Funciona en Linux. validate.py necesita Python 3.9 o superior, con saxonche y lxml; jing es opcional, para la capa estructural, y la ruta del ODD necesita además `extract-isosch.xsl` y `common/functions.xsl` de las TEI Stylesheets junto al script. La extensión necesita Visual Studio Code 1.85 o posterior; en Linux conviene la versión nativa (RPM o deb) y no la Flatpak, que no ve el Python ni el jing del sistema.
+Funciona en Linux. validate.py necesita Python 3.15 o superior, con saxonche y lxml; jing es opcional, para la capa estructural, y la ruta del ODD necesita además `extract-isosch.xsl` y `common/functions.xsl` de las TEI Stylesheets junto al script. La extensión necesita Visual Studio Code 1.85 o posterior; en Linux conviene la versión nativa (RPM o deb) y no la Flatpak, que no ve el Python ni el jing del sistema.
 
 Al ser Python y una extensión de VS Code, debería funcionar también en Windows y macOS, pero allí no se ha probado. Solo necesita internet para descargar los esquemas remotos la primera vez, o al refrescarlos, y nunca escribe en los documentos que valida.
 
