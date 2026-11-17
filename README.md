@@ -1,4 +1,4 @@
-# py-xmlvalidate — Schematron validation of TEI documents, in the terminal and in VS Code
+# py-xmlvalidate — Schematron validation of TEI documents, in the terminal, VS Code and Emacs
 
 *(Español: [README_es.md](README_es.md))*
 
@@ -23,6 +23,10 @@ in verbose mode, the line number and `xml:id` of every offender.
   or [GitHub](https://github.com/nivaca/py-xmlvalidate/releases)) and install it
   with `code --install-extension validate-schematron-*.vsix`. See
   [VS Code extension](#32-vs-code-extension).
+- **The Emacs package** (`emacs/`, Emacs 31 or later) does the same with
+  Flymake: problems underlined as you type, the message under the cursor in
+  the echo area, all of them in Flymake's list. It installs from this
+  repository with `package-vc-install`. See [Emacs package](#33-emacs-package).
 
 How it was made is told in [`docs/DESCRIPTION.md`](docs/DESCRIPTION.md).
 
@@ -258,6 +262,36 @@ cd vscode && npm install && npx vsce package
 ```
 
 Settings, requirements and details are in [vscode/README.md](vscode/README.md).
+
+### 3.3 Emacs package
+
+`emacs/py-xmlvalidate.el` is a Flymake backend for Emacs 31 or later. It
+runs `py-xmlvalidate.py --json` the same way the VS Code extension does,
+with jing for RelaxNG schemas, and shows the results in the buffer: each
+problem underlined, its message in the echo area when the cursor is on it,
+with its layer (Schematron, RelaxNG or XML) and pattern, and all of them in
+`M-x flymake-show-buffer-diagnostics`. It checks as you type, from a
+private temporary copy, and a new check cancels the one still running.
+`M-x py-xmlvalidate-report` gives the full text report with links to the
+lines, and `M-x py-xmlvalidate-refresh-schema` downloads a remote schema
+again.
+
+**Install** (the whole repository is cloned; the package uses its copy of
+`py-xmlvalidate.py`):
+
+```elisp
+(package-vc-install
+ '(py-xmlvalidate :url "https://codeberg.org/nivaca/py-xmlvalidate"
+                  :lisp-dir "emacs"))
+(add-hook 'nxml-mode-hook #'py-xmlvalidate-mode)
+(setopt py-xmlvalidate-python "~/.venvs/schematron/bin/python")
+(setopt trusted-content '("~/path/to/your/editions/"))
+```
+
+Flymake checks only files in `trusted-content`. This package keeps that
+rule, because the schema a document names is run by Saxon, and its XPath
+can read files and fetch URLs. Settings, commands and tests are in
+[emacs/README.md](emacs/README.md).
 
 ## 4. Configuration and caching
 

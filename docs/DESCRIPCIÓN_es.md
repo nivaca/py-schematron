@@ -18,11 +18,14 @@ py-xmlvalidate-all.sh valida en dos capas sobre el mismo RelaxNG: primero la est
 
 La extensión está en `vscode/`: `extension.ts` se ocupa de la integración con el editor (cuándo validar, los procesos, los diagnósticos, la barra de estado y las órdenes), y `parse.ts` de leer los informes de py-xmlvalidate.py y de jing, sin depender del editor, para poder probarla aparte. Al empaquetarse, la extensión lleva su propia copia de py-xmlvalidate.py.
 
+El paquete de Emacs está en `emacs/`: `py-xmlvalidate.el` lee los mismos informes con funciones sin efectos, que se prueban aparte, y lanza los procesos desde un backend de Flymake. No lleva copia del script: se instala clonando el repositorio y usa el py-xmlvalidate.py de este.
+
 Los archivos del proyecto son estos:
 
 - `py-xmlvalidate.py`: el validador (662 líneas).
 - `py-xmlvalidate-all.sh`: las dos capas, RelaxNG y Schematron (156 líneas).
 - `vscode/`: la extensión (`src/extension.ts`, `src/parse.ts`), sus pruebas (`src/test/`), su icono (`images/`), su registro de cambios (`CHANGELOG.md`) y su README.
+- `emacs/`: el paquete de Emacs (`py-xmlvalidate.el`), sus pruebas (`test/`) y su README.
 - `py-xmlvalidate-install.py`: enlaza los dos scripts en `~/bin`, para llamarlos por su nombre desde cualquier carpeta.
 - `tools/screenshots.py`: hace las capturas de los README.
 - `tools/bundle-zip.py`: hace los archivos de cada versión en `dist/`: un zip de py-xmlvalidate.py con su documentación y el paquete de la extensión (`.vsix`).
@@ -63,6 +66,14 @@ El texto sin guardar se escribe en una carpeta temporal privada, nunca junto al 
 
 Una barra de estado muestra el resultado del archivo actual: validando, limpio, el número de problemas o un fallo; sin ella, un archivo limpio parecía una extensión que no funcionaba. Si el Python configurado no tiene saxonche, la extensión dice cuál probó y ofrece elegir otro, comprobándolo antes de guardarlo. La orden *Refresh Schema* vuelve a descargar un esquema remoto que haya cambiado y valida de nuevo los archivos abiertos.
 
+## El paquete de Emacs
+
+Para Emacs 31 había cuatro diseños posibles: un backend de Flymake, un comprobador de Flycheck, un servidor de lenguaje usado con Eglot y una simple orden de informe. Elegí Flymake porque viene con Emacs y no pide nada más. La velocidad no justificaba un servidor: Python con sus bibliotecas arranca en unos 15 ms, y los segundos que tarda una edición grande se van en las reglas mismas, que es lo que la versión 1.15 acababa de reducir.
+
+El backend trabaja como la extensión. Escribe el búfer en una copia temporal privada, ejecuta py-xmlvalidate.py con `--json` y `--as`, y jing si el esquema es RelaxNG, y convierte los dos informes en diagnósticos de Flymake con su capa y su pattern; una comprobación nueva mata la que sigue en marcha. `M-x py-xmlvalidate-report` muestra el informe de texto con enlaces a las líneas, y `M-x py-xmlvalidate-check-setup` dice si Python, saxonche, lxml, el script y jing están donde deben.
+
+Emacs 31 solo deja que Flymake corra sobre los archivos de `trusted-content`, y el paquete respeta esa regla en lugar de declararse inofensivo: el `<?xml-model?>` de un documento elige el esquema, y Saxon ejecuta el XPath de ese esquema, que puede leer archivos y pedir URL. Basta poner ahí las carpetas de las ediciones propias.
+
 ## Lo que vino de oXygen
 
 oXygen falla en silencio de tres maneras: muestra como mucho 100 avisos de validación y descarta el resto sin decirlo; cuando dos reglas de un pattern comparten contexto, solo se ejecuta la primera (*first-match shadowing*); y una regla vacía por error puede invalidar el esquema entero. Un documento podía parecer limpio sin estarlo.
@@ -73,16 +84,18 @@ py-xmlvalidate.py elimina el primer fallo por diseño: el recuento por regla est
 
 La extensión tiene 11 pruebas automáticas (`npm test`), que corren con el ejecutor de pruebas de Node. Comprueban cómo los informes de py-xmlvalidate.py y de jing se convierten en diagnósticos, las gravedades, dónde empiezan y terminan los subrayados y los mensajes de error; una de ellas ejecuta py-xmlvalidate.py de principio a fin. Otra prueba (`npm run test:integration`) ejecuta la extensión dentro de un VS Code real, sin pantalla y con un perfil propio: comprueba que los errores caigan en las líneas correctas y se vean subrayados, que se encuentre un elemento mal escrito, que se valide el texto sin guardar y que *Refresh Schema* recoja un esquema cambiado en un pequeño servidor web. Las pruebas de la extensión corren también en GitHub Actions con cada etiqueta de versión.
 
+El paquete de Emacs tiene 19 pruebas de ERT, que corren en un Emacs sin pantalla. Seis leen los informes de py-xmlvalidate.py y de jing; las otras trece ejecutan los programas reales mediante Flymake, sobre documentos hechos para cada caso, y comprueban las líneas y los subrayados, el elemento mal escrito, el texto sin guardar, la comprobación cancelada por otra más nueva, el esquema remoto refrescado desde un pequeño servidor web, el archivo fuera de `trusted-content`, el búfer del informe con sus enlaces, y que no quede ningún proceso ni copia temporal. El paquete se probó también instalándolo con `package-vc-install` en un perfil vacío.
+
 py-xmlvalidate.py se comprueba con documentos y esquemas pequeños hechos para cada caso (*shadowing*, `let`s en cada nivel, espacios de nombres, atributos, texto mal formado, las tres fuentes de reglas), comparando el resultado antes y después de cada cambio, y con el ejemplo de `docs/example/`. Las capturas de los README se rehacen con `tools/screenshots.py` y se revisan a ojo, y el zip de cada versión se prueba descomprimiéndolo y ejecutándolo.
 
 ## Plataforma
 
-Funciona en Linux. py-xmlvalidate.py necesita Python 3.15 o superior, con saxonche y lxml; jing es opcional, para la capa estructural, y la ruta del ODD necesita además `extract-isosch.xsl` y `common/functions.xsl` de las TEI Stylesheets junto al script. La extensión necesita Visual Studio Code 1.85 o posterior; en Linux conviene la versión nativa (RPM o deb) y no la Flatpak, que no ve el Python ni el jing del sistema.
+Funciona en Linux. py-xmlvalidate.py necesita Python 3.15 o superior, con saxonche y lxml; jing es opcional, para la capa estructural, y la ruta del ODD necesita además `extract-isosch.xsl` y `common/functions.xsl` de las TEI Stylesheets junto al script. El paquete de Emacs necesita Emacs 31 o posterior. La extensión necesita Visual Studio Code 1.85 o posterior; en Linux conviene la versión nativa (RPM o deb) y no la Flatpak, que no ve el Python ni el jing del sistema.
 
 Al ser Python y una extensión de VS Code, debería funcionar también en Windows y macOS, pero allí no se ha probado. Solo necesita internet para descargar los esquemas remotos la primera vez, o al refrescarlos, y nunca escribe en los documentos que valida.
 
 ## Ambiente
 
-Lo desarrollé en Fedora Linux 45 con KDE Plasma, con Python 3.15, Node.js 22 y Visual Studio Code, y con git, con repositorios en GitHub y Codeberg. Las capturas se hacen con Xvfb, ImageMagick y Pillow.
+Lo desarrollé en Fedora Linux 45 con KDE Plasma, con Python 3.15, Node.js 22, Visual Studio Code y Emacs 31, y con git, con repositorios en GitHub y Codeberg. Las capturas se hacen con Xvfb, ImageMagick y Pillow.
 
-Para usar py-xmlvalidate.py basta descomprimir el zip de una versión publicada, instalar saxonche y lxml (`pip install saxonche lxml`, mejor en un entorno virtual) y ejecutar `python3 py-xmlvalidate.py documento.xml`. Para la extensión, se descarga el `.vsix` de la misma versión y se instala con `code --install-extension`; en sus ajustes, `schematron.pythonPath` indica el Python que tiene saxonche y lxml. Las descargas de esquemas quedan en `.schema-cache/`, junto al script.
+Para usar py-xmlvalidate.py basta descomprimir el zip de una versión publicada, instalar saxonche y lxml (`pip install saxonche lxml`, mejor en un entorno virtual) y ejecutar `python3 py-xmlvalidate.py documento.xml`. Para la extensión, se descarga el `.vsix` de la misma versión y se instala con `code --install-extension`; en sus ajustes, `schematron.pythonPath` indica el Python que tiene saxonche y lxml. El paquete de Emacs se instala con `package-vc-install`, como explica `emacs/README.md`. Las descargas de esquemas quedan en `.schema-cache/`, junto al script.

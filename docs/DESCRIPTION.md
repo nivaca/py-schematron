@@ -192,6 +192,23 @@ edition, about 26,000 lines, the check went from 13.9 to 3.5 seconds,
 with the same results; a rule whose combined call fails is still evaluated
 test by test, so that a broken test is reported on its own.
 
+Then came an Emacs package, `emacs/py-xmlvalidate.el`, for Emacs 31.  I
+weighed four designs: a Flymake backend, a Flycheck checker, a language
+server used through Eglot, and a mere report command.  Flymake won
+because it is part of Emacs and asks for nothing else.  Speed was not an
+argument for a server: Python with its libraries starts in about 15 ms,
+and the seconds a large edition takes go into the rules themselves,
+which is what version 1.15 had just reduced.  The backend works like
+the extension: it writes the buffer to a private temporary copy, runs
+py-xmlvalidate.py with `--json` and `--as`, and jing for RelaxNG
+schemas, and turns both reports into Flymake diagnostics with their
+layer and pattern; a new check kills the one still running.  Emacs 31
+lets Flymake run only on files listed in `trusted-content`, and the
+package keeps that rule: a document's `<?xml-model?>` chooses the
+schema, and Saxon runs the schema's XPath, which can read files and
+fetch URLs.  The package installs from the repository with
+`package-vc-install` and uses the repository's own py-xmlvalidate.py.
+
 Testing
 -------
 
@@ -206,6 +223,15 @@ visibly underlined, that a misspelt element is found, that unsaved
 changes are validated, and that *Refresh Schema* picks up a schema
 changed on a small web server.  The tests of the extension also run on
 GitHub Actions with each release tag.
+
+The Emacs package has 19 ERT tests, run in a batch Emacs.  Six read the
+reports of py-xmlvalidate.py and jing; the other thirteen run the real
+programs through Flymake on documents made for each case, and check the
+lines and underlines, the typo, unsaved changes, a check cancelled by a
+newer one, a remote schema refreshed from a small web server, a file
+outside `trusted-content`, the report buffer and its links, and that no
+process or temporary copy is left behind.  The package was also
+installed with `package-vc-install` into an empty profile.
 
 py-xmlvalidate.py is checked on small documents and schemas made for each
 case (shadowing, `let`s at every level, namespaces, attributes,
