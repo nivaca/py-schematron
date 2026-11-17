@@ -299,7 +299,9 @@ da la forma completa con `use-package`.
 
 Flymake solo comprueba los archivos de `trusted-content`, y este paquete
 respeta esa regla: Saxon ejecuta el esquema que nombra el documento, y su
-XPath puede leer archivos y pedir URL. La configuración, las órdenes y las
+XPath puede leer archivos y pedir URL. Un archivo que no es de confianza
+recibe un aviso al abrirse, y `M-x py-xmlvalidate-trust-file` lo añade (a
+él o a su carpeta) cuando se le pide. La configuración, las órdenes y las
 pruebas están en [emacs/README.md](emacs/README.md) (en inglés).
 
 ## 4. Configuración y caché

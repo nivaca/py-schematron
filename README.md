@@ -294,7 +294,9 @@ gives the full `use-package` form.
 
 Flymake checks only files in `trusted-content`. This package keeps that
 rule, because the schema a document names is run by Saxon, and its XPath
-can read files and fetch URLs. Settings, commands and tests are in
+can read files and fetch URLs. An untrusted file gets a warning when it is
+opened, and `M-x py-xmlvalidate-trust-file` trusts it (or its folder) on
+request. Settings, commands and tests are in
 [emacs/README.md](emacs/README.md).
 
 ## 4. Configuration and caching

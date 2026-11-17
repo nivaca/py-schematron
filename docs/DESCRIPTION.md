@@ -210,7 +210,14 @@ fetch URLs.  The package installs from the repository with
 `package-vc-install` and uses the repository's own py-xmlvalidate.py.
 Version 0.1.1 added Straight, which builds a package from links to its
 clone; the package now follows the link to its own file to find the
-script.
+script.  In real use, a document opened from the downloads folder was
+never checked as I typed, and only the report showed its Schematron
+errors: the file was not trusted, and the package said so in a passing
+message that nobody reads.  Version 0.1.2 makes this hard to miss: a
+warning in the `*Warnings*` buffer, once per file, with the line to add
+to the init file; commands that explain why they cannot run; a note at
+the end of the report; and `M-x py-xmlvalidate-trust-file`, which trusts
+the file or its folder after asking.
 
 Testing
 -------
@@ -227,14 +234,16 @@ changes are validated, and that *Refresh Schema* picks up a schema
 changed on a small web server.  The tests of the extension also run on
 GitHub Actions with each release tag.
 
-The Emacs package has 20 ERT tests, run in a batch Emacs.  Seven need no
+The Emacs package has 22 ERT tests, run in a batch Emacs.  Seven need no
 Python: they read the reports of py-xmlvalidate.py and jing, and find the
-script, also through a link like Straight's; the other thirteen run the
+script, also through a link like Straight's; the other fifteen run the
 real programs through Flymake on documents made for each case, and check
-the lines and underlines, the typo, unsaved changes, a check cancelled by a
-newer one, a remote schema refreshed from a small web server, a file
-outside `trusted-content`, the report buffer and its links, and that no
-process or temporary copy is left behind.  The package was also
+the lines and underlines, the typo, unsaved changes, a check cancelled by
+a newer one, a remote schema refreshed from a small web server, a file
+outside `trusted-content` (its warning, the commands that refuse, the
+note at the end of its report, and trusting it on request), the report
+buffer and its links, and that no process or temporary copy is left
+behind.  The package was also
 installed with `package-vc-install` and with Straight into empty
 profiles.
 
