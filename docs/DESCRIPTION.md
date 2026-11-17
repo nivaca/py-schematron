@@ -229,6 +229,29 @@ to the init file; commands that explain why they cannot run; a note at
 the end of the report; and `M-x py-xmlvalidate-trust-file`, which trusts
 the file or its folder after asking.
 
+Version 0.2.0 added two things, after looking at how I actually use
+Emacs.  I check code with Flycheck, not Flymake, so XML buffers looked
+and behaved unlike the rest; the package now registers a Flycheck checker
+as well, chosen when Flycheck is installed, with the same trust rule that
+Flymake imposes (Flycheck has none of its own).  And nxml-mode, the XML
+editor, had no schema at all: it cannot read `<?xml-model?>`, so it used
+a "vacuous" schema that allows anything, and its completion offered
+nothing.  After each check, the package now converts the document's
+RelaxNG schema to the compact syntax with trang, keeps it in a cache and
+gives it to nxml, which then completes the elements and attributes the
+schema allows and validates the structure itself, at once.  Two things
+had to be worked around.  nxml's command for setting a schema offers to
+write a `schemas.xml` next to the document, so the package uses the
+function underneath it.  And nxml's tables for the Unicode categories
+`\p{P}` and `\p{S}` leave out ordinary punctuation such as `#`, so it
+rejected 94 `ed="#U2"` attributes in the Latin edition that jing accepts;
+in nxml's copy of the schema, TEI's word pattern also lists those
+characters explicitly.  trang was not installed, and Fedora does not
+package it, so `tools/install-trang.py` downloads it from the jing-trang
+releases, checks its SHA-1 and installs it in `~/bin`, as jing usually
+is (or in `~/.local/bin` when there is no `~/bin`); for the smed
+schema its output is identical to that of the copy inside oXygen.
+
 Testing
 -------
 
@@ -244,18 +267,27 @@ changes are validated, and that *Refresh Schema* picks up a schema
 changed on a small web server.  The tests of the extension also run on
 GitHub Actions with each release tag.
 
-The Emacs package has 22 ERT tests, run in a batch Emacs.  Seven need no
-Python: they read the reports of py-xmlvalidate.py and jing, and find the
-script, also through a link like Straight's; the other fifteen run the
-real programs through Flymake on documents made for each case, and check
-the lines and underlines, the typo, unsaved changes, a check cancelled by
-a newer one, a remote schema refreshed from a small web server, a file
-outside `trusted-content` (its warning, the commands that refuse, the
-note at the end of its report, and trusting it on request), the report
-buffer and its links, and that no process or temporary copy is left
-behind.  The package was also
-installed with `package-vc-install` and with Straight into empty
-profiles.
+The Emacs package has 31 ERT tests, run in a batch Emacs.  Eight need no
+Python: they read the reports of py-xmlvalidate.py and jing, find the
+script (also through a link like Straight's), and adapt the compact
+schema for nxml.  The other twenty-three run the real programs on
+documents made for each case.  Through Flymake they check the lines and
+underlines, the typo, unsaved changes, a check cancelled by a newer one,
+a remote schema refreshed from a small web server, a file outside
+`trusted-content` (its warning, the commands that refuse, the note at
+the end of its report, and trusting it on request), the report buffer
+and its links, and that no process or temporary copy is left behind.
+Through Flycheck, loaded from my own installation, they check the same
+lines, layers and underlines, unsaved text, the trust rule, and that
+turning the mode off leaves Flycheck as it found it.  With trang, they
+check that nxml gets the schema and offers its elements, accepts
+`ed="#U2"`, finds a misplaced element, reuses the cached conversion,
+never replaces a schema chosen by hand, and gets its vacuous schema back.
+The package was also installed with `package-vc-install` and with
+Straight into empty profiles, and tried on the Latin edition: Flycheck's
+check took 2.6 seconds, nxml had the schema 0.7 seconds later and found
+no errors, and inside an `<rdg>` it offered the 123 elements the schema
+allows there.
 
 py-xmlvalidate.py is checked on small documents and schemas made for each
 case (shadowing, `let`s at every level, namespaces, attributes,

@@ -265,12 +265,15 @@ Settings, requirements and details are in [vscode/README.md](vscode/README.md).
 
 ### 3.3 Emacs package
 
-`emacs/py-xmlvalidate.el` is a Flymake backend for Emacs 31 or later. It
-runs `py-xmlvalidate.py --json` the same way the VS Code extension does,
-with jing for RelaxNG schemas, and shows the results in the buffer: each
-problem underlined, its message in the echo area when the cursor is on it,
-with its layer (Schematron, RelaxNG or XML) and pattern, and all of them in
-`M-x flymake-show-buffer-diagnostics`. It checks as you type, from a
+`emacs/py-xmlvalidate.el` is a Flycheck checker and a Flymake backend for
+Emacs 31 or later; it uses Flycheck when it is installed. It runs
+`py-xmlvalidate.py --json` the same way the VS Code extension does, with
+jing for RelaxNG schemas, and shows the results in the buffer: each problem
+underlined, its message when the cursor is on it, with its layer
+(Schematron, RelaxNG or XML) and pattern, and all of them in the checker's
+list. In nxml-mode it also gives nxml the document's RelaxNG schema
+(converted with trang), so that `C-RET` completes the elements and
+attributes the schema allows. It checks as you type, from a
 private temporary copy, and a new check cancels the one still running.
 `M-x py-xmlvalidate-report` gives the full text report with links to the
 lines, and `M-x py-xmlvalidate-refresh-schema` downloads a remote schema

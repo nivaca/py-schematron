@@ -270,12 +270,15 @@ Ajustes, requisitos y detalles en [vscode/README.md](vscode/README.md)
 
 ### 3.3 Paquete de Emacs
 
-`emacs/py-xmlvalidate.el` es un backend de Flymake para Emacs 31 o
-posterior. Ejecuta `py-xmlvalidate.py --json` igual que la extensión de VS
-Code, con jing para los esquemas RelaxNG, y muestra los resultados en el
-búfer: cada problema subrayado, su mensaje en el área de eco cuando el
-cursor está encima, con su capa (Schematron, RelaxNG o XML) y su pattern, y
-todos en `M-x flymake-show-buffer-diagnostics`. Comprueba mientras se
+`emacs/py-xmlvalidate.el` es un comprobador de Flycheck y un backend de
+Flymake para Emacs 31 o posterior; usa Flycheck cuando está instalado.
+Ejecuta `py-xmlvalidate.py --json` igual que la extensión de VS Code, con
+jing para los esquemas RelaxNG, y muestra los resultados en el búfer: cada
+problema subrayado, su mensaje cuando el cursor está encima, con su capa
+(Schematron, RelaxNG o XML) y su pattern, y todos en la lista del
+comprobador. En nxml-mode le da además a nxml el esquema RelaxNG del
+documento (convertido con trang), de modo que `C-RET` completa los elementos
+y atributos que el esquema permite. Comprueba mientras se
 escribe, a partir de una copia temporal privada, y una comprobación nueva
 cancela la que sigue en marcha. `M-x py-xmlvalidate-report` da el informe
 de texto completo, con enlaces a las líneas, y `M-x
