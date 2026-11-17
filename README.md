@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 1.13** (`py-xmlvalidate.py --version`)
+**Version 1.14** (`py-xmlvalidate.py --version`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -95,8 +95,10 @@ curl -sL -o common/functions.xsl \
 Resulting layout:
 
 ```
-validate/
+py-xmlvalidate/
 ├── py-xmlvalidate.py
+├── py-xmlvalidate-all.sh
+├── py-xmlvalidate-install.py
 ├── odds/
 │   └── extract-isosch.xsl
 └── common/
@@ -106,6 +108,27 @@ validate/
 Paths to `odds/` and `common/` are resolved relative to the script
 (`Path(__file__).parent`), not to the working directory: you can invoke it
 from anywhere.
+
+### 2.1 The commands in `~/bin`
+
+To run the scripts by name from any folder, link them into `~/bin`:
+
+```sh
+python3 py-xmlvalidate-install.py
+```
+
+It makes two symbolic links, `~/bin/py-xmlvalidate.py` and
+`~/bin/py-xmlvalidate-all.sh`, that point to this folder, so a `git pull`
+here updates the commands at once; run it again after moving the folder.
+An existing file or another link with the same name is left alone
+(`--force` replaces another link, never a file). `--uninstall` removes only
+its own links, and `--bin FOLDER` puts them somewhere else.
+
+The commands run with the first `python3` on your PATH, which needs saxonche
+and lxml. The installer checks this and, if they are missing, shows the
+command that installs them (`python3 -m pip install --user saxonche lxml`).
+A virtual environment works as well, if its `bin/` folder comes first on
+your PATH.
 
 ## 3. Usage
 
@@ -438,7 +461,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **1.13** | 2026-11-17 | The scripts take the project's name: **py-xmlvalidate.py** (it was xmlvalidate.py) and **py-xmlvalidate-all.sh** (it was xmlvalidate-all.sh). Nothing else changes |
+| **1.14** | 2026-11-17 | **py-xmlvalidate-install.py** links the two scripts into `~/bin` (§2.1), checking that `python3` has saxonche and lxml; `--uninstall` removes the links. py-xmlvalidate-all.sh finds py-xmlvalidate.py through a symbolic link, and py-xmlvalidate.py is executable. The validation is the same |
+| 1.13 | 2026-11-17 | The scripts take the project's name: **py-xmlvalidate.py** (it was xmlvalidate.py) and **py-xmlvalidate-all.sh** (it was xmlvalidate-all.sh). Nothing else changes |
 | 1.12 | 2026-11-17 | The script is renamed **xmlvalidate.py** (it was validate.py), and its companion **xmlvalidate-all.sh** (it was validate-all.sh), to match the project's new name, py-xmlvalidate. Nothing else changes |
 | 1.11 | 2026-11-14 | validate.py checks that its Python is 3.15 or later and, if not, says so clearly (an environment error, exit code 3) instead of failing later; the requirements say 3.15 (they said 3.9). Bundled in the VS Code extension 0.5.6 |
 | 1.10 | 2026-11-14 | Python 3.15 or later is needed (it was 3.13); the validation is the same |

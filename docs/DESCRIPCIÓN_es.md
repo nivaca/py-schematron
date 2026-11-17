@@ -1,4 +1,4 @@
-# py-xmlvalidate 1.12: descripción
+# py-xmlvalidate 1.14: descripción
 
 ## Análisis
 
@@ -23,6 +23,7 @@ Los archivos del proyecto son estos:
 - `py-xmlvalidate.py`: el validador (662 líneas).
 - `py-xmlvalidate-all.sh`: las dos capas, RelaxNG y Schematron (156 líneas).
 - `vscode/`: la extensión (`src/extension.ts`, `src/parse.ts`), sus pruebas (`src/test/`), su icono (`images/`), su registro de cambios (`CHANGELOG.md`) y su README.
+- `py-xmlvalidate-install.py`: enlaza los dos scripts en `~/bin`, para llamarlos por su nombre desde cualquier carpeta.
 - `tools/screenshots.py`: hace las capturas de los README.
 - `tools/bundle-zip.py`: hace los archivos de cada versión en `dist/`: un zip de py-xmlvalidate.py con su documentación y el paquete de la extensión (`.vsix`).
 - `.github/workflows/publish-vscode.yml`: prueba, empaqueta y publica la extensión con cada etiqueta de versión.

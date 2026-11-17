@@ -50,7 +50,9 @@ fi
 
 # py-xmlvalidate.py: junto a este wrapper, o en el PATH (se necesita ya para la
 # clasificación y la autodetección)
-VALIDATE="$(dirname "$0")/py-xmlvalidate.py"
+# (junto al archivo real: si este script se llama desde un enlace simbólico,
+#  p. ej. el que crea py-xmlvalidate-install.py en ~/bin, se sigue el enlace)
+VALIDATE="$(dirname "$(readlink -f "$0")")/py-xmlvalidate.py"
 [ -f "$VALIDATE" ] || VALIDATE=$(command -v py-xmlvalidate.py) || {
   echo "No encuentro py-xmlvalidate.py (ni junto al wrapper ni en el PATH)" >&2; exit 4; }
 
