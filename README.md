@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 1.14** (`py-xmlvalidate.py --version`)
+**Version 1.15** (`py-xmlvalidate.py --version`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -317,10 +317,22 @@ Guidelines Schematron (§7) you will see the `sqf` notice.
 
 ### Performance
 
-Full edition (~28,000 lines, 28 rules, including per-empty-lem
-`//*[@xml:id = ...]` scans): **≈ 1–2 s** on ordinary hardware. The dominant
-cost is those O(n²) scans; should they ever matter, the alternative
-documented in the ODD is `id()` on a Saxon engine.
+The Latin edition, `salmarc_ed_lat.xml` (about 26,000 lines and 2,000
+`<app>` elements), is checked in **about 3.5 s**; small documents, in a tenth
+of a second. Starting the script costs almost nothing (Python with saxonche
+and lxml loads in about 15 ms): the time goes into evaluating the rules.
+
+Since version 1.15, all the tests of a rule are evaluated together, in one
+call per node, so the rule's `<let>` variables are computed once per node,
+as ISO Schematron intends; before, each test computed them again. In the
+smed schema, whose `<app>` rule has seven tests sharing seven costly
+variables, that brought the Latin edition from 13.9 s to 3.5 s, with the
+same results. If a combined call fails, the rule's tests are evaluated one by
+one, so a broken test is still reported on its own.
+
+What remains is the variables' own work, such as `//*[@xml:id = ...]`
+scans; should they ever matter, the alternative documented in the ODD is
+`id()` on a Saxon engine.
 
 ## 6. Reading the output
 
@@ -461,7 +473,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **1.14** | 2026-11-17 | **py-xmlvalidate-install.py** links the two scripts into `~/bin` (§2.1), checking that `python3` has saxonche and lxml; `--uninstall` removes the links. py-xmlvalidate-all.sh finds py-xmlvalidate.py through a symbolic link, and py-xmlvalidate.py is executable. The validation is the same |
+| **1.15** | 2026-11-17 | Faster: all the tests of a rule are evaluated in one call per node, so the rule's `<let>` variables are computed once per node, not once per test. The Latin edition (about 26,000 lines) went from 13.9 s to 3.5 s, with identical results on 35 documents; if the combined call fails, the tests are evaluated one by one, so a broken test is still reported on its own |
+| 1.14 | 2026-11-17 | **py-xmlvalidate-install.py** links the two scripts into `~/bin` (§2.1), checking that `python3` has saxonche and lxml; `--uninstall` removes the links. py-xmlvalidate-all.sh finds py-xmlvalidate.py through a symbolic link, and py-xmlvalidate.py is executable. The validation is the same |
 | 1.13 | 2026-11-17 | The scripts take the project's name: **py-xmlvalidate.py** (it was xmlvalidate.py) and **py-xmlvalidate-all.sh** (it was xmlvalidate-all.sh). Nothing else changes |
 | 1.12 | 2026-11-17 | The script is renamed **xmlvalidate.py** (it was validate.py), and its companion **xmlvalidate-all.sh** (it was validate-all.sh), to match the project's new name, py-xmlvalidate. Nothing else changes |
 | 1.11 | 2026-11-14 | validate.py checks that its Python is 3.15 or later and, if not, says so clearly (an environment error, exit code 3) instead of failing later; the requirements say 3.15 (they said 3.9). Bundled in the VS Code extension 0.5.6 |

@@ -1,4 +1,4 @@
-# py-xmlvalidate 1.14: descripción
+# py-xmlvalidate 1.15: descripción
 
 ## Análisis
 
@@ -39,7 +39,7 @@ Está escrito en Python 3.15 o superior, con dos bibliotecas, saxonche y lxml; l
 
 Antes se probaron implementaciones hechas. pyschematron tardaba minutos sobre el corpus, por las búsquedas `//*[@xml:id=…]` de las reglas; jing no admite `queryBinding="xslt2"`; SchXslt exigía administrar más archivos XSLT. Saxon, a través de saxonche, ya era una dependencia del proyecto, corre a la velocidad de C, y su XPath 3.1 es un superconjunto del de oXygen, de modo que `matches()`, `tokenize()`, `some`/`every` y `let` se comportan igual.
 
-Los contextos relativos de las reglas se evalúan sobre todo el documento, y dentro de cada pattern cada nodo se compara solo con la primera regla cuyo contexto lo abarca, como prescribe ISO Schematron. Los `let` del esquema, del pattern y de la regla se traducen a `let $x := … return …` de XPath, y `current()`, que es de XSLT, se liga al nodo de contexto. Los mensajes interpolan sus `<value-of>` (su valor de cadena) y sus `<name/>` para cada infracción. Una regla que no puede evaluarse se informa una sola vez, con el aviso de que el veredicto está incompleto, y un esquema sin reglas termina con un código de salida propio en lugar de aprobarlo todo.
+Los contextos relativos de las reglas se evalúan sobre todo el documento, y dentro de cada pattern cada nodo se compara solo con la primera regla cuyo contexto lo abarca, como prescribe ISO Schematron. Los `let` del esquema, del pattern y de la regla se traducen a `let $x := … return …` de XPath, y `current()`, que es de XSLT, se liga al nodo de contexto. Desde la versión 1.15, los tests de una regla se evalúan juntos, con sus variables calculadas una sola vez por nodo: la edición latina, de unas 26 000 líneas, pasó así de 13,9 a 3,5 segundos. Los mensajes interpolan sus `<value-of>` (su valor de cadena) y sus `<name/>` para cada infracción. Una regla que no puede evaluarse se informa una sola vez, con el aviso de que el veredicto está incompleto, y un esquema sin reglas termina con un código de salida propio en lugar de aprobarlo todo.
 
 ### Caché
 

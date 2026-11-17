@@ -69,7 +69,7 @@ if sys.version_info < (3, 15):
 from lxml import etree
 from saxonche import PySaxonProcessor
 
-__version__ = "1.14"
+__version__ = "1.15"
 
 SCH_NS = 'http://purl.oclc.org/dsdl/schematron'
 S = f'{{{SCH_NS}}}'
@@ -361,9 +361,15 @@ def leer_mensaje(t):
 
 def cargar_reglas(sch_path: Path):
     """Devuelve (namespaces, patterns); cada pattern es (id, [reglas]), cada
-    regla (context, [tests]) y cada test (tipo, xpath, mensaje, segmentos).
-    Los <let> (de schema, pattern y regla, por ese orden) ya van integrados
-    en las expresiones XPath de tests y segmentos."""
+    regla (context, [tests], conjunta) y cada test (tipo, xpath, mensaje,
+    segmentos, role). Los <let> (de schema, pattern y regla, por ese orden)
+    ya van integrados en las expresiones XPath de tests y segmentos.
+
+    `conjunta` evalúa todos los tests de la regla en una sola llamada, con
+    los <let> calculados una vez por nodo, como manda ISO Schematron; por
+    separado, cada test los recalcula, y en una regla con muchos tests y
+    variables costosas eso multiplica el tiempo. Devuelve un xs:boolean por
+    test, en orden. Es None si la regla tiene un solo test."""
     exigir_archivo(sch_path, 'el Schematron')
     root = etree.parse(str(sch_path)).getroot()
     nss = {ns.get('prefix'): ns.get('uri') for ns in root.iter(S + 'ns')
@@ -383,7 +389,7 @@ def cargar_reglas(sch_path: Path):
                                'reglas abstractas no implementadas: omitidas')
                 continue
             lets = lets_pat + leer_lets(rule)
-            tests = []
+            tests, crudos = [], []
             for t in rule:
                 if not isinstance(t.tag, str):      # comentarios, PIs
                     continue
@@ -404,11 +410,14 @@ def cargar_reglas(sch_path: Path):
                             for k, v in segs]
                     tests.append((qn.localname, con_lets(lets, t.get('test')),
                                   msg, segs, t.get('role') or ''))
+                    crudos.append(t.get('test'))
                 elif qn.localname != 'let':
                     avisar_una_vez(f'el:{qn.localname}',
                                    f'elemento Schematron no implementado: '
                                    f'{qn.localname} (omitido)')
-            reglas.append((rule.get('context'), tests))
+            conjunta = (con_lets(lets, '(' + ', '.join(f'boolean(({c}))' for c in crudos) + ')')
+                        if len(crudos) > 1 else None)
+            reglas.append((rule.get('context'), tests, conjunta))
         if reglas:
             patterns.append((pat.get('id') or '', reglas))
     if root.find(S + 'phase') is not None:
@@ -487,6 +496,22 @@ def validar(doc_path: Path, nss, patterns, proc, n_lineas=None, nombre=None):
             return []
         return [r[i] for i in range(r.size)] if hasattr(r, 'size') else [r]
 
+    def evaluar_juntos(node, conjunta, n):
+        """Los n tests de una regla en una sola llamada (sus <let> se
+        calculan una vez); None si la regla no la tiene o si la llamada
+        falla, y entonces se evalúan uno a uno, para que un test roto se
+        informe solo, como siempre."""
+        if conjunta is None:
+            return None
+        try:
+            r = en(node, xp.evaluate, conjunta)
+        except Exception:
+            return None
+        items = [] if r is None else ([r[i] for i in range(r.size)] if hasattr(r, 'size') else [r])
+        if len(items) != n:
+            return None
+        return [str(item) == 'true' for item in items]
+
     def interpolar(node, msg, segs):
         if not any(k == 'exp' for k, _ in segs):
             return msg
@@ -522,18 +547,22 @@ def validar(doc_path: Path, nss, patterns, proc, n_lineas=None, nombre=None):
     t0 = time.time()
     for pat_id, reglas in patterns:
         ya_casados = set()                    # first-match shadowing
-        for ctx, tests in reglas:
+        for ctx, tests, conjunta in reglas:
             for node in nodos(ctx):
                 path_id = str(en(node, xp.evaluate_single, 'path(.)'))
                 if path_id in ya_casados:
                     continue
                 ya_casados.add(path_id)
-                for tipo, test, msg, segs, role in tests:
-                    try:
-                        val = en(node, xp.effective_boolean_value, test)
-                    except Exception as e:
-                        errores[(msg, ctx, str(e).strip())] += 1
-                        continue
+                valores = evaluar_juntos(node, conjunta, len(tests))
+                for i, (tipo, test, msg, segs, role) in enumerate(tests):
+                    if valores is not None:
+                        val = valores[i]
+                    else:                      # (uno a uno: aísla los errores)
+                        try:
+                            val = en(node, xp.effective_boolean_value, test)
+                        except Exception as e:
+                            errores[(msg, ctx, str(e).strip())] += 1
+                            continue
                     if val == (tipo == 'report'):
                         infracciones.append({
                             'pattern': pat_id, 'context': ctx, 'type': tipo,

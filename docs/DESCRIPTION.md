@@ -184,6 +184,14 @@ publish it in the Visual Studio Marketplace with Trusted Publishing,
 without storing any key (0.5.3).  The repositories are now called
 py-xmlvalidate.
 
+Version 1.15 made the checks faster.  Each test of a rule used to be
+evaluated on its own, computing the rule's `<let>` variables again every
+time; now all the tests of a rule are evaluated in one call per node, with
+the variables computed once, as ISO Schematron intends.  On the Latin
+edition, about 26,000 lines, the check went from 13.9 to 3.5 seconds,
+with the same results; a rule whose combined call fails is still evaluated
+test by test, so that a broken test is reported on its own.
+
 Testing
 -------
 
