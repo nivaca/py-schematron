@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Schematron validation of TEI documents, in the terminal and in VS Code"
 readme = "README.md"
 authors = [
-    { name = "Nicolas Vaughan", email = "nivaca@fastmail.com" }
+    { name = "Nicolas Vaughan", email = "nicolasvaughan@proton.me" }
 ]
 requires-python = ">=3.15"
 license = "GPL-3.0-or-later"

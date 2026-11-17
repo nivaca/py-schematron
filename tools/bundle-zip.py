@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Copyright (C) 2026 Nicolas Vaughan <nivaca@fastmail.com>
+# Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
 # This file is part of py-xmlvalidate. See the LICENSE file for details.
 """Makes the release bundles in dist/: python3 tools/bundle-zip.py
 
