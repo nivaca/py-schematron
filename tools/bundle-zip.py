@@ -4,8 +4,8 @@
 # This file is part of py-xmlvalidate. See the LICENSE file for details.
 """Makes the release bundles in dist/: python3 tools/bundle-zip.py
 
-* dist/py-xmlvalidate-v.VERSION.zip (the version of xmlvalidate.py), with
-  the program in a folder of the same name: xmlvalidate.py, xmlvalidate-all.sh,
+* dist/py-xmlvalidate-v.VERSION.zip (the version of py-xmlvalidate.py), with
+  the program in a folder of the same name: py-xmlvalidate.py, py-xmlvalidate-all.sh,
   the READMEs, the licence and docs/ (the descriptions, the screenshots and
   the example).  It is made from the files git tracks, so nothing that only
   lives in this folder gets in (node_modules, the TEI stylesheets in odds/
@@ -13,7 +13,7 @@
   out as well: what is not part of the program (tools/, with the scripts
   that make the bundles and the screenshots; vscode/, the extension, which
   is distributed as its .vsix; and src/ with pyproject.toml, the package
-  scaffold, not yet in use) and hidden files.  xmlvalidate-all.sh keeps its
+  scaffold, not yet in use) and hidden files.  py-xmlvalidate-all.sh keeps its
   permission to run.
 * dist/validate-schematron-EXTVERSION.vsix, the VS Code extension (named after
   the extension, which keeps its name; the
@@ -44,12 +44,12 @@ NOT_PART = ("tools/", "vscode/", "src/", "pyproject.toml")
 
 
 def version() -> str:
-    """xmlvalidate.py's __version__, read without importing it (that would
+    """py-xmlvalidate.py's __version__, read without importing it (that would
     need saxonche and lxml)."""
-    with open(os.path.join(HERE, "xmlvalidate.py"), encoding="utf-8") as f:
+    with open(os.path.join(HERE, "py-xmlvalidate.py"), encoding="utf-8") as f:
         m = re.search(r'^__version__\s*=\s*"([^"]+)"', f.read(), re.M)
     if not m:
-        sys.exit("bundle-zip.py: no __version__ in xmlvalidate.py")
+        sys.exit("bundle-zip.py: no __version__ in py-xmlvalidate.py")
     return m.group(1)
 
 
@@ -92,7 +92,7 @@ def bundle_zip(folder: str) -> str:
             src = os.path.join(HERE, f)
             info = zipfile.ZipInfo.from_file(src, name() + "/" + f)
             #  (ordinary permissions, whatever this folder has: rw-r--r--, or
-            #  rwxr-xr-x for what can be run, as xmlvalidate-all.sh)
+            #  rwxr-xr-x for what can be run, as py-xmlvalidate-all.sh)
             mode = 0o755 if os.access(src, os.X_OK) else 0o644
             info.external_attr = (0o100000 | mode) << 16
             info.compress_type = zipfile.ZIP_DEFLATED

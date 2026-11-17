@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# xmlvalidate-all.sh — validación bicapa de documentos TEI desde el terminal:
+# py-xmlvalidate-all.sh — validación bicapa de documentos TEI desde el terminal:
 #   capa 1: estructura RelaxNG   (jing; si no está instalado, lxml)
-#   capa 2: reglas Schematron    (xmlvalidate.py -r, cosechadas del mismo .rng)
+#   capa 2: reglas Schematron    (py-xmlvalidate.py -r, cosechadas del mismo .rng)
 #
 # Uso:
-#   xmlvalidate-all.sh [-v] [-m N] esquema.rng documento.xml [más.xml ...]
-#   xmlvalidate-all.sh [-v] [-m N] documento.xml [más.xml ...]        (v1.2)
+#   py-xmlvalidate-all.sh [-v] [-m N] esquema.rng documento.xml [más.xml ...]
+#   py-xmlvalidate-all.sh [-v] [-m N] documento.xml [más.xml ...]        (v1.2)
 #     -v    modo detallado de la capa Schematron (líneas y xml:ids)
-#     -m N  máximo de infractores detallados (pasa --max N a xmlvalidate.py)
+#     -m N  máximo de infractores detallados (pasa --max N a py-xmlvalidate.py)
 #
-# Desde v1.2 (a juego con xmlvalidate.py 1.2): si el primer argumento no es un
+# Desde v1.2 (a juego con py-xmlvalidate.py 1.2): si el primer argumento no es un
 # esquema RelaxNG (se clasifica por CONTENIDO, no por extensión), se asume
 # que todo son documentos y el .rng se AUTODETECTA de la PI <?xml-model?>
 # del primero, reutilizando la resolución y el caché de descargas
-# (.schema-cache/) de xmlvalidate.py. La capa Schematron corre entonces con la
-# autodetección propia de xmlvalidate.py (que converge en la misma fuente).
+# (.schema-cache/) de py-xmlvalidate.py. La capa Schematron corre entonces con la
+# autodetección propia de py-xmlvalidate.py (que converge en la misma fuente).
 #
 # Un único .rng alimenta ambas capas, eliminando el riesgo de divergencia
 # entre artefactos regenerados asimétricamente.
@@ -48,11 +48,11 @@ if [ $# -lt 1 ]; then
   exit 4
 fi
 
-# xmlvalidate.py: junto a este wrapper, o en el PATH (se necesita ya para la
+# py-xmlvalidate.py: junto a este wrapper, o en el PATH (se necesita ya para la
 # clasificación y la autodetección)
-VALIDATE="$(dirname "$0")/xmlvalidate.py"
-[ -f "$VALIDATE" ] || VALIDATE=$(command -v xmlvalidate.py) || {
-  echo "No encuentro xmlvalidate.py (ni junto al wrapper ni en el PATH)" >&2; exit 4; }
+VALIDATE="$(dirname "$0")/py-xmlvalidate.py"
+[ -f "$VALIDATE" ] || VALIDATE=$(command -v py-xmlvalidate.py) || {
+  echo "No encuentro py-xmlvalidate.py (ni junto al wrapper ni en el PATH)" >&2; exit 4; }
 
 [ -f "$1" ] || { echo "No existe: $1" >&2; exit 4; }
 
@@ -78,7 +78,7 @@ if es_rng "$1"; then
 else
   AUTO=1
   # Autodetección: href RelaxNG de la PI xml-model del primer documento,
-  # resuelto/descargado con las funciones y el caché de xmlvalidate.py.
+  # resuelto/descargado con las funciones y el caché de py-xmlvalidate.py.
   RNG=$(python3 - "$VALIDATE" "$1" <<'PY'
 import sys, importlib.util
 from pathlib import Path
@@ -141,7 +141,7 @@ else
   python3 "$VALIDATE" -r "$RNG" $VERBOSE ${MAX:+--max "$MAX"} "$@"
 fi
 rc2=$?
-[ $rc2 -ge 2 ] && { echo "xmlvalidate.py terminó con error ($rc2)" >&2; exit 4; }
+[ $rc2 -ge 2 ] && { echo "py-xmlvalidate.py terminó con error ($rc2)" >&2; exit 4; }
 
 # Síntesis y código de salida compuesto
 total=0
