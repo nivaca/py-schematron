@@ -288,6 +288,10 @@ again.
 (setopt trusted-content '("~/path/to/your/editions/"))
 ```
 
+With Straight, the recipe is `(:host codeberg :repo
+"nivaca/py-xmlvalidate" :files ("emacs/*.el"))`; [emacs/README.md](emacs/README.md)
+gives the full `use-package` form.
+
 Flymake checks only files in `trusted-content`. This package keeps that
 rule, because the schema a document names is run by Saxon, and its XPath
 can read files and fetch URLs. Settings, commands and tests are in

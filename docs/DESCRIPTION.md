@@ -208,6 +208,9 @@ package keeps that rule: a document's `<?xml-model?>` chooses the
 schema, and Saxon runs the schema's XPath, which can read files and
 fetch URLs.  The package installs from the repository with
 `package-vc-install` and uses the repository's own py-xmlvalidate.py.
+Version 0.1.1 added Straight, which builds a package from links to its
+clone; the package now follows the link to its own file to find the
+script.
 
 Testing
 -------
@@ -224,14 +227,16 @@ changes are validated, and that *Refresh Schema* picks up a schema
 changed on a small web server.  The tests of the extension also run on
 GitHub Actions with each release tag.
 
-The Emacs package has 19 ERT tests, run in a batch Emacs.  Six read the
-reports of py-xmlvalidate.py and jing; the other thirteen run the real
-programs through Flymake on documents made for each case, and check the
-lines and underlines, the typo, unsaved changes, a check cancelled by a
+The Emacs package has 20 ERT tests, run in a batch Emacs.  Seven need no
+Python: they read the reports of py-xmlvalidate.py and jing, and find the
+script, also through a link like Straight's; the other thirteen run the
+real programs through Flymake on documents made for each case, and check
+the lines and underlines, the typo, unsaved changes, a check cancelled by a
 newer one, a remote schema refreshed from a small web server, a file
 outside `trusted-content`, the report buffer and its links, and that no
 process or temporary copy is left behind.  The package was also
-installed with `package-vc-install` into an empty profile.
+installed with `package-vc-install` and with Straight into empty
+profiles.
 
 py-xmlvalidate.py is checked on small documents and schemas made for each
 case (shadowing, `let`s at every level, namespaces, attributes,

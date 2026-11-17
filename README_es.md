@@ -293,6 +293,10 @@ py-xmlvalidate-refresh-schema` vuelve a descargar un esquema remoto.
 (setopt trusted-content '("~/ruta/a/tus/ediciones/"))
 ```
 
+Con Straight, la receta es `(:host codeberg :repo
+"nivaca/py-xmlvalidate" :files ("emacs/*.el"))`; [emacs/README.md](emacs/README.md)
+da la forma completa con `use-package`.
+
 Flymake solo comprueba los archivos de `trusted-content`, y este paquete
 respeta esa regla: Saxon ejecuta el esquema que nombra el documento, y su
 XPath puede leer archivos y pedir URL. La configuración, las órdenes y las
