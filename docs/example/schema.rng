@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- A small TEI-like RelaxNG schema with Schematron rules embedded in it,
      the way schemas generated from a TEI ODD carry them. It is the example
-     used by tools/screenshots.py: validate.py harvests the sch:pattern
-     elements (validate.py -r schema.rng), jing checks the structure. -->
+     used by tools/screenshots.py: xmlvalidate.py harvests the sch:pattern
+     elements (xmlvalidate.py -r schema.rng), jing checks the structure. -->
 <grammar xmlns="http://relaxng.org/ns/structure/1.0"
          xmlns:sch="http://purl.oclc.org/dsdl/schematron"
          ns="http://www.tei-c.org/ns/1.0">

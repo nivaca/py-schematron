@@ -1,8 +1,8 @@
-# validate.py — Schematron validation of TEI documents, in the terminal and in VS Code
+# xmlvalidate.py — Schematron validation of TEI documents, in the terminal and in VS Code
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 1.11** (`validate.py --version`)
+**Version 1.12** (`xmlvalidate.py --version`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -10,10 +10,10 @@ against one or more TEI documents with Saxon (XPath 3.1), producing a
 complete report — free of oXygen's display cap — with per-rule counts and,
 in verbose mode, the line number and `xml:id` of every offender.
 
-- **The command line** (`validate.py`) runs the Schematron rules of a
+- **The command line** (`xmlvalidate.py`) runs the Schematron rules of a
   document's schema (an ODD, an ISO Schematron file, or a RelaxNG with the
   rules embedded), which it finds by itself in the document's
-  `<?xml-model?>`. **`validate-all.sh`** adds the structural layer, RelaxNG
+  `<?xml-model?>`. **`xmlvalidate-all.sh`** adds the structural layer, RelaxNG
   with jing, and gives one verdict for both. See [Usage](#3-usage).
 - **The VS Code extension** (`vscode/`) shows the same results in the
   editor, **as you type**: errors underlined in the text, their messages on
@@ -37,11 +37,11 @@ total count.
 
 ## Screenshots
 
-`validate.py` and `validate-all.sh` in the terminal, on the example in
+`xmlvalidate.py` and `xmlvalidate-all.sh` in the terminal, on the example in
 [`docs/example/`](docs/example/) (a short TEI text with deliberate mistakes,
 and a small RelaxNG schema with Schematron rules embedded in it):
 
-![validate.py and validate-all.sh in the terminal](docs/img/cli.png)
+![xmlvalidate.py and xmlvalidate-all.sh in the terminal](docs/img/cli.png)
 
 The VS Code extension (§3.2) on the same document: the errors underlined,
 the message of one of them, all of them in the Problems panel with the layer
@@ -96,7 +96,7 @@ Resulting layout:
 
 ```
 validate/
-├── validate.py
+├── xmlvalidate.py
 ├── odds/
 │   └── extract-isosch.xsl
 └── common/
@@ -110,7 +110,7 @@ from anywhere.
 ## 3. Usage
 
 ```
-python3 validate.py [-o ODD | -s SCH | -r RNG] [-v] [--max N] [--refresh] [--json] [--as PATH] DOC.xml [...]
+python3 xmlvalidate.py [-o ODD | -s SCH | -r RNG] [-v] [--max N] [--refresh] [--json] [--as PATH] DOC.xml [...]
 ```
 
 Since v1.2, the schema flags are **optional**: without them, the schema is
@@ -154,40 +154,40 @@ and:
 The minimal invocation thus becomes simply:
 
 ```sh
-python3 validate.py document.xml
+python3 xmlvalidate.py document.xml
 ```
 
 ### Recipes
 
 ```sh
 # Daily cycle: extract if needed and validate
-python3 validate.py -o ../smed-schema/smed-schema.xml ../salmarc_ed_lat.xml
+python3 xmlvalidate.py -o ../smed-schema/smed-schema.xml ../salmarc_ed_lat.xml
 
 # Full report for a correction campaign
-python3 validate.py -o ../smed-schema/smed-schema.xml -v --max 999 \
+python3 xmlvalidate.py -o ../smed-schema/smed-schema.xml -v --max 999 \
     ../salmarc_ed_lat.xml > pending.txt
 
 # Several documents against a fixed .sch
-python3 validate.py -s smed-schema.sch -v ed_lat.xml ed_es.xml
+python3 xmlvalidate.py -s smed-schema.sch -v ed_lat.xml ed_es.xml
 
 # Against the Guidelines' Schematron, harvested from the tei_all RNG (§7)
-python3 validate.py -r tei_all.rng -v document.xml
+python3 xmlvalidate.py -r tei_all.rng -v document.xml
 
 # One artifact for both layers: structure with Jing, rules with -r
-jing smed-schema.rng ed_lat.xml && python3 validate.py -r smed-schema.rng ed_lat.xml
+jing smed-schema.rng ed_lat.xml && python3 xmlvalidate.py -r smed-schema.rng ed_lat.xml
 
 # Or with the two-layer wrapper (ALWAYS runs both layers, no short-circuit,
 # with a composite verdict: 0 clean, 1 RelaxNG, 2 Schematron, 3 both, 4 environment;
 # falls back to lxml's RelaxNG when jing is not installed):
-./validate-all.sh -v smed-schema.rng ed_lat.xml
+./xmlvalidate-all.sh -v smed-schema.rng ed_lat.xml
 
 # Wrapper in auto mode (v1.2): without a schema argument, it detects the
 # schema from the document's xml-model PI (classifying the first argument
-# by content, not by extension) and shares validate.py's download cache:
-./validate-all.sh -v document.xml
+# by content, not by extension) and shares xmlvalidate.py's download cache:
+./xmlvalidate-all.sh -v document.xml
 
 # In a Makefile or pre-commit hook (non-zero exit code on violations)
-python3 validate.py -s smed-schema.sch ed_lat.xml || echo "pending issues"
+python3 xmlvalidate.py -s smed-schema.sch ed_lat.xml || echo "pending issues"
 ```
 
 ### Exit codes
@@ -202,7 +202,7 @@ python3 validate.py -s smed-schema.sch ed_lat.xml || echo "pending issues"
 ### 3.2 VS Code extension
 
 `vscode/` contains an extension for Visual Studio Code that runs
-`validate.py --json`, and jing when the schema is RelaxNG, and shows the
+`xmlvalidate.py --json`, and jing when the schema is RelaxNG, and shows the
 results as diagnostics in the editor and the Problems panel:
 
 - **When:** as you type (once typing pauses for half a second, a setting),
@@ -228,7 +228,7 @@ code --install-extension validate-schematron-*.vsix
 
 and point `schematron.pythonPath` at a Python that has saxonche and lxml
 (the extension offers to choose one if needed). It bundles its own copy of
-`validate.py`. To build it from source instead:
+`xmlvalidate.py`. To build it from source instead:
 
 ```sh
 cd vscode && npm install && npx vsce package
@@ -241,7 +241,7 @@ Settings, requirements and details are in [vscode/README.md](vscode/README.md).
 - **Extraction cache**: with `-o`, the `.sch` is written next to the ODD
   (same name, `.sch` extension); with `-r`, next to the RNG
   (`.harvested.sch` extension). They are regenerated when the mtime of the source **or of the
-  script itself** is newer — updating `validate.py` automatically
+  script itself** is newer — updating `xmlvalidate.py` automatically
   invalidates all derivatives, so a fixed generator never coexists with
   derivatives produced by the defective version. The `[caché] ... está al día` message indicates a cache
   hit. To force regeneration: `touch` the source or delete the derivative.
@@ -362,7 +362,7 @@ discrepancies due to P5 version differences.
 **Complete two-layer recipe against the standard:**
 
 ```sh
-jing tei_all.rng document.xml && python3 validate.py -r tei_all.rng document.xml
+jing tei_all.rng document.xml && python3 xmlvalidate.py -r tei_all.rng document.xml
 ```
 
 The `&&` stops at the first failing layer; after the runner, `$? -eq 1`
@@ -438,7 +438,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **1.11** | 2026-11-14 | validate.py checks that its Python is 3.15 or later and, if not, says so clearly (an environment error, exit code 3) instead of failing later; the requirements say 3.15 (they said 3.9). Bundled in the VS Code extension 0.5.6 |
+| **1.12** | 2026-11-17 | The script is renamed **xmlvalidate.py** (it was validate.py), and its companion **xmlvalidate-all.sh** (it was validate-all.sh), to match the project's new name, py-xmlvalidate. Nothing else changes |
+| 1.11 | 2026-11-14 | validate.py checks that its Python is 3.15 or later and, if not, says so clearly (an environment error, exit code 3) instead of failing later; the requirements say 3.15 (they said 3.9). Bundled in the VS Code extension 0.5.6 |
 | 1.10 | 2026-11-14 | Python 3.15 or later is needed (it was 3.13); the validation is the same |
 | 1.9 | 2026-11-14 | Python 3.13 or later is needed (it was 3.11), as in the author's other programs; the validation is the same |
 | 1.8 | 2026-11-12 | `--as PATH`: validate a document as if it were located elsewhere (relative `xml-model` hrefs, report name); schema auto-detection now reads the `xml-model` PIs tolerantly, so a document that is not (yet) well-formed gets a normal "not well-formed" error with its line instead of an environment failure. Used by the VS Code extension 0.4.0 to validate as you type |

@@ -15,7 +15,7 @@ Every shot uses the example in docs/example/ (edition.xml, with deliberate
 mistakes, and schema.rng, a small RelaxNG with Schematron rules embedded),
 copied to a temporary folder; no other document is read or written.
 
-* The command line is a real session: validate.py and validate-all.sh are
+* The command line is a real session: xmlvalidate.py and xmlvalidate-all.sh are
   run on the example, and their output is drawn like a terminal (Konsole's
   Breeze colours, the Hack font) with Pillow.
 * VS Code runs on a hidden X display of its own (Xvfb), with a throwaway
@@ -26,7 +26,7 @@ copied to a temporary folder; no other document is read or written.
   on the screen, and the user's own VS Code settings are not touched.
 
 It needs Pillow (for this script), a Python with saxonche and lxml to run
-validate.py (--python; by default the one running this script), jing for the
+xmlvalidate.py (--python; by default the one running this script), jing for the
 RelaxNG layer (--jing; optional), and, for VS Code: Xvfb, ImageMagick,
 Node.js with npm, and VS Code itself (--code).
 """
@@ -60,8 +60,8 @@ HOVER = "must not contain loose text"
 # The command-line session, run in a temporary folder holding the example
 # and the two programs (shown as typed; run with --python and --jing)
 SESSION = [
-    ["python3", "validate.py", "-v", "edition.xml"],
-    ["./validate-all.sh", "edition.xml"],
+    ["python3", "xmlvalidate.py", "-v", "edition.xml"],
+    ["./xmlvalidate-all.sh", "edition.xml"],
 ]
 
 # The terminal: Konsole's Breeze scheme
@@ -87,7 +87,7 @@ def need(program: str, why: str) -> str:
 
 
 def session_environment(python: str, jing: str | None) -> dict:
-    """python3 and jing, as validate-all.sh calls them, are the chosen ones."""
+    """python3 and jing, as xmlvalidate-all.sh calls them, are the chosen ones."""
     bindir = Path(tempfile.mkdtemp(prefix="validate-shot-bin-"))
     for name, target in (("python3", python), ("jing", jing)):
         if target:  # (a wrapper, not a symlink: a venv's python must be started by its own path)
@@ -95,7 +95,7 @@ def session_environment(python: str, jing: str | None) -> dict:
             (bindir / name).chmod(0o755)
     env = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONDONTWRITEBYTECODE="1")
     env["PATH"] = f"{bindir}{os.pathsep}{env.get('PATH', '')}"
-    if not jing:  # (so that validate-all.sh falls back to lxml)
+    if not jing:  # (so that xmlvalidate-all.sh falls back to lxml)
         env["PATH"] = os.pathsep.join(p for p in env["PATH"].split(os.pathsep)
                                       if not (Path(p) / "jing").exists())
     return env
@@ -108,9 +108,9 @@ def cli(out: Path, scale: float, python: str, jing: str | None):
     try:
         for f in ("edition.xml", "schema.rng"):
             shutil.copyfile(EXAMPLE / f, folder / f)
-        for f in ("validate.py", "validate-all.sh"):
+        for f in ("xmlvalidate.py", "xmlvalidate-all.sh"):
             shutil.copy2(ROOT / f, folder / f)
-        (folder / "validate-all.sh").chmod(0o755)
+        (folder / "xmlvalidate-all.sh").chmod(0o755)
         lines: list[tuple[str, str]] = []  # (kind, text): prompt or output
         for args in SESSION:
             lines.append(("prompt", shlex.join(args)))
@@ -319,7 +319,7 @@ def main(argv=None):
                         help=f"the colours of the VS Code shots: {','.join(LOOKS)} (default: both)")
     parser.add_argument("--scale", type=float, default=SCALE, help="times the size on the screen (default: 2)")
     parser.add_argument("--python", default=sys.executable,
-                        help="a Python with saxonche and lxml, to run validate.py (default: this one)")
+                        help="a Python with saxonche and lxml, to run xmlvalidate.py (default: this one)")
     parser.add_argument("--jing", default=shutil.which("jing"),
                         help="jing, for the RelaxNG layer (default: the one on the PATH; without it, none)")
     parser.add_argument("--code", help="VS Code (default: the 'code' command)")

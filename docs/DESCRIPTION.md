@@ -1,23 +1,24 @@
-How validate.py was made
-========================
+How xmlvalidate.py was made
+===========================
 
-validate.py checks TEI documents against the Schematron rules of their
-schema, from the terminal, and reports every offence: how many times
-each rule is broken and, for each offence, the line and the `xml:id` of
-the nearest identifiable element.  It takes the rules from an ODD, from
-an ISO Schematron file, or from a RelaxNG schema generated from an ODD,
-which carries them embedded; it finds the schema by itself in the
-document's `<?xml-model?>` instructions.  A companion script,
-validate-all.sh, also checks the structure with RelaxNG, and an extension
-for Visual Studio Code shows the same results in the editor, underlined
-as you type.  Nicolas Vaughan made it in 2026, for the editions of the
-SMTrad project.  Here I explain how it was made, in eight stages.
+xmlvalidate.py (called validate.py until version 1.12) checks TEI
+documents against the Schematron rules of their schema, from the
+terminal, and reports every offence: how many times each rule is broken
+and, for each offence, the line and the `xml:id` of the nearest
+identifiable element.  It takes the rules from an ODD, from an ISO
+Schematron file, or from a RelaxNG schema generated from an ODD, which
+carries them embedded; it finds the schema by itself in the document's
+`<?xml-model?>` instructions.  A companion script, xmlvalidate-all.sh,
+also checks the structure with RelaxNG, and an extension for Visual
+Studio Code shows the same results in the editor, underlined as you
+type.  Nicolas Vaughan made it in 2026, for the editions of the SMTrad
+project.  Here I explain how it was made, in eight stages.
 
 It stands on four pieces of other people's work: Saxon, through saxonche
 (Saxon C), which evaluates the rules with XPath 3.1; lxml, which finds
 the lines and the `xml:id`s; jing, by James Clark, which checks the
 RelaxNG structure; and the stylesheet `extract-isosch.xsl` of the TEI
-Stylesheets, which extracts the Schematron of an ODD.  validate.py is
+Stylesheets, which extracts the Schematron of an ODD.  xmlvalidate.py is
 free software, under the GNU General Public License, version 3 or later.
 
 Nicolas Vaughan is Associate Professor of Literature at the School of Arts
@@ -56,7 +57,7 @@ the same way.
 
 Version 1.1 (July 2026) added a second source of rules: a RelaxNG schema
 generated from an ODD carries the Schematron patterns embedded in it, the
-very rules that jing ignores.  validate.py harvests them, without
+very rules that jing ignores.  xmlvalidate.py harvests them, without
 duplicates, into a Schematron file of its own.  Harvesting had a subtle
 bug: copied out of their context, the patterns could be written with
 the wrong namespace and come back as nothing.  The fix cleans up the
@@ -65,21 +66,21 @@ and compares the number of patterns before using it.
 
 The same version added `current()` (the TEI Guidelines' rules use it),
 guards against documents that are not well-formed and against schemas
-without rules (which would approve anything), an exit code of its own for
-problems of the environment, and a cache that is renewed when either the
-schema or the script changes.  validate-all.sh runs the two layers on the
-same RelaxNG file: the structure with jing (or lxml, without it), then
-the rules with validate.py, and combines their verdicts in its exit
-code.
+without rules (which would approve anything), an exit code of its own
+for problems of the environment, and a cache that is renewed when either
+the schema or the script changes.  xmlvalidate-all.sh runs the two
+layers on the same RelaxNG file: the structure with jing (or lxml,
+without it), then the rules with xmlvalidate.py, and combines their
+verdicts in its exit code.
 
 3. Finding the schema
 ---------------------
 
-From version 1.2 (July 2026) no schema has to be given: validate.py reads
-the document's `<?xml-model?>` instructions, prefers a Schematron one,
-then a RelaxNG one, and downloads a remote schema once, to a cache, until
-`--refresh` asks for it again.  What a file is (ODD, Schematron or
-RelaxNG) is decided by its content, not by its name.  validate-all.sh
+From version 1.2 (July 2026) no schema has to be given: xmlvalidate.py
+reads the document's `<?xml-model?>` instructions, prefers a Schematron
+one, then a RelaxNG one, and downloads a remote schema once, to a cache,
+until `--refresh` asks for it again.  What a file is (ODD, Schematron or
+RelaxNG) is decided by its content, not by its name.  xmlvalidate-all.sh
 gained the same detection.  Version 1.3 made the messages more useful:
 the `<value-of>`s inside them are evaluated for each offence, so a
 message names, for example, the exact sigla that are missing.
@@ -105,13 +106,13 @@ changed.
 5. A Visual Studio Code extension
 ---------------------------------
 
-Version 1.5 gave validate.py a `--json` report, with every offence, its
+Version 1.5 gave xmlvalidate.py a `--json` report, with every offence, its
 line, `xml:id`, pattern and `role`, and the rules that failed.  On it
 stands an extension for Visual Studio Code (`vscode/`), which runs
-validate.py, and jing for RelaxNG schemas, when a document is opened or
+xmlvalidate.py, and jing for RelaxNG schemas, when a document is opened or
 saved, and shows the offences as diagnostics: underlined in the text,
 with the message on hover, and listed in the Problems panel.  The
-extension carries its own copy of validate.py.
+extension carries its own copy of xmlvalidate.py.
 
 The next versions made it easier to set up and to read.  When the Python
 it uses lacks saxonche, it says which Python it tried, and offers to
@@ -141,10 +142,10 @@ validated, the old version failed 88 times in 635; the new one, never.
 Version 0.4 of the extension validates the text being edited, unsaved
 changes included, once typing pauses (half a second by default, a
 setting).  The text is written to a private temporary folder, never next
-to the user's file, and validate.py 1.8 has `--as`, which treats that
+to the user's file, and xmlvalidate.py 1.8 has `--as`, which treats that
 copy as if it were the real file, so relative `<?xml-model?>` paths still
 work.  While a tag is half typed, the document is not well-formed for a
-moment; validate.py now reports that as an ordinary error on its line,
+moment; xmlvalidate.py now reports that as an ordinary error on its line,
 not as a failure.
 
 Testing the extension inside a real VS Code showed two problems that
@@ -173,7 +174,7 @@ mistakes and a small RelaxNG schema with Schematron rules embedded in it.
 Last, the project changed from the MIT licence to the GPL, version 3 or
 later (0.5.2), like my other projects.  Each release now carries two
 files, which `tools/bundle-zip.py` makes in `dist/`: a zip of
-validate.py with its documentation, made from the files that git
+xmlvalidate.py with its documentation, made from the files that git
 tracks, and the extension's package.  The extension has a changelog, and
 a GitHub workflow tests and packages it with each release tag and can
 publish it in the Visual Studio Marketplace with Trusted Publishing,
@@ -184,9 +185,9 @@ Testing
 -------
 
 The extension has 11 automated tests (`npm test`), run with Node's own
-test runner.  They check how the reports of validate.py and of jing
+test runner.  They check how the reports of xmlvalidate.py and of jing
 become diagnostics, the severities, where the underlines start and end,
-and the error messages; one of them runs validate.py from beginning to
+and the error messages; one of them runs xmlvalidate.py from beginning to
 end.  Another test (`npm run test:integration`) runs the extension
 inside a real VS Code, without a screen and with a profile of its own:
 it checks that the errors land on the right lines and are visibly
@@ -195,7 +196,7 @@ validated, and that *Refresh Schema* picks up a schema changed on a
 small web server.  The tests of the extension also run on GitHub Actions
 with each release tag.
 
-validate.py is checked on small documents and schemas made for each
+xmlvalidate.py is checked on small documents and schemas made for each
 case (shadowing, `let`s at every level, namespaces, attributes,
 malformed text, the three sources of rules), compared before and after
 each change, and on the example in `docs/example/`; the cache was
