@@ -177,8 +177,8 @@ validate.py with its documentation, made from the files that git
 tracks, and the extension's package.  The extension has a changelog, and
 a GitHub workflow tests and packages it with each release tag and can
 publish it in the Visual Studio Marketplace with Trusted Publishing,
-without storing any key (0.5.3).  The repositories were renamed
-py-validate.
+without storing any key (0.5.3).  The repositories are now called
+py-xmlvalidate.
 
 Testing
 -------
