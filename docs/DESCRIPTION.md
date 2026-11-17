@@ -192,6 +192,16 @@ edition, about 26,000 lines, the check went from 13.9 to 3.5 seconds,
 with the same results; a rule whose combined call fails is still evaluated
 test by test, so that a broken test is reported on its own.
 
+Version 1.16 found the rest of that time somewhere else.  Saxon compiles
+every expression it is given, and the script still called it once per
+node, so the `<app>` rule's long expression was compiled 2,054 times:
+9 of its 9.6 seconds.  Now each rule is evaluated in a single call over
+all its context nodes, which returns each node's path, for shadowing,
+and its test results.  Measured one after the other on the same machine,
+the Latin edition went from 11.5 to 1.9 seconds, and 39 documents gave
+identical results.  A rule whose single call fails is evaluated node by
+node, as before.
+
 Then came an Emacs package, `emacs/py-xmlvalidate.el`, for Emacs 31.  I
 weighed four designs: a Flymake backend, a Flycheck checker, a language
 server used through Eglot, and a mere report command.  Flymake won

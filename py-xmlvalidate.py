@@ -69,7 +69,7 @@ if sys.version_info < (3, 15):
 from lxml import etree
 from saxonche import PySaxonProcessor
 
-__version__ = "1.15"
+__version__ = "1.16"
 
 SCH_NS = 'http://purl.oclc.org/dsdl/schematron'
 S = f'{{{SCH_NS}}}'
@@ -361,15 +361,24 @@ def leer_mensaje(t):
 
 def cargar_reglas(sch_path: Path):
     """Devuelve (namespaces, patterns); cada pattern es (id, [reglas]), cada
-    regla (context, [tests], conjunta) y cada test (tipo, xpath, mensaje,
-    segmentos, role). Los <let> (de schema, pattern y regla, por ese orden)
+    regla (context, [tests], conjunta, lote) y cada test (tipo, xpath,
+    mensaje, segmentos, role). Los <let> (de schema, pattern y regla, por ese orden)
     ya van integrados en las expresiones XPath de tests y segmentos.
 
     `conjunta` evalúa todos los tests de la regla en una sola llamada, con
     los <let> calculados una vez por nodo, como manda ISO Schematron; por
     separado, cada test los recalcula, y en una regla con muchos tests y
     variables costosas eso multiplica el tiempo. Devuelve un xs:boolean por
-    test, en orden. Es None si la regla tiene un solo test."""
+    test, en orden. Es None si la regla tiene un solo test.
+
+    `lote` evalúa la regla entera en una sola llamada: recorre sus nodos de
+    contexto en orden de documento y devuelve, por cada uno, su path(.) y el
+    xs:boolean de cada test. Saxon compila cada expresión que recibe, así
+    que una llamada por nodo recompila la regla miles de veces; en una sola,
+    se compila una vez (en la edición latina, la regla de <app> pasó de
+    9 s a 0,6 s). Los nodos que el shadowing descarta se evalúan también,
+    y sus resultados se ignoran; si eso provoca un error, la regla se
+    evalúa nodo a nodo, como antes."""
     exigir_archivo(sch_path, 'el Schematron')
     root = etree.parse(str(sch_path)).getroot()
     nss = {ns.get('prefix'): ns.get('uri') for ns in root.iter(S + 'ns')
@@ -415,9 +424,13 @@ def cargar_reglas(sch_path: Path):
                     avisar_una_vez(f'el:{qn.localname}',
                                    f'elemento Schematron no implementado: '
                                    f'{qn.localname} (omitido)')
-            conjunta = (con_lets(lets, '(' + ', '.join(f'boolean(({c}))' for c in crudos) + ')')
-                        if len(crudos) > 1 else None)
-            reglas.append((rule.get('context'), tests, conjunta))
+            ctx = rule.get('context')
+            todos = '(' + ', '.join(f'boolean(({c}))' for c in crudos) + ')'
+            conjunta = con_lets(lets, todos) if len(crudos) > 1 else None
+            sel = ctx if ctx.startswith('/') else f'//({ctx})'
+            lote = (f'for $VALIDATE_N in ({sel}) return $VALIDATE_N/'
+                    f'(string(path(.)){", " + con_lets(lets, todos) if crudos else ""})')
+            reglas.append((ctx, tests, conjunta, lote))
         if reglas:
             patterns.append((pat.get('id') or '', reglas))
     if root.find(S + 'phase') is not None:
@@ -512,6 +525,22 @@ def validar(doc_path: Path, nss, patterns, proc, n_lineas=None, nombre=None):
             return None
         return [str(item) == 'true' for item in items]
 
+    def evaluar_lote(lote, n_tests, n_nodos):
+        """La regla entera en una llamada: [(path, [valores])] por nodo, en
+        el orden de nodos(ctx); None si la llamada falla o el resultado no
+        cuadra, y entonces la regla se evalúa nodo a nodo."""
+        try:
+            r = xp.evaluate(lote)
+        except Exception:
+            return None
+        items = [] if r is None else ([r[i] for i in range(r.size)] if hasattr(r, 'size') else [r])
+        paso = 1 + n_tests
+        if len(items) != paso * n_nodos:
+            return None
+        textos = [str(item) for item in items]
+        return [(textos[i], [t == 'true' for t in textos[i + 1:i + paso]])
+                for i in range(0, len(textos), paso)]
+
     def interpolar(node, msg, segs):
         if not any(k == 'exp' for k, _ in segs):
             return msg
@@ -547,13 +576,19 @@ def validar(doc_path: Path, nss, patterns, proc, n_lineas=None, nombre=None):
     t0 = time.time()
     for pat_id, reglas in patterns:
         ya_casados = set()                    # first-match shadowing
-        for ctx, tests, conjunta in reglas:
-            for node in nodos(ctx):
-                path_id = str(en(node, xp.evaluate_single, 'path(.)'))
+        for ctx, tests, conjunta, lote in reglas:
+            lista = nodos(ctx)
+            de_lote = evaluar_lote(lote, len(tests), len(lista))
+            for k, node in enumerate(lista):
+                if de_lote is not None:
+                    path_id, valores = de_lote[k]
+                else:                          # (nodo a nodo)
+                    path_id = str(en(node, xp.evaluate_single, 'path(.)'))
                 if path_id in ya_casados:
                     continue
                 ya_casados.add(path_id)
-                valores = evaluar_juntos(node, conjunta, len(tests))
+                if de_lote is None:
+                    valores = evaluar_juntos(node, conjunta, len(tests))
                 for i, (tipo, test, msg, segs, role) in enumerate(tests):
                     if valores is not None:
                         val = valores[i]
