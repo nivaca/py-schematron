@@ -126,7 +126,7 @@ def bien_formado(path: Path) -> bool:
 
 
 def cache_al_dia(fuente: Path, derivado: Path) -> bool:
-    """La caché se invalida si cambia la fuente O el propio script (un
+    """El caché se invalida si cambia la fuente O el propio script (un
     generador corregido debe regenerar sus derivados; episodio 2026-07-12),
     y también si el derivado no es XML bien formado (escrito a medias por
     una versión anterior, sin escritura atómica)."""
@@ -208,7 +208,7 @@ def sch_desde_rng(rng: Path) -> Path:
                            xml_declaration=True, pretty_print=True)
     # Self-check: lo re-parseado debe contener exactamente lo cosechado. Se
     # hace sobre los bytes, ANTES de escribir: un esquema mutilado nunca
-    # llega a la caché.
+    # llega al caché.
     chk = etree.fromstring(datos)
     chk_pat = len(chk.findall(S + 'pattern'))
     chk_ns = len(chk.findall(S + 'ns'))
@@ -231,7 +231,7 @@ TEI_NS = 'http://www.tei-c.org/ns/1.0'
 
 def obtener_recurso(href, base_dir: Path, refresh=False) -> Path:
     """Resuelve el href de una PI xml-model: ruta local (relativa al
-    documento) o URL http(s), que se descarga a una caché junto al script
+    documento) o URL http(s), que se descarga a un caché junto al script
     (.schema-cache/, nombre = hash de la URL + nombre original)."""
     if re.match(r'https?://', href):
         cache = HERE / '.schema-cache'

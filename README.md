@@ -1,4 +1,4 @@
-# xmlvalidate.py — Schematron validation of TEI documents, in the terminal and in VS Code
+# py-xmlvalidate — Schematron validation of TEI documents, in the terminal and in VS Code
 
 *(Español: [README_es.md](README_es.md))*
 

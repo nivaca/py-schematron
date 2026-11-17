@@ -12,7 +12,7 @@
 # Desde v1.2 (a juego con xmlvalidate.py 1.2): si el primer argumento no es un
 # esquema RelaxNG (se clasifica por CONTENIDO, no por extensión), se asume
 # que todo son documentos y el .rng se AUTODETECTA de la PI <?xml-model?>
-# del primero, reutilizando la resolución y la caché de descargas
+# del primero, reutilizando la resolución y el caché de descargas
 # (.schema-cache/) de xmlvalidate.py. La capa Schematron corre entonces con la
 # autodetección propia de xmlvalidate.py (que converge en la misma fuente).
 #
@@ -78,7 +78,7 @@ if es_rng "$1"; then
 else
   AUTO=1
   # Autodetección: href RelaxNG de la PI xml-model del primer documento,
-  # resuelto/descargado con las funciones y la caché de xmlvalidate.py.
+  # resuelto/descargado con las funciones y el caché de xmlvalidate.py.
   RNG=$(python3 - "$VALIDATE" "$1" <<'PY'
 import sys, importlib.util
 from pathlib import Path

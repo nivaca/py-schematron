@@ -1,10 +1,10 @@
-# xmlvalidate.py 1.12: descripción
+# py-xmlvalidate 1.12: descripción
 
 ## Análisis
 
-xmlvalidate.py (que hasta la versión 1.12 se llamaba validate.py) comprueba documentos TEI contra las reglas Schematron de su esquema, desde el terminal, e informa de cada infracción: cuántas veces se incumple cada regla y, para cada infracción, la línea y el `xml:id` del elemento identificable más cercano. Toma las reglas de un ODD, de un archivo ISO Schematron o de un esquema RelaxNG generado a partir de un ODD, que las lleva embebidas, y encuentra el esquema por sí solo en las instrucciones `<?xml-model?>` del documento. Un script complementario, xmlvalidate-all.sh, comprueba además la estructura con RelaxNG, y una extensión para Visual Studio Code muestra los mismos resultados en el editor, subrayados mientras se escribe. Lo hizo Nicolas Vaughan en 2026, para las ediciones del proyecto SMTrad.
+py-xmlvalidate comprueba documentos TEI contra las reglas Schematron de su esquema, desde el terminal, e informa de cada infracción: cuántas veces se incumple cada regla y, para cada infracción, la línea y el `xml:id` del elemento identificable más cercano. Toma las reglas de un ODD, de un archivo ISO Schematron o de un esquema RelaxNG generado a partir de un ODD, que las lleva embebidas, y encuentra el esquema por sí solo en las instrucciones `<?xml-model?>` del documento. Su programa principal es xmlvalidate.py (hasta la versión 1.12 se llamaba validate.py); otro, xmlvalidate-all.sh, comprueba además la estructura con RelaxNG, y una extensión para Visual Studio Code muestra los mismos resultados en el editor, subrayados mientras se escribe. Lo hizo Nicolas Vaughan en 2026, para las ediciones del proyecto SMTrad.
 
-Se apoya en cuatro piezas ajenas: Saxon, a través de saxonche (Saxon C), que evalúa las reglas con XPath 3.1; lxml, que encuentra las líneas y los `xml:id`s; jing, de James Clark, que comprueba la estructura RelaxNG; y la hoja de estilo `extract-isosch.xsl` de las TEI Stylesheets, que extrae el Schematron de un ODD. xmlvalidate.py es software libre, bajo la Licencia Pública General de GNU, versión 3 o posterior.
+Se apoya en cuatro piezas ajenas: Saxon, a través de saxonche (Saxon C), que evalúa las reglas con XPath 3.1; lxml, que encuentra las líneas y los `xml:id`s; jing, de James Clark, que comprueba la estructura RelaxNG; y la hoja de estilo `extract-isosch.xsl` de las TEI Stylesheets, que extrae el Schematron de un ODD. py-xmlvalidate es software libre, bajo la Licencia Pública General de GNU, versión 3 o posterior.
 
 Partí de oXygen, con el que se validaban los documentos del proyecto y que resultó fallar en silencio de tres maneras. Al estudiar esos fallos quedaron claros los requisitos. Lo primero era que el informe estuviera siempre completo, o dijera exactamente cuántas infracciones quedaban sin listar, y diera un recuento total verificable. Lo segundo, que las reglas se evaluaran igual que en oXygen, con XPath 3.1, respetando la semántica de ISO Schematron, y que un esquema sin reglas no aprobara nada en silencio.
 
@@ -12,7 +12,7 @@ Además, el programa tenía que servirle a cualquiera: desde el terminal, sobre 
 
 ## Diseño
 
-xmlvalidate.py es un solo script, dividido en partes con un trabajo cada una. Las fuentes de reglas extraen el Schematron de un ODD o cosechan los patterns embebidos en un RelaxNG. La autodetección lee las instrucciones `<?xml-model?>`, descarga los esquemas remotos a una caché propia y clasifica cada esquema por su contenido. La lectura del esquema reúne patterns, reglas, asserts, reports y `let`s, y los mensajes con sus `<value-of>` y `<name/>`. La validación evalúa las reglas con Saxon y busca las líneas y los `xml:id`s con lxml. El informe sale en texto para el terminal o en JSON (`--json`) para otros programas.
+xmlvalidate.py es un solo script, dividido en partes con un trabajo cada una. Las fuentes de reglas extraen el Schematron de un ODD o cosechan los patterns embebidos en un RelaxNG. La autodetección lee las instrucciones `<?xml-model?>`, descarga los esquemas remotos a un caché propio y clasifica cada esquema por su contenido. La lectura del esquema reúne patterns, reglas, asserts, reports y `let`s, y los mensajes con sus `<value-of>` y `<name/>`. La validación evalúa las reglas con Saxon y busca las líneas y los `xml:id`s con lxml. El informe sale en texto para el terminal o en JSON (`--json`) para otros programas.
 
 xmlvalidate-all.sh valida en dos capas sobre el mismo RelaxNG: primero la estructura, con jing (o con lxml si jing no está), y luego las reglas, con xmlvalidate.py; combina los dos veredictos en su código de salida.
 
@@ -30,7 +30,7 @@ Los archivos del proyecto son estos:
 
 Las reglas se ejecutan tal como están en el esquema, con sus mensajes y sus `role`, para que quien conozca el esquema reconozca cada infracción sin aprender nada nuevo; el informe nombra el pattern de cada una.
 
-Para que el programa responda rápido, lo que se extrae, se cosecha o se descarga se guarda en una caché, que se rehace sola cuando cambia el esquema o el propio script. La extensión guarda sus ajustes (el intérprete de Python, jing, el esquema, cuándo validar) en los ajustes de VS Code.
+Para que el programa responda rápido, lo que se extrae, se cosecha o se descarga se guarda en un caché, que se rehace solo cuando cambia el esquema o el propio script. La extensión guarda sus ajustes (el intérprete de Python, jing, el esquema, cuándo validar) en los ajustes de VS Code.
 
 ## Implementación
 
@@ -44,13 +44,13 @@ Los contextos relativos de las reglas se evalúan sobre todo el documento, y den
 
 Al recargar VS Code, dos validaciones arrancaron a la vez, y una leyó el esquema descargado mientras la otra lo estaba escribiendo: "Premature end of data". Peor aún, la copia truncada quedaba en el caché, y todas las corridas siguientes fallaban igual.
 
-Desde la versión 1.7, todo lo que se guarda en caché (esquemas descargados, reglas cosechadas y extraídas) se escribe en un archivo temporal que luego se renombra, de modo que quien lo lea ve o ningún archivo o uno completo. Una copia dañada que haya dejado una versión anterior se detecta y se reemplaza, y una descarga que no sea XML nunca se guarda. La comprobación de la cosecha se hace sobre los bytes, antes de escribir, así que un esquema mutilado nunca llega a el caché.
+Desde la versión 1.7, todo lo que se guarda en caché (esquemas descargados, reglas cosechadas y extraídas) se escribe en un archivo temporal que luego se renombra, de modo que quien lo lea ve o ningún archivo o uno completo. Una copia dañada que haya dejado una versión anterior se detecta y se reemplaza, y una descarga que no sea XML nunca se guarda. La comprobación de la cosecha se hace sobre los bytes, antes de escribir, así que un esquema mutilado nunca llega al caché.
 
 Para probarlo, un proceso volvió a descargar el esquema durante 20 segundos mientras otros tres validaban: la versión anterior falló 88 veces de 635; la nueva, ninguna.
 
 ### Proceso y distribución
 
-El trabajo pasó por ocho etapas: primero el informe sin tope, con el ODD del proyecto (versión 1.0); luego la cosecha de reglas del RelaxNG y las dos capas de xmlvalidate-all.sh (1.1); la detección del esquema por `<?xml-model?>` y los mensajes interpolados (1.2 y 1.3); la corrección de reglas que nunca se ejecutaban y de los mensajes (1.4 y 1.6); el informe JSON y la extensión de VS Code, con la elección del intérprete y la barra de estado (1.5; extensión 0.1 a 0.3); las escrituras atómicas de el caché (1.7); la validación mientras se escribe (1.8; extensión 0.4 y 0.4.1), y por último la orden *Refresh Schema*, el icono, las capturas, la licencia GPL y los archivos de cada versión (extensión 0.4.2 a 0.5.3).
+El trabajo pasó por ocho etapas: primero el informe sin tope, con el ODD del proyecto (versión 1.0); luego la cosecha de reglas del RelaxNG y las dos capas de xmlvalidate-all.sh (1.1); la detección del esquema por `<?xml-model?>` y los mensajes interpolados (1.2 y 1.3); la corrección de reglas que nunca se ejecutaban y de los mensajes (1.4 y 1.6); el informe JSON y la extensión de VS Code, con la elección del intérprete y la barra de estado (1.5; extensión 0.1 a 0.3); las escrituras atómicas del caché (1.7); la validación mientras se escribe (1.8; extensión 0.4 y 0.4.1), y por último la orden *Refresh Schema*, el icono, las capturas, la licencia GPL y los archivos de cada versión (extensión 0.4.2 a 0.5.3).
 
 El código se gestiona con git, en un solo repositorio publicado en GitHub (https://github.com/nivaca/py-xmlvalidate) y en Codeberg (https://codeberg.org/nivaca/py-xmlvalidate). Cada versión se etiqueta (`vX.Y` cuando cambia xmlvalidate.py, `vscode-vA.B.C` cuando cambia solo la extensión) y se publica en las dos forjas, con el zip de xmlvalidate.py y el paquete de la extensión, que hace `tools/bundle-zip.py`. Con cada etiqueta, un flujo de trabajo de GitHub prueba y empaqueta la extensión, y puede publicarla en el Visual Studio Marketplace con Trusted Publishing, sin guardar ninguna clave.
 

@@ -1,7 +1,7 @@
 [project]
-name = "validate-schematron"
+name = "py-xmlvalidate"
 version = "0.1.0"
-description = "Add your description here"
+description = "Schematron validation of TEI documents, in the terminal and in VS Code"
 readme = "README.md"
 authors = [
     { name = "Nicolas Vaughan", email = "nivaca@fastmail.com" }
@@ -12,7 +12,7 @@ license-files = ["LICENSE"]
 dependencies = []
 
 [project.scripts]
-validate-schematron = "validate_schematron:main"
+py-xmlvalidate = "py_xmlvalidate:main"
 
 [build-system]
 requires = ["uv_build>=0.13.7,<0.14.0"]

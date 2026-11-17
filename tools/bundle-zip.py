@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nivaca@fastmail.com>
-# This file is part of validate-schematron. See the LICENSE file for details.
+# This file is part of py-xmlvalidate. See the LICENSE file for details.
 """Makes the release bundles in dist/: python3 tools/bundle-zip.py
 
-* dist/validate-schematron-v.VERSION.zip (the version of xmlvalidate.py), with
+* dist/py-xmlvalidate-v.VERSION.zip (the version of xmlvalidate.py), with
   the program in a folder of the same name: xmlvalidate.py, xmlvalidate-all.sh,
   the READMEs, the licence and docs/ (the descriptions, the screenshots and
   the example).  It is made from the files git tracks, so nothing that only
@@ -15,7 +15,8 @@
   is distributed as its .vsix; and src/ with pyproject.toml, the package
   scaffold, not yet in use) and hidden files.  xmlvalidate-all.sh keeps its
   permission to run.
-* dist/validate-schematron-EXTVERSION.vsix, the VS Code extension (the
+* dist/validate-schematron-EXTVERSION.vsix, the VS Code extension (named after
+  the extension, which keeps its name; the
   version of vscode/package.json), packaged with vsce (Node.js and npm are
   needed; --no-vsix leaves it out).
 
@@ -35,7 +36,8 @@ import zipfile
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # (above tools/)
 DIST = os.path.join(HERE, "dist")
-NAME = "validate-schematron"
+NAME = "py-xmlvalidate"            # the project: the zip
+EXTENSION = "validate-schematron"  # the VS Code extension: the .vsix
 
 #  What is in the repository but not part of the program
 NOT_PART = ("tools/", "vscode/", "src/", "pyproject.toml")
@@ -57,7 +59,7 @@ def extension_version() -> str:
 
 
 def name() -> str:
-    """The name of the zip, without .zip: validate-schematron-v.1.8."""
+    """The name of the zip, without .zip: py-xmlvalidate-v.1.12."""
     return f"{NAME}-v.{version()}"
 
 
@@ -108,7 +110,7 @@ def bundle_vsix(folder: str) -> str:
     ext = os.path.join(HERE, "vscode")
     if not os.path.isdir(os.path.join(ext, "node_modules")):
         subprocess.run([npm, "ci", "--no-fund", "--no-audit"], cwd=ext, check=True)
-    path = os.path.join(folder, f"{NAME}-{extension_version()}.vsix")
+    path = os.path.join(folder, f"{EXTENSION}-{extension_version()}.vsix")
     subprocess.run([npx, "vsce", "package", "-o", path], cwd=ext, check=True,
                    stdout=subprocess.DEVNULL)
     return path

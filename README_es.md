@@ -1,4 +1,4 @@
-# xmlvalidate.py — Validación Schematron de documentos TEI, en el terminal y en VS Code
+# py-xmlvalidate — Validación Schematron de documentos TEI, en el terminal y en VS Code
 
 *(English: [README.md](README.md))*
 
@@ -146,7 +146,7 @@ Sin `-o/-s/-r`, el script lee las PIs `xml-model` del primer documento y:
    trabajo), absoluta, o URL http(s) — que se descarga a `.schema-cache/`
    junto al script (nombre = hash de la URL + nombre original) y se reutiliza
    en corridas siguientes; `--refresh` fuerza la redescarga. Nota: a
-   diferencia de la caché por mtime, la de URL no detecta actualizaciones
+   diferencia del caché por mtime, el de URL no detecta actualizaciones
    remotas — tras una release nueva del esquema, usa `--refresh`.
 3. **Clasifica por contenido real**, no por extensión ni por lo declarado:
    raíz RelaxNG → cosecha; raíz ISO Schematron → uso directo; raíz TEI
@@ -185,7 +185,7 @@ jing smed-schema.rng ed_lat.xml && python3 xmlvalidate.py -r smed-schema.rng ed_
 
 # Wrapper en modo auto (v1.2): sin esquema, lo detecta de la PI xml-model
 # del documento (clasificando el primer argumento por contenido, no por
-# extensión) y comparte la caché de descargas de xmlvalidate.py:
+# extensión) y comparte el caché de descargas de xmlvalidate.py:
 ./xmlvalidate-all.sh -v documento.xml
 
 # En un Makefile o hook pre-commit (código de salida ≠ 0 si hay infracciones)
@@ -371,7 +371,7 @@ El `&&` corta en la primera capa que falle; tras el runner, `$? -eq 1`
 significa inequívocamente "infracciones Schematron" (no error de entorno,
 que es 3). La primera corrida cosecha a `tei_all.harvested.sch` (muchos más
 patterns que un esquema de proyecto: tei_all incluye todos los módulos);
-las siguientes usan la caché.
+las siguientes usan el caché.
 
 Nota sobre recuentos: el `.rng` generado de un ODD embebe, además de las
 reglas propias, el Schematron de las Guidelines para cada módulo incluido
@@ -413,7 +413,7 @@ oXygen, sin topes y con salida procesable.
 | `El ODD X no contiene Schematron embebido` (código 3) | ODD de personalización sin compilar (p. ej. `tei_all.odd`) | Usar `-r` sobre su RNG generado, o compilar con `odd2odd` (§7). Saxon imprime antes su propio error `XTMM9000`: es el mismo diagnóstico en crudo |
 | `El RelaxNG X no contiene anotaciones Schematron` (código 3) | RNG generado sin reglas embebidas | Regenerarlo desde el ODD con la cadena estándar, o usar `-o`/`-s` |
 | `[aviso] elementos ajenos a Schematron ignorados (p. ej. fix ...)` | Schematron de las Guidelines (§7) | Informativo; los veredictos no se ven afectados |
-| `[aviso] elementos ajenos a Schematron ignorados (p. ej. ... de http://www.tei-c.org/ns/1.0)` con versiones del script anteriores a 2026-07-12, o `Self-check de cosecha fallido` | Bug histórico de la cosechadora: lxml serializaba con declaraciones de namespace rancias y el `.harvested.sch` quedaba corrupto (patterns/reglas perdidos, prefijos vacíos, `Namespace prefix 'tei' has not been declared`) | Actualizar el script (≥ 2026-07-12, con `cleanup_namespaces` + self-check) y borrar los `.harvested.sch` existentes; la caché por doble mtime lo hace automáticamente en adelante |
+| `[aviso] elementos ajenos a Schematron ignorados (p. ej. ... de http://www.tei-c.org/ns/1.0)` con versiones del script anteriores a 2026-07-12, o `Self-check de cosecha fallido` | Bug histórico de la cosechadora: lxml serializaba con declaraciones de namespace rancias y el `.harvested.sch` quedaba corrupto (patterns/reglas perdidos, prefijos vacíos, `Namespace prefix 'tei' has not been declared`) | Actualizar el script (≥ 2026-07-12, con `cleanup_namespaces` + self-check) y borrar los `.harvested.sch` existentes; el caché por doble mtime lo hace automáticamente en adelante |
 | Recuentos distintos de los de oXygen | Tope de highlights de oXygen, o `.rng` desactualizado en oXygen | Subir el tope (Options → Preferences → Editor → Document Checking) y regenerar el `.rng`; la cifra del script es la exacta |
 
 ## 10. Historial de diseño

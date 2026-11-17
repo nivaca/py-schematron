@@ -1,24 +1,25 @@
-How xmlvalidate.py was made
+How py-xmlvalidate was made
 ===========================
 
-xmlvalidate.py (called validate.py until version 1.12) checks TEI
-documents against the Schematron rules of their schema, from the
-terminal, and reports every offence: how many times each rule is broken
-and, for each offence, the line and the `xml:id` of the nearest
-identifiable element.  It takes the rules from an ODD, from an ISO
-Schematron file, or from a RelaxNG schema generated from an ODD, which
-carries them embedded; it finds the schema by itself in the document's
-`<?xml-model?>` instructions.  A companion script, xmlvalidate-all.sh,
-also checks the structure with RelaxNG, and an extension for Visual
-Studio Code shows the same results in the editor, underlined as you
-type.  Nicolas Vaughan made it in 2026, for the editions of the SMTrad
-project.  Here I explain how it was made, in eight stages.
+py-xmlvalidate checks TEI documents against the Schematron rules of
+their schema, from the terminal, and reports every offence: how many
+times each rule is broken and, for each offence, the line and the
+`xml:id` of the nearest identifiable element.  It takes the rules from
+an ODD, from an ISO Schematron file, or from a RelaxNG schema generated
+from an ODD, which carries them embedded; it finds the schema by itself
+in the document's `<?xml-model?>` instructions.  Its main program is
+xmlvalidate.py (called validate.py until version 1.12); a companion
+script, xmlvalidate-all.sh, also checks the structure with RelaxNG, and
+an extension for Visual Studio Code shows the same results in the
+editor, underlined as you type.  Nicolas Vaughan made it in 2026, for
+the editions of the SMTrad project.  Here I explain how it was made, in
+eight stages.
 
 It stands on four pieces of other people's work: Saxon, through saxonche
 (Saxon C), which evaluates the rules with XPath 3.1; lxml, which finds
 the lines and the `xml:id`s; jing, by James Clark, which checks the
 RelaxNG structure; and the stylesheet `extract-isosch.xsl` of the TEI
-Stylesheets, which extracts the Schematron of an ODD.  xmlvalidate.py is
+Stylesheets, which extracts the Schematron of an ODD.  py-xmlvalidate is
 free software, under the GNU General Public License, version 3 or later.
 
 Nicolas Vaughan is Associate Professor of Literature at the School of Arts

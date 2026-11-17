@@ -11,7 +11,7 @@
 # Until then the workflow only tests and packages the extension.
 #
 # It runs when a release tag is pushed: vscode-v* (the extension) or v*
-# (xmlvalidate.py, whose releases ship the extension too), or by hand from the
+# (py-xmlvalidate, whose releases ship the extension too), or by hand from the
 # Actions tab. A version already on the Marketplace is skipped, so a tag
 # that did not change the extension does no harm.
 #
