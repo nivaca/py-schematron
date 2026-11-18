@@ -10,6 +10,3 @@ test.xml
 *.harvested.sch
 # release bundles (tools/bundle-zip.py)
 dist/
-# Emacs: compiled files and the autoloads package-vc generates
-*.elc
-*-autoloads.el

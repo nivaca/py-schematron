@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 1.16** (`py-xmlvalidate.py --version`)
+**Version 1.17** (`py-xmlvalidate.py --version`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -15,18 +15,20 @@ in verbose mode, the line number and `xml:id` of every offender.
   rules embedded), which it finds by itself in the document's
   `<?xml-model?>`. **`py-xmlvalidate-all.sh`** adds the structural layer, RelaxNG
   with jing, and gives one verdict for both. See [Usage](#3-usage).
-- **The VS Code extension** (`vscode/`) shows the same results in the
+- **The VS Code extension**
+  ([py-xmlvalidate-vscode](https://codeberg.org/nivaca/py-xmlvalidate-vscode)) shows the same results in the
   editor, **as you type**: errors underlined in the text, their messages on
   hover, all of them in the Problems panel (Schematron, RelaxNG and
-  well-formedness), and the count in the status bar. Download the `.vsix`
-  from the latest release ([Codeberg](https://codeberg.org/nivaca/py-xmlvalidate/releases)
-  or [GitHub](https://github.com/nivaca/py-xmlvalidate/releases)) and install it
-  with `code --install-extension validate-schematron-*.vsix`. See
-  [VS Code extension](#32-vs-code-extension).
-- **The Emacs package** (`emacs/`, Emacs 31 or later) does the same with
-  Flymake: problems underlined as you type, the message under the cursor in
-  the echo area, all of them in Flymake's list. It installs from this
-  repository with `package-vc-install`. See [Emacs package](#33-emacs-package).
+  well-formedness), and the count in the status bar. It is on the
+  [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=NicolasVaughan.validate-schematron) as *Schematron Validator
+  (py-xmlvalidate)*. See [VS Code extension](#32-vs-code-extension).
+- **The Emacs package** ([py-xmlvalidate-emacs](https://codeberg.org/nivaca/py-xmlvalidate-emacs), Emacs 31 or
+  later) does the same with Flycheck or Flymake: problems underlined as you
+  type, the message under the cursor, all of them in the checker's list, and
+  completion from the document's schema. See [Emacs package](#33-emacs-package).
+
+The two plugins have repositories of their own; each carries a copy of
+`py-xmlvalidate.py`, kept in step with this one (§3.4).
 
 How it was made is told in [`docs/DESCRIPTION.md`](docs/DESCRIPTION.md).
 
@@ -64,6 +66,10 @@ what it needs:
 ```sh
 python3 tools/screenshots.py --python ~/.venvs/schematron/bin/python
 ```
+
+The VS Code shots use a clone of
+[py-xmlvalidate-vscode](https://codeberg.org/nivaca/py-xmlvalidate-vscode) next
+to this repository (`--extension FOLDER` gives another).
 
 ---
 
@@ -228,9 +234,13 @@ python3 py-xmlvalidate.py -s smed-schema.sch ed_lat.xml || echo "pending issues"
 
 ### 3.2 VS Code extension
 
-`vscode/` contains an extension for Visual Studio Code that runs
-`py-xmlvalidate.py --json`, and jing when the schema is RelaxNG, and shows the
-results as diagnostics in the editor and the Problems panel:
+The extension for Visual Studio Code lives in its own repository,
+[py-xmlvalidate-vscode](https://codeberg.org/nivaca/py-xmlvalidate-vscode) (also on
+[GitHub](https://github.com/nivaca/py-xmlvalidate-vscode)), and on the
+[Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=NicolasVaughan.validate-schematron) as *Schematron Validator
+(py-xmlvalidate)*. It runs its copy of `py-xmlvalidate.py --json`, and jing
+when the schema is RelaxNG, and shows the results as diagnostics in the
+editor and the Problems panel:
 
 - **When:** as you type (once typing pauses for half a second, a setting),
   on open and on save, for every `.xml` file with an `<?xml-model?>`.
@@ -245,62 +255,61 @@ results as diagnostics in the editor and the Problems panel:
   *Refresh Schema* (download a remote schema again after it changed),
   *Select Python Interpreter…*, *Show Output* and *Clear Diagnostics*.
 
-**Install:** download `validate-schematron-*.vsix` from the latest release
-([Codeberg](https://codeberg.org/nivaca/py-xmlvalidate/releases) or
-[GitHub](https://github.com/nivaca/py-xmlvalidate/releases)), then
-
-```sh
-code --install-extension validate-schematron-*.vsix
-```
-
-and point `schematron.pythonPath` at a Python that has saxonche and lxml
-(the extension offers to choose one if needed). It bundles its own copy of
-`py-xmlvalidate.py`. To build it from source instead:
-
-```sh
-cd vscode && npm install && npx vsce package
-```
-
-Settings, requirements and details are in [vscode/README.md](vscode/README.md).
+**Install:** from the Extensions view (search "Schematron Validator"), or
+with the `.vsix` of a release of py-xmlvalidate-vscode and
+`code --install-extension validate-schematron-*.vsix`. Then point
+`schematron.pythonPath` at a Python that has saxonche and lxml (the
+extension offers to choose one if needed). Settings, requirements, building
+from source and details are in its
+[README](https://codeberg.org/nivaca/py-xmlvalidate-vscode#schematron-validator-for-vs-code).
 
 ### 3.3 Emacs package
 
-`emacs/py-xmlvalidate.el` is a Flycheck checker and a Flymake backend for
-Emacs 31 or later; it uses Flycheck when it is installed. It runs
-`py-xmlvalidate.py --json` the same way the VS Code extension does, with
-jing for RelaxNG schemas, and shows the results in the buffer: each problem
-underlined, its message when the cursor is on it, with its layer
-(Schematron, RelaxNG or XML) and pattern, and all of them in the checker's
-list. In nxml-mode it also gives nxml the document's RelaxNG schema
-(converted with trang), so that `C-RET` completes the elements and
-attributes the schema allows. It checks as you type, from a
-private temporary copy, and a new check cancels the one still running.
-`M-x py-xmlvalidate-report` gives the full text report with links to the
-lines, and `M-x py-xmlvalidate-refresh-schema` downloads a remote schema
-again.
+The Emacs package lives in its own repository,
+[py-xmlvalidate-emacs](https://codeberg.org/nivaca/py-xmlvalidate-emacs) (also on
+[GitHub](https://github.com/nivaca/py-xmlvalidate-emacs)). It is a Flycheck
+checker and a Flymake backend for Emacs 31 or later, and uses Flycheck when
+it is installed. It runs its copy of `py-xmlvalidate.py --json` the same way
+the VS Code extension does, with jing for RelaxNG schemas, and shows the
+results in the buffer: each problem underlined, its message when the cursor
+is on it, with its layer (Schematron, RelaxNG or XML) and pattern, and all
+of them in the checker's list. In nxml-mode it also gives nxml the
+document's RelaxNG schema (converted with trang), so that `C-RET` completes
+the elements and attributes the schema allows. It checks as you type, from
+a private temporary copy, and a new check cancels the one still running.
 
-**Install** (the whole repository is cloned; the package uses its copy of
-`py-xmlvalidate.py`):
+**Install**, with Straight:
 
 ```elisp
-(package-vc-install
- '(py-xmlvalidate :url "https://codeberg.org/nivaca/py-xmlvalidate"
-                  :lisp-dir "emacs"))
-(add-hook 'nxml-mode-hook #'py-xmlvalidate-mode)
-(setopt py-xmlvalidate-python "~/.venvs/schematron/bin/python")
+(use-package py-xmlvalidate
+  :straight (:host codeberg :repo "nivaca/py-xmlvalidate-emacs")
+  :hook (nxml-mode . py-xmlvalidate-mode))
 (setopt trusted-content '("~/path/to/your/editions/"))
 ```
 
-With Straight, the recipe is `(:host codeberg :repo
-"nivaca/py-xmlvalidate" :files ("emacs/*.el"))`; [emacs/README.md](emacs/README.md)
-gives the full `use-package` form.
+or with package-vc, `(package-vc-install '(py-xmlvalidate :url
+"https://codeberg.org/nivaca/py-xmlvalidate-emacs"))`. Flymake checks only files in `trusted-content`, and the
+package keeps that rule with Flycheck too, because the schema a document
+names is run by Saxon, and its XPath can read files and fetch URLs. Until
+version 0.2.0 the package was in the `emacs/` folder of this repository;
+recipes that point here (with `:lisp-dir "emacs"` or `:files
+("emacs/*.el")`) must change to the one above. Settings, commands, trang
+and tests are in its [README](https://codeberg.org/nivaca/py-xmlvalidate-emacs#py-xmlvalidate-for-emacs).
 
-Flymake checks only files in `trusted-content`. This package keeps that
-rule, because the schema a document names is run by Saxon, and its XPath
-can read files and fetch URLs. An untrusted file gets a warning when it is
-opened, and `M-x py-xmlvalidate-trust-file` trusts it (or its folder) on
-request. Settings, commands and tests are in
-[emacs/README.md](emacs/README.md).
+### 3.4 The plugins' copies of py-xmlvalidate.py
+
+Each plugin carries its own copy of `py-xmlvalidate.py`, at the top of its
+repository, so that it installs on its own. After changing the script here,
+
+```sh
+python3 tools/sync-plugins.py           # copy it into ../py-xmlvalidate-emacs and ../py-xmlvalidate-vscode
+python3 tools/sync-plugins.py --check   # only say whether the copies are the same (exit 1 if not)
+```
+
+copies it into the clones of the two plugins next to this repository
+(`--emacs FOLDER` and `--vscode FOLDER` give others) and says which copies
+changed, from which version. It commits nothing: the copy is then committed
+and released in each plugin, whose changelog says which version it carries.
 
 ## 4. Configuration and caching
 
@@ -531,7 +540,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **1.16** | 2026-11-17 | Faster again: each rule is evaluated in one Saxon call for all its context nodes, instead of one call per node, which made Saxon compile the rule's expression once per node. The Latin edition went from 11.5 s to 1.9 s (measured back to back on a busy machine), with identical results on 39 documents; if the single call fails, the rule is evaluated node by node as before. Bundled in the VS Code extension 0.5.12 |
+| **1.17** | 2026-11-18 | The VS Code extension and the Emacs package move to repositories of their own, py-xmlvalidate-vscode and py-xmlvalidate-emacs, with their history; each carries a copy of `py-xmlvalidate.py`, which the new `tools/sync-plugins.py` keeps in step. Releases of py-xmlvalidate no longer attach the `.vsix`, and its zip no longer has `emacs/`; `tools/install-trang.py` moved to the Emacs package; `tools/screenshots.py` takes the extension from a clone next to this one (`--extension`). The script does not change |
+| 1.16 | 2026-11-17 | Faster again: each rule is evaluated in one Saxon call for all its context nodes, instead of one call per node, which made Saxon compile the rule's expression once per node. The Latin edition went from 11.5 s to 1.9 s (measured back to back on a busy machine), with identical results on 39 documents; if the single call fails, the rule is evaluated node by node as before. Bundled in the VS Code extension 0.5.12 |
 | 1.15 | 2026-11-17 | Faster: all the tests of a rule are evaluated in one call per node, so the rule's `<let>` variables are computed once per node, not once per test. The Latin edition (about 26,000 lines) went from 13.9 s to 3.5 s, with identical results on 35 documents; if the combined call fails, the tests are evaluated one by one, so a broken test is still reported on its own |
 | 1.14 | 2026-11-17 | **py-xmlvalidate-install.py** links the two scripts into `~/bin` (§2.1), checking that `python3` has saxonche and lxml; `--uninstall` removes the links. py-xmlvalidate-all.sh finds py-xmlvalidate.py through a symbolic link, and py-xmlvalidate.py is executable. The validation is the same |
 | 1.13 | 2026-11-17 | The scripts take the project's name: **py-xmlvalidate.py** (it was xmlvalidate.py) and **py-xmlvalidate-all.sh** (it was xmlvalidate-all.sh). Nothing else changes |

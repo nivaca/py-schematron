@@ -2,23 +2,20 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
 # This file is part of py-xmlvalidate. See the LICENSE file for details.
-"""Makes the release bundles in dist/: python3 tools/bundle-zip.py
+"""Makes the release bundle in dist/: python3 tools/bundle-zip.py
 
-* dist/py-xmlvalidate-v.VERSION.zip (the version of py-xmlvalidate.py), with
-  the program in a folder of the same name: py-xmlvalidate.py, py-xmlvalidate-all.sh,
-  the READMEs, the licence and docs/ (the descriptions, the screenshots and
-  the example).  It is made from the files git tracks, so nothing that only
-  lives in this folder gets in (node_modules, the TEI stylesheets in odds/
-  and common/, schema caches, test documents, editor lock files ...).  Left
-  out as well: what is not part of the program (tools/, with the scripts
-  that make the bundles and the screenshots; vscode/, the extension, which
-  is distributed as its .vsix; and src/ with pyproject.toml, the package
-  scaffold, not yet in use) and hidden files.  py-xmlvalidate-all.sh keeps its
-  permission to run.
-* dist/validate-schematron-EXTVERSION.vsix, the VS Code extension (named after
-  the extension, which keeps its name; the
-  version of vscode/package.json), packaged with vsce (Node.js and npm are
-  needed; --no-vsix leaves it out).
+dist/py-xmlvalidate-v.VERSION.zip (the version of py-xmlvalidate.py), with
+the program in a folder of the same name: py-xmlvalidate.py,
+py-xmlvalidate-all.sh, py-xmlvalidate-install.py, the READMEs, the licence
+and docs/ (the descriptions, the screenshots and the example).  It is made
+from the files git tracks, so nothing that only lives in this folder gets
+in (the TEI stylesheets in odds/ and common/, schema caches, test
+documents, editor lock files ...).  Left out as well: what is not part of
+the program (tools/, with the scripts that make the bundle, the screenshots
+and the plugins' copies; src/ with pyproject.toml, the package scaffold,
+not yet in use) and hidden files.  The scripts keep their permission to
+run.  The VS Code extension and the Emacs package have repositories and
+releases of their own (py-xmlvalidate-vscode, py-xmlvalidate-emacs).
 
 dist is made in the program's folder if need be; --output gives another
 folder.  If any of the bundled files has changes not committed yet, it
@@ -26,21 +23,18 @@ says so, since the zip takes the files as they are now.
 """
 
 import argparse
-import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 import zipfile
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # (above tools/)
 DIST = os.path.join(HERE, "dist")
-NAME = "py-xmlvalidate"            # the project: the zip
-EXTENSION = "validate-schematron"  # the VS Code extension: the .vsix
+NAME = "py-xmlvalidate"
 
 #  What is in the repository but not part of the program
-NOT_PART = ("tools/", "vscode/", "src/", "pyproject.toml")
+NOT_PART = ("tools/", "src/", "pyproject.toml")
 
 
 def version() -> str:
@@ -51,11 +45,6 @@ def version() -> str:
     if not m:
         sys.exit("bundle-zip.py: no __version__ in py-xmlvalidate.py")
     return m.group(1)
-
-
-def extension_version() -> str:
-    with open(os.path.join(HERE, "vscode", "package.json"), encoding="utf-8") as f:
-        return json.load(f)["version"]
 
 
 def name() -> str:
@@ -102,29 +91,15 @@ def bundle_zip(folder: str) -> str:
     return path
 
 
-def bundle_vsix(folder: str) -> str:
-    """Packages the extension into FOLDER; returns its path."""
-    npm, npx = shutil.which("npm"), shutil.which("npx")
-    if not (npm and npx):
-        sys.exit("bundle-zip.py: Node.js and npm are needed for the .vsix (or use --no-vsix)")
-    ext = os.path.join(HERE, "vscode")
-    if not os.path.isdir(os.path.join(ext, "node_modules")):
-        subprocess.run([npm, "ci", "--no-fund", "--no-audit"], cwd=ext, check=True)
-    path = os.path.join(folder, f"{EXTENSION}-{extension_version()}.vsix")
-    subprocess.run([npx, "vsce", "package", "-o", path], cwd=ext, check=True,
-                   stdout=subprocess.DEVNULL)
-    return path
-
-
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="tools/bundle-zip.py",
-        description=f"Make the release bundles: {name()}.zip and the extension's .vsix.")
+        description=f"Make the release bundle: {name()}.zip.")
     parser.add_argument("-o", "--output", metavar="FOLDER", default=None,
-                        help="the folder to write them in (default: dist, in the program's folder)")
+                        help="the folder to write it in (default: dist, in the program's folder)")
     parser.add_argument("-l", "--list", action="store_true",
                         help="only list the files the zip would have")
-    parser.add_argument("--no-vsix", action="store_true", help="make only the zip")
+    parser.add_argument("--no-vsix", action="store_true", help=argparse.SUPPRESS)  # (no .vsix any more)
     args = parser.parse_args(argv)
     if args.list:
         print("\n".join(files()))
@@ -144,9 +119,6 @@ def main(argv=None):
     with zipfile.ZipFile(path) as z:
         count = len(z.namelist())
     print(f"Wrote {path} ({count} files, {os.path.getsize(path) / 1e6:.1f} MB).")
-    if not args.no_vsix:
-        vsix = bundle_vsix(args.output)
-        print(f"Wrote {vsix} ({os.path.getsize(vsix) / 1e3:.0f} kB).")
 
 
 if __name__ == "__main__":

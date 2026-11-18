@@ -1,4 +1,4 @@
-# py-xmlvalidate 1.16: descripción
+# py-xmlvalidate 1.17: descripción
 
 ## Análisis
 
@@ -16,21 +16,20 @@ py-xmlvalidate.py es un solo script, dividido en partes con un trabajo cada una.
 
 py-xmlvalidate-all.sh valida en dos capas sobre el mismo RelaxNG: primero la estructura, con jing (o con lxml si jing no está), y luego las reglas, con py-xmlvalidate.py; combina los dos veredictos en su código de salida.
 
-La extensión está en `vscode/`: `extension.ts` se ocupa de la integración con el editor (cuándo validar, los procesos, los diagnósticos, la barra de estado y las órdenes), y `parse.ts` de leer los informes de py-xmlvalidate.py y de jing, sin depender del editor, para poder probarla aparte. Al empaquetarse, la extensión lleva su propia copia de py-xmlvalidate.py.
+La extensión tiene su propio repositorio, py-xmlvalidate-vscode: `extension.ts` se ocupa de la integración con el editor (cuándo validar, los procesos, los diagnósticos, la barra de estado y las órdenes), y `parse.ts` de leer los informes de py-xmlvalidate.py y de jing, sin depender del editor, para poder probarla aparte. La extensión lleva su propia copia de py-xmlvalidate.py, que se empaqueta con ella.
 
-El paquete de Emacs está en `emacs/`: `py-xmlvalidate.el` lee los mismos informes con funciones sin efectos, que se prueban aparte, y lanza los procesos desde un backend de Flymake. No lleva copia del script: se instala clonando el repositorio y usa el py-xmlvalidate.py de este. Straight arma el paquete con enlaces a su clon, y desde la versión 0.1.1 el paquete sigue el enlace de su propio archivo para encontrar el script.
+El paquete de Emacs tiene también su propio repositorio, py-xmlvalidate-emacs: `py-xmlvalidate.el` lee los mismos informes con funciones sin efectos, que se prueban aparte, y lanza los procesos desde un backend de Flymake o un comprobador de Flycheck. Lleva su propia copia de py-xmlvalidate.py, junto a `py-xmlvalidate.el`; Straight arma el paquete con enlaces a su clon, y el paquete sigue el enlace de su propio archivo para encontrar el script.
+
+Hasta la versión 1.17 los dos complementos estaban en las carpetas `vscode/` y `emacs/` de este repositorio. Al pasar a repositorios propios se llevaron su historia, y cada uno guarda una copia del script en lugar de depender de este; `tools/sync-plugins.py` copia aquí cada versión nueva en los dos.
 
 Los archivos del proyecto son estos:
 
 - `py-xmlvalidate.py`: el validador (662 líneas).
 - `py-xmlvalidate-all.sh`: las dos capas, RelaxNG y Schematron (156 líneas).
-- `vscode/`: la extensión (`src/extension.ts`, `src/parse.ts`), sus pruebas (`src/test/`), su icono (`images/`), su registro de cambios (`CHANGELOG.md`) y su README.
-- `emacs/`: el paquete de Emacs (`py-xmlvalidate.el`), sus pruebas (`test/`) y su README.
 - `py-xmlvalidate-install.py`: enlaza los dos scripts en `~/bin`, para llamarlos por su nombre desde cualquier carpeta.
 - `tools/screenshots.py`: hace las capturas de los README.
-- `tools/install-trang.py`: descarga trang de las versiones publicadas de jing-trang, comprueba su SHA-1 y lo instala en `~/bin` (o en `~/.local/bin` si no existe), para que el paquete de Emacs pueda darle a nxml el esquema.
-- `tools/bundle-zip.py`: hace los archivos de cada versión en `dist/`: un zip de py-xmlvalidate.py con su documentación y el paquete de la extensión (`.vsix`).
-- `.github/workflows/publish-vscode.yml`: prueba, empaqueta y publica la extensión con cada etiqueta de versión.
+- `tools/sync-plugins.py`: copia py-xmlvalidate.py en los clones de la extensión y del paquete de Emacs, o comprueba si sus copias son iguales.
+- `tools/bundle-zip.py`: hace el zip de cada versión en `dist/`, con py-xmlvalidate.py y su documentación.
 - `docs/`: las descripciones, las capturas (`img/`) y un ejemplo autónomo (`example/`): un texto TEI breve con errores deliberados y un esquema RelaxNG pequeño con reglas Schematron embebidas.
 
 Las reglas se ejecutan tal como están en el esquema, con sus mensajes y sus `role`, para que quien conozca el esquema reconozca cada infracción sin aprender nada nuevo; el informe nombra el pattern de cada una.
@@ -57,7 +56,7 @@ Para probarlo, un proceso volvió a descargar el esquema durante 20 segundos mie
 
 El trabajo pasó por ocho etapas: primero el informe sin tope, con el ODD del proyecto (versión 1.0); luego la cosecha de reglas del RelaxNG y las dos capas de py-xmlvalidate-all.sh (1.1); la detección del esquema por `<?xml-model?>` y los mensajes interpolados (1.2 y 1.3); la corrección de reglas que nunca se ejecutaban y de los mensajes (1.4 y 1.6); el informe JSON y la extensión de VS Code, con la elección del intérprete y la barra de estado (1.5; extensión 0.1 a 0.3); las escrituras atómicas del caché (1.7); la validación mientras se escribe (1.8; extensión 0.4 y 0.4.1), y por último la orden *Refresh Schema*, el icono, las capturas, la licencia GPL y los archivos de cada versión (extensión 0.4.2 a 0.5.3).
 
-El código se gestiona con git, en un solo repositorio publicado en GitHub (https://github.com/nivaca/py-xmlvalidate) y en Codeberg (https://codeberg.org/nivaca/py-xmlvalidate). Cada versión se etiqueta (`vX.Y` cuando cambia py-xmlvalidate.py, `vscode-vA.B.C` cuando cambia solo la extensión) y se publica en las dos forjas, con el zip de py-xmlvalidate.py y el paquete de la extensión, que hace `tools/bundle-zip.py`. Con cada etiqueta, un flujo de trabajo de GitHub prueba y empaqueta la extensión, y puede publicarla en el Visual Studio Marketplace con Trusted Publishing, sin guardar ninguna clave.
+El código se gestiona con git, en tres repositorios publicados en GitHub y en Codeberg: py-xmlvalidate (https://codeberg.org/nivaca/py-xmlvalidate), py-xmlvalidate-vscode y py-xmlvalidate-emacs. Cada versión se etiqueta (`vX.Y` en el programa, `vA.B.C` en cada complemento) y se publica en las dos forjas: el programa, con el zip que hace `tools/bundle-zip.py`; la extensión, con su `.vsix`; el paquete de Emacs, con su zip. Hasta la 1.16 todo estaba en un solo repositorio, con etiquetas `vscode-vA.B.C` y `emacs-vA.B.C` para los complementos. En el repositorio de la extensión, un flujo de trabajo de GitHub la prueba y empaqueta con cada etiqueta, y puede publicarla en el Visual Studio Marketplace con Trusted Publishing, sin guardar ninguna clave.
 
 ## La extensión de VS Code
 
@@ -87,7 +86,7 @@ py-xmlvalidate.py elimina el primer fallo por diseño: el recuento por regla est
 
 ## Validación
 
-La extensión tiene 11 pruebas automáticas (`npm test`), que corren con el ejecutor de pruebas de Node. Comprueban cómo los informes de py-xmlvalidate.py y de jing se convierten en diagnósticos, las gravedades, dónde empiezan y terminan los subrayados y los mensajes de error; una de ellas ejecuta py-xmlvalidate.py de principio a fin. Otra prueba (`npm run test:integration`) ejecuta la extensión dentro de un VS Code real, sin pantalla y con un perfil propio: comprueba que los errores caigan en las líneas correctas y se vean subrayados, que se encuentre un elemento mal escrito, que se valide el texto sin guardar y que *Refresh Schema* recoja un esquema cambiado en un pequeño servidor web. Las pruebas de la extensión corren también en GitHub Actions con cada etiqueta de versión.
+Las pruebas de los complementos están ahora en sus repositorios. La extensión tiene 11 pruebas automáticas (`npm test`), que corren con el ejecutor de pruebas de Node. Comprueban cómo los informes de py-xmlvalidate.py y de jing se convierten en diagnósticos, las gravedades, dónde empiezan y terminan los subrayados y los mensajes de error; una de ellas ejecuta py-xmlvalidate.py de principio a fin. Otra prueba (`npm run test:integration`) ejecuta la extensión dentro de un VS Code real, sin pantalla y con un perfil propio: comprueba que los errores caigan en las líneas correctas y se vean subrayados, que se encuentre un elemento mal escrito, que se valide el texto sin guardar y que *Refresh Schema* recoja un esquema cambiado en un pequeño servidor web. Las pruebas de la extensión corren también en GitHub Actions con cada etiqueta de versión.
 
 El paquete de Emacs tiene 31 pruebas de ERT, que corren en un Emacs sin pantalla. Ocho no necesitan Python: leen los informes de py-xmlvalidate.py y de jing, buscan el script (también a través de un enlace como los de Straight) y adaptan el esquema compacto para nxml. Las otras veintitrés ejecutan los programas reales sobre documentos hechos para cada caso. Mediante Flymake comprueban las líneas y los subrayados, el elemento mal escrito, el texto sin guardar, la comprobación cancelada por otra más nueva, el esquema remoto refrescado desde un pequeño servidor web, el archivo fuera de `trusted-content` (su aviso, las órdenes que se niegan, la nota al final de su informe y la confianza concedida a petición), el búfer del informe con sus enlaces, y que no quede ningún proceso ni copia temporal. Mediante Flycheck, cargado de mi propia instalación, comprueban las mismas líneas, capas y subrayados, el texto sin guardar, la regla de confianza y que al apagar el modo Flycheck quede como estaba. Con trang, comprueban que nxml recibe el esquema y ofrece sus elementos, acepta `ed="#U2"`, encuentra un elemento fuera de lugar, reutiliza la conversión guardada, nunca reemplaza un esquema elegido a mano y recupera su esquema vacío. El paquete se probó también instalándolo con `package-vc-install` y con Straight en perfiles vacíos, y sobre la edición latina: la comprobación de Flycheck tardó 2,6 segundos, nxml tuvo el esquema 0,7 segundos después y no encontró errores, y dentro de un `<rdg>` ofreció los 123 elementos que el esquema permite allí.
 
@@ -103,4 +102,4 @@ Al ser Python y una extensión de VS Code, debería funcionar también en Window
 
 Lo desarrollé en Fedora Linux 45 con KDE Plasma, con Python 3.15, Node.js 22, Visual Studio Code y Emacs 31, y con git, con repositorios en GitHub y Codeberg. Las capturas se hacen con Xvfb, ImageMagick y Pillow.
 
-Para usar py-xmlvalidate.py basta descomprimir el zip de una versión publicada, instalar saxonche y lxml (`pip install saxonche lxml`, mejor en un entorno virtual) y ejecutar `python3 py-xmlvalidate.py documento.xml`. Para la extensión, se descarga el `.vsix` de la misma versión y se instala con `code --install-extension`; en sus ajustes, `schematron.pythonPath` indica el Python que tiene saxonche y lxml. El paquete de Emacs se instala con `package-vc-install`, como explica `emacs/README.md`. Las descargas de esquemas quedan en `.schema-cache/`, junto al script.
+Para usar py-xmlvalidate.py basta descomprimir el zip de una versión publicada, instalar saxonche y lxml (`pip install saxonche lxml`, mejor en un entorno virtual) y ejecutar `python3 py-xmlvalidate.py documento.xml`. La extensión se instala desde el Visual Studio Marketplace, o con el `.vsix` de una versión de py-xmlvalidate-vscode y `code --install-extension`; en sus ajustes, `schematron.pythonPath` indica el Python que tiene saxonche y lxml. El paquete de Emacs se instala desde py-xmlvalidate-emacs con Straight o con `package-vc-install`, como explica su README. Las descargas de esquemas quedan en `.schema-cache/`, junto al script.

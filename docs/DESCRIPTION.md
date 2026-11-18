@@ -252,10 +252,28 @@ releases, checks its SHA-1 and installs it in `~/bin`, as jing usually
 is (or in `~/.local/bin` when there is no `~/bin`); for the smed
 schema its output is identical to that of the copy inside oXygen.
 
+Version 1.17 moved the two plugins out.  They had lived in the `vscode/`
+and `emacs/` folders of this repository, and both depended on it: the
+extension copied `../py-xmlvalidate.py` when it was packaged, and the
+Emacs package ran the copy in the folder above its own.  Each now has a
+repository of its own, py-xmlvalidate-vscode and py-xmlvalidate-emacs, on
+GitHub and Codeberg, with its history extracted from this one and its
+tags renamed (`vscode-v0.5.9` became `v0.5.9`; the extension versions
+released only inside py-xmlvalidate releases got tags of their own).  I
+weighed git submodules and chose against them: the dependency runs from
+the plugins to the script, not the other way, and submodules would have
+cost two commits for every change and broken the Emacs install.  Instead
+each plugin carries a copy of `py-xmlvalidate.py` at the top of its
+repository, and `tools/sync-plugins.py` copies each new version there, or
+says whether the copies are the same.  The Emacs recipes became simpler
+(no `:files`, no `:lisp-dir`), the trang installer went with the Emacs
+package, and the publishing workflow with the extension.
+
 Testing
 -------
 
-The extension has 11 automated tests (`npm test`), run with Node's own
+The tests of the plugins now live in their repositories.  The extension
+has 11 automated tests (`npm test`), run with Node's own
 test runner.  They check how the reports of py-xmlvalidate.py and of
 jing become diagnostics, the severities, where the underlines start and
 end, and the error messages; one of them runs py-xmlvalidate.py from

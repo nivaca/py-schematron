@@ -5,10 +5,11 @@ extension at work (in dark and light colours).
     python3 tools/screenshots.py [-o FOLDER] [--only cli,vscode]
                                  [--looks dark,light] [--scale 2]
                                  [--python PYTHON] [--jing JING] [--code CODE]
+                                 [--extension FOLDER]
 
 It writes FOLDER/cli.png and FOLDER/vscode_LOOK.png (by default in
-docs/img/, where README.md, README_es.md and vscode/README.md take them
-from), at SCALE times the size on the screen (2 by default, sharp on screens
+docs/img/, where README.md, README_es.md and the extension's README take
+them from), at SCALE times the size on the screen (2 by default, sharp on screens
 of high resolution).
 
 Every shot uses the example in docs/example/ (edition.xml, with deliberate
@@ -19,8 +20,10 @@ copied to a temporary folder; no other document is read or written.
   run on the example, and their output is drawn like a terminal (Konsole's
   Breeze colours, the Hack font) with Pillow.
 * VS Code runs on a hidden X display of its own (Xvfb), with a throwaway
-  profile (settings, extensions) and the extension loaded from vscode/,
-  compiled first. vscode/src/test/screenshots/drive.ts opens the example,
+  profile (settings, extensions) and the extension loaded from a clone of
+  py-xmlvalidate-vscode (--extension; by default ../py-xmlvalidate-vscode,
+  next to this repository), compiled first. Its
+  src/test/screenshots/drive.ts opens the example,
   waits for the diagnostics, and shows the Problems panel and the hover of
   one error; then ImageMagick's import takes the display. Nothing appears
   on the screen, and the user's own VS Code settings are not touched.
@@ -45,7 +48,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 EXAMPLE = ROOT / "docs" / "example"
-EXTENSION = ROOT / "vscode"
+EXTENSION = ROOT.parent / "py-xmlvalidate-vscode"   # (--extension)
 DRIVER = EXTENSION / "out" / "test" / "screenshots" / "drive.js"
 
 KINDS = ("cli", "vscode")
@@ -310,6 +313,7 @@ def check_python(python: str):
 
 
 def main(argv=None):
+    global EXTENSION, DRIVER
     parser = argparse.ArgumentParser(description="Take the screenshots of the command line and the VS Code "
                                                  "extension (for the READMEs).")
     parser.add_argument("-o", "--output", type=Path, default=ROOT / "docs" / "img",
@@ -323,6 +327,8 @@ def main(argv=None):
     parser.add_argument("--jing", default=shutil.which("jing"),
                         help="jing, for the RelaxNG layer (default: the one on the PATH; without it, none)")
     parser.add_argument("--code", help="VS Code (default: the 'code' command)")
+    parser.add_argument("--extension", type=Path, default=EXTENSION, metavar="FOLDER",
+                        help="a clone of py-xmlvalidate-vscode (default: ../py-xmlvalidate-vscode)")
     args = parser.parse_args(argv)
 
     kinds = [k for k in args.only.split(",") if k]
@@ -347,6 +353,11 @@ def main(argv=None):
     args.output.mkdir(parents=True, exist_ok=True)
 
     if "vscode" in kinds:
+        EXTENSION = args.extension.expanduser().resolve()
+        DRIVER = EXTENSION / "out" / "test" / "screenshots" / "drive.js"
+        if not (EXTENSION / "package.json").is_file():
+            raise SystemExit(f"No extension in {EXTENSION}: clone py-xmlvalidate-vscode there, "
+                             f"or give its folder with --extension")
         code = vscode_binary(args.code)
         say("compiling the extension")
         compile_extension()
