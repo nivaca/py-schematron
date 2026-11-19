@@ -236,8 +236,11 @@ installer says if it is missing:
 The [VS Code extension](https://codeberg.org/nivaca/py-schematron-vscode)
 and the [Emacs package](https://codeberg.org/nivaca/py-schematron.el)
 bring their own copy of py-schematron.py, but need a Python with saxonche
-and lxml. The installer's environment has them, so you can point the
-plugin to its Python:
+and lxml. The installer's environment has them, and the plugins (VS Code
+extension 0.11 and Emacs package 0.9, and later) use its Python by
+themselves while their Python setting is empty: run the installer, and
+there is nothing to set. Its Python is here, for older versions or other
+uses:
 
 | System | The installer's Python |
 |---|---|
@@ -245,8 +248,8 @@ plugin to its Python:
 | macOS | `~/Library/Application Support/py-schematron/venv/bin/python` |
 | Windows | `%LOCALAPPDATA%\py-schematron\venv\Scripts\python.exe` |
 
-In VS Code, set `schematron.pythonPath` to it (or use *Schematron: Select
-Python Interpreter…*); in Emacs, `py-schematron-python`.
+A Python named in the plugin's setting (`schematron.pythonPath` in VS Code,
+`py-schematron-python` in Emacs) still takes precedence.
 
 #### If something goes wrong
 
@@ -786,7 +789,7 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **2.1** | 2026-11-19 | **Installers for Linux, macOS and Windows** (`installers/`, §2.1): one command downloads the latest release and sets it up in the user's folders, with a Python environment of its own (saxonche, lxml), the two TEI stylesheets for `-o`, and the commands on the PATH; run again, it updates, and `--uninstall` removes it. Detailed instructions for each system, in English and Spanish. `py-schematron-all.sh` takes its Python from `PY_SCHEMATRON_PYTHON`. 45 tests; GitHub also installs it for real on the three systems. The validation is the same |
+| **2.1** | 2026-11-19 | **Installers for Linux, macOS and Windows** (`installers/`, §2.1): one command downloads the latest release and sets it up in the user's folders, with a Python environment of its own (saxonche, lxml), the two TEI stylesheets for `-o`, and the commands on the PATH; run again, it updates, and `--uninstall` removes it. Detailed instructions for each system, in English and Spanish. `py-schematron-all.sh` takes its Python from `PY_SCHEMATRON_PYTHON`. 45 tests; GitHub also installs it for real on the three systems. The VS Code extension (0.11) and the Emacs package (0.9) use the installer's Python by themselves. The validation is the same |
 | 2.0 | 2026-11-19 | **The project is renamed py-schematron** (it was py-xmlvalidate): the scripts are `py-schematron.py`, `py-schematron-all.sh` and `py-schematron-install.py`, the repositories nivaca/py-schematron, nivaca/py-schematron.el (the Emacs package) and nivaca/py-schematron-vscode (the VS Code extension, whose name does not change), and the release zip `py-schematron-v.X.Y.zip`. The old repository addresses redirect to the new ones. Run `py-schematron-install.py` again: it links the new names into `~/bin` and removes the old links. The validation is the same |
 | 1.21 | 2026-11-19 | With `--json`, the progress messages are also `events` in the report (download, cache, extraction, harvest…), with stable kinds and their data, and a fatal error gives JSON with its message; the plugins read these instead of the Spanish messages on stderr. Each violation and XPath error says where its rule is (`rule`: file and line, in the ODD or RelaxNG it came from), so that the plugins can jump to it. 35 tests, which run every Monday too. The validation is the same |
 | 1.20 | 2026-11-18 | `-o` finds the TEI Stylesheets through `--stylesheets DIR`, `TEI_STYLESHEETS` or ODD2RNG's configuration, before `odds/` and `common/` next to the script; `--about` says which it uses. 33 tests, run on GitHub at every push. `tools/release.py` makes a release in one command, here and in the plugins (§3.5). The validation is the same |

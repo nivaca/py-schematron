@@ -240,8 +240,11 @@ instalado. El instalador avisa si falta:
 La [extensión de VS Code](https://codeberg.org/nivaca/py-schematron-vscode)
 y el [paquete de Emacs](https://codeberg.org/nivaca/py-schematron.el)
 traen su propia copia de py-schematron.py, pero necesitan un Python con
-saxonche y lxml. El entorno del instalador los tiene, así que puedes
-indicarle al complemento su Python:
+saxonche y lxml. El entorno del instalador los tiene, y los complementos
+(la extensión de VS Code desde la 0.11 y el paquete de Emacs desde la 0.9)
+usan su Python por sí solos mientras su ajuste de Python esté vacío: basta
+con ejecutar el instalador, y no hay nada que configurar. Su Python está
+aquí, para versiones anteriores u otros usos:
 
 | Sistema | El Python del instalador |
 |---|---|
@@ -249,8 +252,8 @@ indicarle al complemento su Python:
 | macOS | `~/Library/Application Support/py-schematron/venv/bin/python` |
 | Windows | `%LOCALAPPDATA%\py-schematron\venv\Scripts\python.exe` |
 
-En VS Code, pon esa ruta en `schematron.pythonPath` (o usa *Schematron:
-Select Python Interpreter…*); en Emacs, en `py-schematron-python`.
+Un Python indicado en el ajuste del complemento (`schematron.pythonPath` en
+VS Code, `py-schematron-python` en Emacs) sigue teniendo prioridad.
 
 #### Si algo sale mal
 
@@ -795,7 +798,7 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **2.1** | 2026-11-19 | **Instaladores para Linux, macOS y Windows** (`installers/`, §2.1): una orden descarga la última versión y la instala en las carpetas del usuario, con un entorno de Python propio (saxonche, lxml), las dos hojas de estilo de TEI para `-o` y las órdenes en el PATH; vuelto a ejecutar, actualiza, y `--uninstall` lo quita. Instrucciones detalladas para cada sistema, en inglés y en español. `py-schematron-all.sh` toma su Python de `PY_SCHEMATRON_PYTHON`. 45 pruebas; GitHub, además, lo instala de verdad en los tres sistemas. La validación es la misma |
+| **2.1** | 2026-11-19 | **Instaladores para Linux, macOS y Windows** (`installers/`, §2.1): una orden descarga la última versión y la instala en las carpetas del usuario, con un entorno de Python propio (saxonche, lxml), las dos hojas de estilo de TEI para `-o` y las órdenes en el PATH; vuelto a ejecutar, actualiza, y `--uninstall` lo quita. Instrucciones detalladas para cada sistema, en inglés y en español. `py-schematron-all.sh` toma su Python de `PY_SCHEMATRON_PYTHON`. 45 pruebas; GitHub, además, lo instala de verdad en los tres sistemas. La extensión de VS Code (0.11) y el paquete de Emacs (0.9) usan por sí solos el Python del instalador. La validación es la misma |
 | 2.0 | 2026-11-19 | **El proyecto pasa a llamarse py-schematron** (era py-xmlvalidate): los scripts son `py-schematron.py`, `py-schematron-all.sh` y `py-schematron-install.py`; los repositorios, nivaca/py-schematron, nivaca/py-schematron.el (el paquete de Emacs) y nivaca/py-schematron-vscode (la extensión de VS Code, cuyo nombre no cambia), y el zip de cada versión, `py-schematron-v.X.Y.zip`. Las direcciones antiguas de los repositorios redirigen a las nuevas. Hay que ejecutar de nuevo `py-schematron-install.py`, que enlaza los nombres nuevos en `~/bin` y quita los enlaces antiguos. La validación es la misma |
 | 1.21 | 2026-11-19 | Con `--json`, los mensajes de progreso son también `events` del informe (descarga, caché, extracción, cosecha…), con tipos estables y sus datos, y un error fatal da JSON con su mensaje; los complementos leen esto en lugar de los mensajes en español de stderr. Cada infracción y cada error XPath dice dónde está su regla (`rule`: archivo y línea, en el ODD o el RelaxNG de origen), para que los complementos puedan saltar a ella. 35 pruebas, que corren también cada lunes. La validación es la misma |
 | 1.20 | 2026-11-18 | `-o` encuentra las TEI Stylesheets mediante `--stylesheets CARPETA`, `TEI_STYLESHEETS` o la configuración de ODD2RNG, antes que en `odds/` y `common/` junto al script; `--about` dice cuál usa. 33 pruebas, que corren en GitHub en cada *push*. `tools/release.py` publica una versión con una sola orden, aquí y en los complementos (§3.5). La validación es la misma |
