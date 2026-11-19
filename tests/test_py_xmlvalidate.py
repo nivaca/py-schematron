@@ -413,6 +413,21 @@ class TestSources(Base):
             for folder in ("odds", "common"):
                 shutil.rmtree(self.bin / folder, ignore_errors=True)
 
+    def test_fatal_error_in_json(self):
+        """With --json, a fatal error still gives JSON: the message, and the
+        events up to it; the exit code is still 3."""
+        d = self.write("d.xml", tei("<p>a</p>"))
+        code, out, err = self.run_script("--json", d)
+        self.assertEqual(code, 3)
+        report = json.loads(out)
+        self.assertIn("no lleva ninguna PI <?xml-model?>", report["error"])
+        self.assertIn(report["error"], err)
+        self.assertEqual(report["events"], [])
+        self.assertNotIn("documents", report)
+        # without --json, nothing on stdout
+        code, out, _ = self.run_script(d)
+        self.assertEqual((code, out), (3, ""))
+
     def test_odd_without_stylesheets_exits_3(self):
         o = self.write("o.odd", self.ODD)
         d = self.write("d.xml", tei("<p>ok</p>"))
@@ -472,15 +487,27 @@ class TestRemote(Base):
 
     def test_download_cache_and_refresh(self):
         d = self.write("d.xml", RNG_PI.format(href=self.url) + tei("<p>a</p>\n<p>b</p>"))
-        code, _, err = self.check(d)
+        code, report, err = self.check(d)
         self.assertEqual(code, 0)
         self.assertIn("[descarga]", err)
-        self.assertTrue(any((self.bin / ".schema-cache").glob("*-remote.rng")))
+        cached = next((self.bin / ".schema-cache").glob("*-remote.rng"))
+        # the same, as events in the JSON, for the plugins
+        kinds = [e["kind"] for e in report["events"]]
+        self.assertEqual(kinds[:3], ["xml-model", "download", "xml-model"])
+        self.assertIn("harvest", kinds)
+        self.assertEqual(kinds[-1], "schema")
+        download = report["events"][1]
+        self.assertEqual((download["url"], download["file"]), (self.url, str(cached)))
+        self.assertEqual(report["events"][2]["type"], "rng")
+        self.assertEqual(report["events"][-1]["patterns"], 1)
         # the schema changes upstream: the cached copy still applies...
         (self.served / "remote.rng").write_text(rng(1), encoding="utf-8")
-        code, _, err = self.check(d)
+        code, report, err = self.check(d)
         self.assertEqual(code, 0)
         self.assertNotIn("[descarga]", err)
+        self.assertNotIn("download", [e["kind"] for e in report["events"]])
+        self.assertIn({"kind": "cache", "url": self.url, "file": str(cached)},
+                      [{k: e.get(k) for k in ("kind", "url", "file")} for e in report["events"]])
         # ...until --refresh
         code, report, err = self.check("--refresh", d)
         self.assertIn("[descarga]", err)

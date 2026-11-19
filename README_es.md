@@ -2,7 +2,7 @@
 
 *(English: [README.md](README.md))*
 
-**Versión 1.20** (`py-xmlvalidate.py --version`, `--about`)
+**Versión 1.21** (`py-xmlvalidate.py --version`, `--about`)
 
 Validador de la capa Schematron del proyecto SMTrad. Extrae las reglas ISO
 Schematron embebidas en el ODD (`smed-schema.xml`) y las ejecuta contra uno o
@@ -195,7 +195,7 @@ esquema se **autodetecta** de las PIs `<?xml-model?>` del primer documento
 | `--max N` | Máximo de infractores en el detalle (defecto 50). Si hay más, el script **dice cuántos quedaron fuera** — nunca trunca en silencio |
 
 | `--refresh` | Con autodetección: volver a descargar un esquema remoto aunque esté en caché |
-| `--json` | Informe legible por máquina en stdout: todas las infracciones (pattern, contexto, assert/report, `role`, mensaje, texto interpolado, `fn:path`, línea, `xml:id`), errores XPath por regla y la fuente del esquema; ignora `-v`/`--max`. Un documento mal formado se convierte en una entrada `error` en lugar de abortar la corrida. Los mensajes de progreso siguen yendo a stderr (lo usa la extensión de VS Code, §3.2) |
+| `--json` | Informe legible por máquina en stdout: todas las infracciones (pattern, contexto, assert/report, `role`, mensaje, texto interpolado, `fn:path`, línea, `xml:id`), errores XPath por regla y la fuente del esquema; ignora `-v`/`--max`. Un documento mal formado se convierte en una entrada `error` en lugar de abortar la corrida. Los mensajes de progreso siguen yendo a stderr y, desde la 1.21, también están en `events`, un objeto por mensaje, con un `kind` estable (`xml-model`, `download`, `cache`, `extraction`, `harvest`, `schema`, `warning`), el mensaje y sus datos (`url`, `file`, `patterns`…). Un error fatal (código 3) también da JSON: `{"version", "error", "events"}`. Los complementos leen esto, no stderr |
 | `--as RUTA` | Con un único documento: tratarlo como si estuviera en RUTA, para resolver los hrefs relativos de `xml-model` y para el nombre en el informe. La extensión de VS Code lo usa para validar el texto sin guardar a partir de una copia temporal |
 | `--stylesheets CARPETA` | Las TEI Stylesheets para `-o`, en lugar de `TEI_STYLESHEETS`, la configuración de ODD2RNG u `odds/` junto al script (§2) |
 | `--about` | Qué es este programa, quién lo hizo, su licencia y dónde está, y con qué corre aquí: Python, saxonche, lxml, Saxon, la carpeta del caché y si están las hojas de estilo de TEI para `-o`. Con `--version`, las únicas opciones que no necesitan documento |
@@ -607,7 +607,8 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **1.20** | 2026-11-18 | `-o` encuentra las TEI Stylesheets mediante `--stylesheets CARPETA`, `TEI_STYLESHEETS` o la configuración de ODD2RNG, antes que en `odds/` y `common/` junto al script; `--about` dice cuál usa. 33 pruebas, que corren en GitHub en cada *push*. `tools/release.py` publica una versión con una sola orden, aquí y en los complementos (§3.5). La validación es la misma |
+| **1.21** | 2026-11-19 | Con `--json`, los mensajes de progreso son también `events` del informe (descarga, caché, extracción, cosecha…), con tipos estables y sus datos, y un error fatal da JSON con su mensaje; los complementos leen esto en lugar de los mensajes en español de stderr. Las pruebas corren también cada lunes. La validación es la misma |
+| 1.20 | 2026-11-18 | `-o` encuentra las TEI Stylesheets mediante `--stylesheets CARPETA`, `TEI_STYLESHEETS` o la configuración de ODD2RNG, antes que en `odds/` y `common/` junto al script; `--about` dice cuál usa. 33 pruebas, que corren en GitHub en cada *push*. `tools/release.py` publica una versión con una sola orden, aquí y en los complementos (§3.5). La validación es la misma |
 | 1.19 | 2026-11-18 | `--about`: qué es el programa, su autor, licencia y repositorios, y con qué corre aquí (Python, saxonche, lxml, Saxon, el caché, las hojas de estilo de TEI para `-o`). La extensión de VS Code y el paquete de Emacs tienen una orden *About* propia, que muestra también esto. La validación es la misma |
 | 1.18 | 2026-11-18 | Un conjunto de pruebas (`tests/`, 28 pruebas con `unittest`, §2.2). Los `let` de schema y de pattern se evalúan con la raíz del documento como contexto, como dice ISO Schematron (antes tomaban el nodo de cada regla), y pueden usarse en el contexto de una regla. Una regla que no se puede evaluar (un error XPath) hace ahora que el script salga con 3, porque el veredicto está incompleto; `py-xmlvalidate-all.sh` lo informa como veredicto propio (salida 4). Los resultados en las ediciones no cambian |
 | 1.17 | 2026-11-18 | La extensión de VS Code y el paquete de Emacs pasan a repositorios propios, py-xmlvalidate-vscode y py-xmlvalidate-emacs, con su historia; cada uno lleva una copia de `py-xmlvalidate.py`, que el nuevo `tools/sync-plugins.py` mantiene igual. Las versiones de py-xmlvalidate ya no adjuntan el `.vsix`, y su zip ya no tiene `emacs/`; `tools/install-trang.py` pasó al paquete de Emacs; `tools/screenshots.py` toma la extensión de un clon junto a este (`--extension`). El script no cambia |
