@@ -14,7 +14,7 @@ py-xmlvalidate); a companion script, py-schematron-all.py, also
 checks the structure with RelaxNG, and an extension for Visual Studio
 Code shows the same results in the editor, underlined as you type.
 Nicolas Vaughan made it in 2026, for the editions of the SMTrad project.
-Here I explain how it was made, in eight stages.
+Here I explain how it was made, in nine stages.
 
 It stands on four pieces of other people's work: Saxon, through saxonche
 (Saxon C), which evaluates the rules with XPath 3.1; lxml, which finds
@@ -314,11 +314,53 @@ or Windows machine at hand, a job of the GitHub workflow installs it for
 real on the three systems at every push, and validates a document with
 the installed command.
 
+9. Windows, and checks before each release
+------------------------------------------
+
+The installers made Windows a real target, and Windows was where the
+remaining problems were.  py-schematron-all.sh was a shell script, so in
+2.2 I rewrote it in Python as py-schematron-all.py; it finds jing as a
+command, or as a `jing.jar` run with Java, which is how jing comes on
+Windows.  The plugins could not do that yet: they ran a command called
+`jing`, which Windows does not have.  The Emacs package (0.10.0) and the
+extension (0.12.0) now accept a `jing.jar` in their settings, or take it
+from the variable `JING_JAR`, and run it with `java -jar`.
+
+The tests of the Emacs package on Windows found more.  Emacs there reads
+the output of a process in the system's code page, so the accents in
+the messages came out garbled; the package now reads it as UTF-8.  More
+serious was that Flymake on Windows calls the backend for a file outside
+`trusted-content`, where on Linux and macOS it does not: a document I
+had not trusted was checked, and its schema run.  The backend relied on
+Flymake for that rule, which the Flycheck checker did not, so now it
+refuses such a file itself (0.10.1).  Its test calls the backend
+directly, as Flymake does on Windows, and fails without the fix.
+
+The other changes are checks.  `tools/corpus-check.py` validates all
+the documents of my editions, 210 of them, with the last released
+version and with the new one, and compares the results;
+`tools/release.py` runs it before each release.  Since 2.4 it also
+compares the time of each document, and warns about those the new
+version validates clearly slower (by more than half, and by a quarter of
+a second at least).  As the documents are validated in parallel, the
+timings are noisy, so each document flagged is timed again alone before
+it is reported.  In 2.5 the GitHub workflow began to run ruff on the
+Python code, with only the rules that find real errors, and package-lint
+on the Emacs package.  ruff found six small things in the program;
+package-lint objected that the package changed nxml as soon as it was
+loaded, so the fixes for nxml's datatypes now go in when the mode starts
+in an nxml buffer.  Finally, 2.6 added `--jobs N`, which validates
+several documents at once in separate processes, each with its own
+Saxon (one cannot be shared between threads) and the rules already read.
+The results come back in the order of the documents, so the report is
+the same as with one; on 32 editions, eight processes took 0.28 seconds
+instead of 0.65.
+
 Testing
 -------
 
 The tests of the plugins now live in their repositories.  The extension
-has 17 automated tests (`npm test`), run with Node's own
+has 18 automated tests (`npm test`), run with Node's own
 test runner.  They check how the reports of py-schematron.py and of
 jing become diagnostics, the severities, where the underlines start and
 end, and the error messages; one of them runs py-schematron.py from
@@ -329,9 +371,9 @@ visibly underlined, that a misspelt element is found, that unsaved
 changes are validated, that *Refresh Schema* picks up a schema changed
 on a small web server, that *Go to Rule* opens the schema at the
 assert, and what *About* shows.  The unit tests also run on GitHub
-Actions at every push.
+Actions at every push, on Linux and Windows.
 
-The Emacs package has 44 ERT tests, run in a batch Emacs.  Some need no
+The Emacs package has 46 ERT tests, run in a batch Emacs.  Some need no
 Python: they read the reports of py-schematron.py and jing, find the
 script (also through a link like Straight's), and check the mending of
 nxml's XSD datatypes in a fresh Emacs.  The others run the real programs on
@@ -339,7 +381,9 @@ documents made for each case.  Through Flymake they check the lines and
 underlines, the typo, unsaved changes, a check cancelled by a newer one,
 a remote schema refreshed from a small web server, a file outside
 `trusted-content` (its warning, the commands that refuse, the note at
-the end of its report, and trusting it on request), the report buffer
+the end of its report, trusting it on request, and that the backend
+itself refuses it), how jing is run (a program, a `jing.jar`, or the one
+in `JING_JAR`), the report buffer
 and its links, and that no process or temporary copy is left behind.
 Through Flycheck, loaded from my own installation, they check the same
 lines, layers and underlines, unsaved text, the trust rule, and that
@@ -363,7 +407,12 @@ copy, and a remote schema served by a small web server.  Run against
 version 1.17, exactly the six tests of what 1.18 changed fail.  Each
 change is also compared before and after on the editions and on the
 example in `docs/example/`; the cache was
-checked with the test of concurrent runs described above.  The zip of
+checked with the test of concurrent runs described above, and before
+each release `tools/corpus-check.py` compares the results and the times
+of the new version with those of the last one on the 210 documents of
+my editions.  On GitHub, ruff checks the Python code and package-lint
+the Emacs package before the tests, and the tests of both plugins run on
+Windows as well as Linux, and on macOS for each release.  The zip of
 each release is tried by unzipping it and running it, and a job of the
 GitHub workflow installs the program with `installers/` and validates a
 document with the installed command, on Linux and Windows at every push
