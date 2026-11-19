@@ -354,7 +354,8 @@ repositorio (`--emacs CARPETA` y `--vscode CARPETA` indican otros) y dice qué
 copias cambiaron y desde qué versión. No hace commits: la copia se guarda y
 se publica después en cada complemento, cuyo registro de cambios dice qué
 versión lleva. También copia `tools/release.py`, el script de publicación que
-comparten los tres repositorios.
+comparten los tres repositorios (ODD2RNG también lo usa, con una copia
+hecha a mano).
 
 ### 3.5 Publicar una versión
 

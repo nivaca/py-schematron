@@ -346,7 +346,7 @@ copies it into the clones of the two plugins next to this repository
 changed, from which version. It commits nothing: the copy is then committed
 and released in each plugin, whose changelog says which version it carries.
 It copies `tools/release.py` too, the release script the three repositories
-share.
+share (ODD2RNG uses it as well, with a copy made by hand).
 
 ### 3.5 Releases
 
