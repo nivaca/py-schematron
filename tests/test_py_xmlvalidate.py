@@ -496,7 +496,10 @@ class TestAllLayers(Base):
     validation could not be completed."""
 
     def all(self, *args):
-        env = dict(os.environ, PATH=f"{Path(JING).parent}{os.pathsep}{os.environ.get('PATH', '')}")
+        # (the wrapper runs python3: the one running these tests comes first,
+        # before jing's folder, which may hold another, as /usr/bin does)
+        env = dict(os.environ, PATH=os.pathsep.join(
+            [str(Path(sys.executable).parent), str(Path(JING).parent), os.environ.get("PATH", "")]))
         p = subprocess.run([str(self.bin / "py-xmlvalidate-all.sh"), *map(str, args)],
                            capture_output=True, text=True, cwd=self.dir, env=env, timeout=120)
         return p.returncode, p.stdout + p.stderr
