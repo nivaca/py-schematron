@@ -300,6 +300,17 @@ rule with the same test there, since extraction and harvest keep the
 order.  On the five schemas of the editions every rule was found.  Both
 plugins use it to jump from an error to its rule.
 
+Version 2.0 renamed the project py-schematron, and 2.1 gave it
+installers for Linux, macOS and Windows, on the model of py-foliation's:
+a shell script and a PowerShell script find Python 3.15 or later and run
+a common install.py, which downloads the latest release, makes a Python
+environment of its own with saxonche and lxml, fetches the two TEI
+stylesheets, and writes the commands.  Until then the program assumed a
+Linux machine with a suitable python3 on the PATH.  Since I have no Mac
+or Windows machine at hand, a job of the GitHub workflow installs it for
+real on the three systems at every push, and validates a document with
+the installed command.
+
 Testing
 -------
 
@@ -338,7 +349,7 @@ check took 2.6 seconds, nxml had the schema 0.7 seconds later and found
 no errors, and inside an `<rdg>` it offered the 123 elements the schema
 allows there.
 
-py-schematron.py has 35 tests (`python3 -m unittest discover -s
+py-schematron.py has 45 tests (`python3 -m unittest discover -s
 tests`), which run it, py-schematron-all.sh and the installer on small
 documents and schemas made for each case, in a temporary folder: rules
 and messages, shadowing, `let`s at every level and `current()`, broken

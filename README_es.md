@@ -2,7 +2,7 @@
 
 *(English: [README.md](README.md))*
 
-**Versión 2.0** (`py-schematron.py --version`, `--about`)
+**Versión 2.1** (`py-schematron.py --version`, `--about`)
 
 Validador de la capa Schematron del proyecto SMTrad. Extrae las reglas ISO
 Schematron embebidas en el ODD (`smed-schema.xml`) y las ejecuta contra uno o
@@ -91,6 +91,186 @@ y los `<let>` de las reglas se evalúan de forma idéntica en ambos entornos.
 
 ## 2. Instalación
 
+py-schematron se instala de dos maneras:
+
+- **Con el instalador** (§2.1), en Linux, macOS o Windows: una sola orden
+  descarga la última versión y prepara todo lo que necesita, en tus
+  propias carpetas. Es la manera de usarlo.
+- **Desde un clon** del repositorio (§2.2), en Linux o macOS: para trabajar
+  en el propio py-schematron o seguir su desarrollo.
+
+### 2.1 Con el instalador (Linux, macOS, Windows)
+
+#### Qué hace falta
+
+Solo **Python 3.15 o posterior**, y conexión a internet mientras se
+instala. El instalador no necesita permisos de administrador ni toca el
+Python del sistema: crea un entorno de Python propio.
+
+Para saber qué Python tienes, escribe en una terminal `python3 --version`
+(Linux, macOS) o, en PowerShell, `py --list` o `python --version`
+(Windows). Si es anterior a la 3.15, o no está:
+
+- **Linux:** instálalo con los paquetes del sistema: en Fedora,
+  `sudo dnf install python3.15`; en Debian y Ubuntu,
+  `sudo apt install python3.15 python3.15-venv` (si tu versión aún no lo
+  trae, el [PPA deadsnakes](https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa)
+  sí). En Debian y Ubuntu hace falta también `python3.15-venv`.
+- **macOS:** descarga el instalador de
+  [python.org](https://www.python.org/downloads/macos/) y ábrelo, o usa
+  Homebrew: `brew install python@3.15`.
+- **Windows:** descarga el instalador de
+  [python.org](https://www.python.org/downloads/windows/) y ejecútalo
+  (instala también el lanzador `py`, que es lo que busca el instalador), o
+  escribe en PowerShell `winget install Python.Python.3.15`.
+
+#### Linux y macOS
+
+Abre una terminal (en macOS: Aplicaciones › Utilidades › Terminal) y
+escribe:
+
+```sh
+curl -LsSf https://raw.githubusercontent.com/nivaca/py-schematron/main/installers/install.sh | sh
+```
+
+Al terminar, dice dónde dejó todo y cómo probarlo:
+
+```sh
+py-schematron.py --about
+py-schematron.py documento.xml
+py-schematron-all.sh documento.xml
+```
+
+Las órdenes van a `~/bin` si esa carpeta existe y, si no, a
+`~/.local/bin`. Si el instalador avisa de que la carpeta no está en tu PATH
+(y la terminal responde *command not found*), añádela: en macOS, cuya
+terminal usa zsh, agrega la línea `export PATH="$HOME/.local/bin:$PATH"` a
+`~/.zshrc`; en Linux, a `~/.profile` o `~/.bashrc`. Luego abre una
+terminal nueva.
+
+#### Windows
+
+Abre PowerShell (menú Inicio › escribe *PowerShell*) y escribe:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/nivaca/py-schematron/main/installers/install.ps1 | iex"
+```
+
+El instalador añade la carpeta de sus órdenes a tu PATH. **Cierra
+PowerShell y vuelve a abrirlo**, para que lea el PATH nuevo; después:
+
+```powershell
+py-schematron --about
+py-schematron documento.xml
+```
+
+En Windows la orden es `py-schematron`, sin `.py`.
+`py-schematron-all.sh`, que es un script de shell, no funciona en Windows;
+para la estructura (RelaxNG), véase *jing* más abajo.
+
+`-ExecutionPolicy ByPass` deja correr esa sola orden sin cambiar la
+configuración del sistema. Si la política de tu institución prohíbe del
+todo los scripts, descarga `py-schematron-v.X.Y.zip` de las
+[versiones publicadas](https://github.com/nivaca/py-schematron/releases),
+descomprímelo y, en la carpeta que crea, ejecuta
+`py installers\install.py --from .`.
+
+#### Qué hace el instalador
+
+1. Busca Python 3.15 o posterior y, si no lo hay, dice dónde conseguirlo.
+2. En una carpeta propia, `~/.local/share/py-schematron` (Linux),
+   `~/Library/Application Support/py-schematron` (macOS) o
+   `%LOCALAPPDATA%\py-schematron` (Windows), pone:
+   - `program/`: la última versión de py-schematron, descargada de GitHub
+     (o de Codeberg, si GitHub no responde), con las dos hojas de estilo
+     de TEI que necesita `-o` (las reglas de un ODD), descargadas de
+     [TEIC/Stylesheets](https://github.com/TEIC/Stylesheets);
+   - `venv/`: un entorno de Python con saxonche y lxml, instalados con pip.
+3. Crea las órdenes, que ejecutan el programa con ese entorno:
+   `py-schematron.py` y `py-schematron-all.sh` en `~/bin` o `~/.local/bin`
+   (Linux, macOS), o `py-schematron` en la carpeta `bin\` de su carpeta,
+   que añade a tu PATH (Windows).
+
+Una orden del mismo nombre que no creó el instalador, como un enlace hecho
+desde un clon con `py-schematron-install.py` (§2.2), se deja intacta; el
+instalador lo dice, y `--force` la reemplaza.
+
+#### Actualizar, opciones, desinstalar
+
+Para actualizar a la última versión, vuelve a ejecutar la misma orden; los
+esquemas ya descargados se conservan. Para pasarle opciones, ponlas después
+de `sh -s --` (Linux, macOS), así:
+
+```sh
+curl -LsSf https://raw.githubusercontent.com/nivaca/py-schematron/main/installers/install.sh | sh -s -- --uninstall
+```
+
+o, en Windows, descarga `installers\install.ps1` y ejecuta
+`powershell -ExecutionPolicy ByPass -File install.ps1 --uninstall`. Con una
+copia del repositorio, ejecuta directamente `sh installers/install.sh` o
+`installers\install.ps1`. Las opciones son:
+
+| Opción | Efecto |
+|---|---|
+| `--version X` | Instala la versión X (por ejemplo, `2.0`) en lugar de la última |
+| `--from ZIP-O-CARPETA` | Instala desde el zip de una versión, o desde una carpeta (un clon), en lugar de descargar |
+| `--no-tei-stylesheets` | No descarga las hojas de estilo de TEI (`-o` necesita entonces `--stylesheets`, §2.2) |
+| `--force` | Reemplaza las órdenes del mismo nombre que no creó el instalador |
+| `--uninstall` | Quita la carpeta del instalador y sus órdenes (y, en Windows, su entrada del PATH), y nada más |
+
+#### jing (opcional)
+
+`py-schematron.py` comprueba las reglas Schematron. La estructura (RelaxNG)
+la comprueba [jing](https://relaxng.org/jclark/jing.html), que usan
+`py-schematron-all.sh` y los complementos de los editores si está
+instalado. El instalador avisa si falta:
+
+- **Linux:** `sudo dnf install jing` (Fedora) o `sudo apt install jing`
+  (Debian, Ubuntu).
+- **macOS:** `brew install jing-trang`.
+- **Windows:** jing necesita Java
+  (`winget install EclipseAdoptium.Temurin.21.JRE`) y `jing.jar`, que
+  está en el zip de una
+  [versión de jing-trang](https://github.com/relaxng/jing-trang/releases);
+  luego `java -jar C:\ruta\a\jing.jar esquema.rng documento.xml` comprueba
+  un documento.
+
+#### Con los complementos de los editores
+
+La [extensión de VS Code](https://codeberg.org/nivaca/py-schematron-vscode)
+y el [paquete de Emacs](https://codeberg.org/nivaca/py-schematron.el)
+traen su propia copia de py-schematron.py, pero necesitan un Python con
+saxonche y lxml. El entorno del instalador los tiene, así que puedes
+indicarle al complemento su Python:
+
+| Sistema | El Python del instalador |
+|---|---|
+| Linux | `~/.local/share/py-schematron/venv/bin/python` |
+| macOS | `~/Library/Application Support/py-schematron/venv/bin/python` |
+| Windows | `%LOCALAPPDATA%\py-schematron\venv\Scripts\python.exe` |
+
+En VS Code, pon esa ruta en `schematron.pythonPath` (o usa *Schematron:
+Select Python Interpreter…*); en Emacs, en `py-schematron-python`.
+
+#### Si algo sale mal
+
+| Lo que ves | Qué hacer |
+|---|---|
+| *needs Python 3.15 or later, and none was found* | Instálalo (véase *Qué hace falta*), abre una terminal nueva y vuelve a ejecutar el instalador |
+| *a Python environment could not be made* (Debian, Ubuntu) | `sudo apt install python3.15-venv`, y vuelve a ejecutarlo |
+| *command not found* tras instalar (Linux, macOS) | La carpeta de las órdenes no está en tu PATH: véase *Linux y macOS* más arriba |
+| `py-schematron` no se reconoce (Windows) | Cierra PowerShell y vuelve a abrirlo; el PATH se lee al arrancar |
+| *running scripts is disabled on this system* (Windows) | Usa la orden exactamente como arriba, con `-ExecutionPolicy ByPass` |
+| *the latest release could not be found* | No hay conexión con GitHub ni con Codeberg: descarga el zip de la versión desde otro lugar y usa `--from` |
+| *the TEI stylesheets could not be downloaded* | Todo funciona salvo `-o`; vuelve a ejecutar el instalador más tarde, o usa `--stylesheets` (§2.2) |
+
+### 2.2 Desde un clon (Linux, macOS)
+
+```sh
+git clone https://codeberg.org/nivaca/py-schematron.git    # o https://github.com/nivaca/py-schematron.git
+cd py-schematron
+```
+
 ```sh
 # 1. Dependencias Python
 pip install saxonche lxml
@@ -132,7 +312,8 @@ este orden, en `--stylesheets CARPETA`, la variable de entorno
 (`~/.config/odd2rng/config.toml`) y, por último, en `odds/` y `common/`
 junto al script. `py-schematron.py --about` dice qué carpeta usa.
 
-### 2.1 Las órdenes en `~/bin`
+#### Las órdenes en `~/bin`
+
 
 Para llamar a los scripts por su nombre desde cualquier carpeta, enlázalos
 en `~/bin`:
@@ -153,7 +334,7 @@ y lxml. El instalador lo comprueba y, si faltan, muestra la orden que los
 instala (`python3 -m pip install --user saxonche lxml`). También sirve un
 entorno virtual, si su carpeta `bin/` va primero en el PATH.
 
-### 2.2 Pruebas
+### 2.3 Pruebas
 
 ```sh
 python3 -m unittest discover -s tests -v
@@ -173,8 +354,15 @@ pruebas del ODD necesitan las hojas de estilo de TEI en `odds/` y `common/`, y
 las de `py-schematron-all.sh` necesitan jing; sin ellas se omiten. Las pruebas no leen tu propia `TEI_STYLESHEETS` ni la configuración de
 ODD2RNG.
 
-En GitHub las pruebas corren en cada *push* (`.github/workflows/tests.yml`),
-con jing y las dos hojas de estilo, de modo que ninguna se salta.
+`tests/test_installers.py` prueba el instalador de §2.1 sin red ni pip:
+las carpetas de cada sistema, las órdenes que escribe, una actualización
+que conserva el caché, una orden que no creó él y la desinstalación.
+
+En GitHub las pruebas corren en cada *push* y cada lunes
+(`.github/workflows/tests.yml`), con jing y las dos hojas de estilo, de
+modo que ninguna se salta. Otra tarea instala py-schematron de verdad con
+`installers/` en Linux, macOS y Windows, como lo haría un usuario, y luego
+ejecuta la orden, valida un documento y lo desinstala.
 
 ## 3. Uso
 
@@ -607,7 +795,8 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **2.0** | 2026-11-19 | **El proyecto pasa a llamarse py-schematron** (era py-xmlvalidate): los scripts son `py-schematron.py`, `py-schematron-all.sh` y `py-schematron-install.py`; los repositorios, nivaca/py-schematron, nivaca/py-schematron.el (el paquete de Emacs) y nivaca/py-schematron-vscode (la extensión de VS Code, cuyo nombre no cambia), y el zip de cada versión, `py-schematron-v.X.Y.zip`. Las direcciones antiguas de los repositorios redirigen a las nuevas. Hay que ejecutar de nuevo `py-schematron-install.py`, que enlaza los nombres nuevos en `~/bin` y quita los enlaces antiguos. La validación es la misma |
+| **2.1** | 2026-11-19 | **Instaladores para Linux, macOS y Windows** (`installers/`, §2.1): una orden descarga la última versión y la instala en las carpetas del usuario, con un entorno de Python propio (saxonche, lxml), las dos hojas de estilo de TEI para `-o` y las órdenes en el PATH; vuelto a ejecutar, actualiza, y `--uninstall` lo quita. Instrucciones detalladas para cada sistema, en inglés y en español. `py-schematron-all.sh` toma su Python de `PY_SCHEMATRON_PYTHON`. 45 pruebas; GitHub, además, lo instala de verdad en los tres sistemas. La validación es la misma |
+| 2.0 | 2026-11-19 | **El proyecto pasa a llamarse py-schematron** (era py-xmlvalidate): los scripts son `py-schematron.py`, `py-schematron-all.sh` y `py-schematron-install.py`; los repositorios, nivaca/py-schematron, nivaca/py-schematron.el (el paquete de Emacs) y nivaca/py-schematron-vscode (la extensión de VS Code, cuyo nombre no cambia), y el zip de cada versión, `py-schematron-v.X.Y.zip`. Las direcciones antiguas de los repositorios redirigen a las nuevas. Hay que ejecutar de nuevo `py-schematron-install.py`, que enlaza los nombres nuevos en `~/bin` y quita los enlaces antiguos. La validación es la misma |
 | 1.21 | 2026-11-19 | Con `--json`, los mensajes de progreso son también `events` del informe (descarga, caché, extracción, cosecha…), con tipos estables y sus datos, y un error fatal da JSON con su mensaje; los complementos leen esto en lugar de los mensajes en español de stderr. Cada infracción y cada error XPath dice dónde está su regla (`rule`: archivo y línea, en el ODD o el RelaxNG de origen), para que los complementos puedan saltar a ella. 35 pruebas, que corren también cada lunes. La validación es la misma |
 | 1.20 | 2026-11-18 | `-o` encuentra las TEI Stylesheets mediante `--stylesheets CARPETA`, `TEI_STYLESHEETS` o la configuración de ODD2RNG, antes que en `odds/` y `common/` junto al script; `--about` dice cuál usa. 33 pruebas, que corren en GitHub en cada *push*. `tools/release.py` publica una versión con una sola orden, aquí y en los complementos (§3.5). La validación es la misma |
 | 1.19 | 2026-11-18 | `--about`: qué es el programa, su autor, licencia y repositorios, y con qué corre aquí (Python, saxonche, lxml, Saxon, el caché, las hojas de estilo de TEI para `-o`). La extensión de VS Code y el paquete de Emacs tienen una orden *About* propia, que muestra también esto. La validación es la misma |

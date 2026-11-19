@@ -42,3 +42,65 @@ jobs:
 
       - name: Test
         run: python -m unittest discover -s tests -v
+
+  # A real install with installers/, as a user would run it, on the three
+  # systems: from this checkout (--from .), with the TEI stylesheets and
+  # pip's saxonche and lxml; then the command, a validation, and --uninstall.
+  installers:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.15"
+
+      - name: A document with one violation, and its rules
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/case"
+          cat > "$RUNNER_TEMP/case/s.sch" <<'SCH'
+          <schema xmlns="http://purl.oclc.org/dsdl/schematron" queryBinding="xslt2">
+            <ns prefix="tei" uri="http://www.tei-c.org/ns/1.0"/>
+            <pattern><rule context="tei:TEI"><assert test="count(tei:p) le 1">one p at most</assert></rule></pattern>
+          </schema>
+          SCH
+          printf '<TEI xmlns="http://www.tei-c.org/ns/1.0">\n<p>a</p>\n<p>b</p>\n</TEI>\n' > "$RUNNER_TEMP/case/d.xml"
+
+      - name: Install, use and uninstall (Linux, macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          sh installers/install.sh --from .
+          cmd="$HOME/.local/bin/py-schematron.py"
+          "$cmd" --about | tee about.txt
+          grep -q "TEI Stylesheets para -o: .*junto al script" about.txt
+          set +e; "$cmd" -s "$RUNNER_TEMP/case/s.sch" "$RUNNER_TEMP/case/d.xml"; code=$?; set -e
+          test "$code" -eq 1
+          sh installers/install.sh --uninstall
+          test ! -e "$cmd"
+          if [ "$RUNNER_OS" = macOS ]; then app="$HOME/Library/Application Support/py-schematron"; else app="$HOME/.local/share/py-schematron"; fi
+          test ! -e "$app"
+
+      - name: Install, use and uninstall (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          powershell -ExecutionPolicy ByPass -File installers\install.ps1 --from .
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $cmd = Join-Path $env:LOCALAPPDATA "py-schematron\bin\py-schematron.cmd"
+          & $cmd --about | Tee-Object -FilePath about.txt
+          if (-not (Select-String -Path about.txt -Pattern "TEI Stylesheets para -o: .*junto al script" -Quiet)) { exit 1 }
+          & $cmd -s "$env:RUNNER_TEMP\case\s.sch" "$env:RUNNER_TEMP\case\d.xml"
+          if ($LASTEXITCODE -ne 1) { Write-Host "expected exit code 1, got $LASTEXITCODE"; exit 1 }
+          $path = [Environment]::GetEnvironmentVariable("Path", "User")
+          if ($path -notlike "*py-schematron\bin*") { Write-Host "not on the user's PATH"; exit 1 }
+          powershell -ExecutionPolicy ByPass -File installers\install.ps1 --uninstall
+          if (Test-Path $cmd) { exit 1 }
+          if (Test-Path (Join-Path $env:LOCALAPPDATA "py-schematron")) { exit 1 }
+          $path = [Environment]::GetEnvironmentVariable("Path", "User")
+          if ($path -like "*py-schematron\bin*") { Write-Host "still on the user's PATH"; exit 1 }

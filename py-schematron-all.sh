@@ -33,6 +33,11 @@
 
 set -u
 
+# El Python que ejecuta py-schematron.py, que necesita saxonche y lxml:
+# $PY_SCHEMATRON_PYTHON (las órdenes del instalador lo fijan en el Python de
+# su propio entorno) o, si no, python3.
+PYTHON="${PY_SCHEMATRON_PYTHON:-python3}"
+
 VERBOSE=""
 MAX=""
 while getopts ":vm:" opt; do
@@ -62,7 +67,7 @@ VALIDATE="$(dirname "$(readlink -f "$0")")/py-schematron.py"
 
 # ¿El primer argumento es un esquema RelaxNG? (clasificación por contenido)
 es_rng() {
-  python3 - "$1" <<'PY'
+  "$PYTHON" - "$1" <<'PY'
 import sys
 from lxml import etree
 try:
@@ -83,7 +88,7 @@ else
   AUTO=1
   # Autodetección: href RelaxNG de la PI xml-model del primer documento,
   # resuelto/descargado con las funciones y el caché de py-schematron.py.
-  RNG=$(python3 - "$VALIDATE" "$1" <<'PY'
+  RNG=$("$PYTHON" - "$VALIDATE" "$1" <<'PY'
 import sys, importlib.util
 from pathlib import Path
 spec = importlib.util.spec_from_file_location("validate", sys.argv[1])
@@ -117,7 +122,7 @@ if command -v jing >/dev/null 2>&1; then
 else
   echo "[aviso] jing no está instalado; uso el RelaxNG de lxml (más lento" >&2
   echo "        en esquemas grandes; para lo definitivo: apt/brew install jing)" >&2
-  python3 - "$RNG" "$@" <<'PYEOF'
+  "$PYTHON" - "$RNG" "$@" <<'PYEOF'
 import sys
 from lxml import etree
 rng = etree.RelaxNG(etree.parse(sys.argv[1]))
@@ -140,9 +145,9 @@ fi
 echo "=== capa 2: reglas Schematron ===" >&2
 # shellcheck disable=SC2086
 if [ $AUTO -eq 1 ]; then
-  python3 "$VALIDATE" $VERBOSE ${MAX:+--max "$MAX"} "$@"
+  "$PYTHON" "$VALIDATE" $VERBOSE ${MAX:+--max "$MAX"} "$@"
 else
-  python3 "$VALIDATE" -r "$RNG" $VERBOSE ${MAX:+--max "$MAX"} "$@"
+  "$PYTHON" "$VALIDATE" -r "$RNG" $VERBOSE ${MAX:+--max "$MAX"} "$@"
 fi
 rc2=$?
 # 3: un documento mal formado o reglas que no se pudieron evaluar (el
