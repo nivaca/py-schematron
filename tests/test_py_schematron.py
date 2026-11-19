@@ -18,6 +18,7 @@ environment variable JING).
 
 import http.server
 import json
+import re
 import os
 import shutil
 import subprocess
@@ -475,6 +476,43 @@ class TestSources(Base):
         code, _, err = self.run_script("-o", o, d, "--stylesheets", self.dir)
         self.assertEqual(code, 3)
         self.assertIn("no tiene odds/extract-isosch.xsl", err)
+
+
+class TestJobs(Base):
+    """--jobs N: the documents in parallel processes, the results as with
+    one, in the documents' order."""
+
+    def documents(self):
+        s = self.write("s.sch", sch("""  <pattern id="one-p"><rule context="tei:TEI">
+    <assert test="count(tei:p) le 1">at most one p</assert>
+  </rule></pattern>"""))
+        docs = [self.write(f"d{i}.xml", tei("<p>a</p>" * (i % 3 + 1))) for i in range(6)]
+        return s, docs
+
+    def test_the_same_results_in_the_same_order(self):
+        s, docs = self.documents()
+        reports = []
+        for jobs in ("1", "3", "0"):
+            code, report, err = self.check("-s", s, "--jobs", jobs, *docs)
+            self.assertEqual(code, 1, err)
+            for d in report["documents"]:
+                d.pop("seconds")
+            reports.append(report["documents"])
+        self.assertEqual(reports[0], reports[1])
+        self.assertEqual(reports[0], reports[2])
+        self.assertEqual([Path(d["file"]).name for d in reports[1]], [d.name for d in docs])
+        self.assertEqual([len(d["violations"]) for d in reports[1]], [0, 1, 1, 0, 1, 1])
+
+    def test_text_report_and_a_malformed_document(self):
+        s, docs = self.documents()
+        out1 = self.run_script("-s", s, *docs)[1]
+        out3 = self.run_script("-s", s, "--jobs", "3", *docs)[1]
+        strip = lambda t: re.sub(r"\([0-9.]+s\)", "", t)  # noqa: E731
+        self.assertEqual(strip(out1), strip(out3))
+        bad = self.write("bad.xml", f'<TEI xmlns="{TEI}"><p>a</TEI>')
+        code, _, err = self.run_script("-s", s, "--jobs", "3", docs[0], bad, docs[1])
+        self.assertEqual(code, 3)
+        self.assertIn("bad.xml no está bien formado", err)
 
 
 # ------------------------------------------------------------------ the cache

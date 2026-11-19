@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 2.5** (`py-schematron.py --version`, `--about`)
+**Version 2.6** (`py-schematron.py --version`, `--about`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -406,6 +406,7 @@ Since v1.2, the schema flags are **optional**: without them, the schema is
 | `-r, --rng PATH` | **Harvests** the `sch:ns`/`sch:pattern` annotations embedded in an ODD-generated RelaxNG (deduplicated, cached) and validates against them — the very rules Jing ignores |
 | `-v, --verbose` | Detailed listing: line, `xml:id`, message per offender |
 | `--max N` | Maximum offenders in the detailed listing (default 50). If there are more, the script **says how many were left out** — it never truncates silently |
+| `--jobs N` | With several documents: validate N at a time, in separate processes (`0`: as many as there are processors); the report comes out in the usual order |
 | `--refresh` | With auto-detection: re-download a remote schema even if cached |
 | `--json` | Machine-readable report on stdout: every violation (pattern, context, assert/report, `role`, message, interpolated text, `fn:path`, line, `xml:id`), XPath errors per rule, and the schema source; ignores `-v`/`--max`. A malformed document becomes an `error` entry instead of aborting the run. Progress messages still go to stderr, and since 1.21 they are also in `events`, one object each, with a stable `kind` (`xml-model`, `download`, `cache`, `extraction`, `harvest`, `schema`, `warning`), the message, and their data (`url`, `file`, `patterns`…). A fatal error (exit 3) still gives JSON: `{"version", "error", "events"}`. The plugins read these, not stderr. Since 1.21 each violation and XPath error also has `rule`, `{"file", "line"}` of its assert or report: in the ODD or the RelaxNG it came from with `-o`, `-r` or auto-detection (the file one edits), not in the `.sch` made from them; the plugins use it to jump to the rule |
 | `--as PATH` | With a single document: treat it as if it were located at PATH, for resolving relative `xml-model` hrefs and for the name in the report. The VS Code extension uses it to validate unsaved text from a temporary copy |
@@ -820,7 +821,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **2.5** | 2026-11-19 | The Python code is checked with ruff on GitHub before the tests (`ruff.toml`: real errors, not style); the six things it found, all small (lambdas given names, two variables called `l`), are fixed. The validation is the same |
+| **2.6** | 2026-11-19 | **`--jobs N`**: with several documents, validate N at a time in separate processes, each with its own Saxon and the rules already read (`0`: one per processor); the results and the report are the same, in the same order. On 32 editions, 0.28 s instead of 0.65 s with eight. 56 tests. The validation is the same |
+| 2.5 | 2026-11-19 | The Python code is checked with ruff on GitHub before the tests (`ruff.toml`: real errors, not style); the six things it found, all small (lambdas given names, two variables called `l`), are fixed. The validation is the same |
 | 2.4 | 2026-11-19 | `tools/corpus-check.py` also compares each document's time, and warns about those the new version validates clearly slower (by over 50% and 0.25 s, confirmed by timing them again alone), so that a slowdown is seen before a release. 54 tests. The validation is the same |
 | 2.3 | 2026-11-19 | `pyproject.toml` and `src/py_schematron/`, a package scaffold never used (its `py-schematron` command only printed a greeting), are removed: the program is its scripts, installed with `installers/` or from a clone (§2). The validation is the same |
 | 2.2 | 2026-11-19 | **`py-schematron-all.py`**: the two layers are now a Python program, so they run on Windows too (the installers make `py-schematron-all` there); where there is no `jing` command, it runs the `jing.jar` named by `JING_JAR` with Java, and otherwise lxml. `py-schematron-all.sh`, its former name, still works. **`tools/corpus-check.py`** compares the last release with this version on every document of a corpus (`--corpus`, `PY_SCHEMATRON_CORPUS`), and `tools/release.py` runs it before a release. 53 tests. The validation is the same |
