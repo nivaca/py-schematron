@@ -1,5 +1,5 @@
 # Runs the tests of py-schematron.py (tests/) on every push and pull
-# request: with jing, so that py-schematron-all.sh is tested too, and with
+# request: with jing, so that py-schematron-all.py is tested too, and with
 # the two TEI stylesheets fetched as README §2 says, so that -o is tested.
 
 name: Tests
@@ -74,6 +74,18 @@ jobs:
           </schema>
           SCH
           printf '<TEI xmlns="http://www.tei-c.org/ns/1.0">\n<p>a</p>\n<p>b</p>\n</TEI>\n' > "$RUNNER_TEMP/case/d.xml"
+          # for the two layers: a RelaxNG with an embedded rule, and a document
+          # that breaks both (an extra p, and an x where none is allowed)
+          cat > "$RUNNER_TEMP/case/s.rng" <<'RNG'
+          <grammar xmlns="http://relaxng.org/ns/structure/1.0" xmlns:sch="http://purl.oclc.org/dsdl/schematron" ns="http://www.tei-c.org/ns/1.0">
+            <sch:ns prefix="tei" uri="http://www.tei-c.org/ns/1.0"/>
+            <start><element name="TEI">
+              <sch:pattern><sch:rule context="tei:TEI"><sch:assert test="count(tei:p) le 1">one p at most</sch:assert></sch:rule></sch:pattern>
+              <oneOrMore><element name="p"><text/></element></oneOrMore>
+            </element></start>
+          </grammar>
+          RNG
+          printf '<?xml-model href="s.rng" type="application/xml" schematypens="http://relaxng.org/ns/structure/1.0"?>\n<TEI xmlns="http://www.tei-c.org/ns/1.0">\n<p>a</p>\n<p>b<x/></p>\n</TEI>\n' > "$RUNNER_TEMP/case/both.xml"
 
       - name: Install, use and uninstall (Linux, macOS)
         if: runner.os != 'Windows'
@@ -85,6 +97,9 @@ jobs:
           grep -q "TEI Stylesheets para -o: .*junto al script" about.txt
           set +e; "$cmd" -s "$RUNNER_TEMP/case/s.sch" "$RUNNER_TEMP/case/d.xml"; code=$?; set -e
           test "$code" -eq 1
+          # the two layers (lxml, since there is no jing): 3, both broken
+          set +e; "$HOME/.local/bin/py-schematron-all.py" "$RUNNER_TEMP/case/both.xml"; code=$?; set -e
+          test "$code" -eq 3
           sh installers/install.sh --uninstall
           test ! -e "$cmd"
           if [ "$RUNNER_OS" = macOS ]; then app="$HOME/Library/Application Support/py-schematron"; else app="$HOME/.local/share/py-schematron"; fi
@@ -101,6 +116,10 @@ jobs:
           if (-not (Select-String -Path about.txt -Pattern "TEI Stylesheets para -o: .*junto al script" -Quiet)) { exit 1 }
           & $cmd -s "$env:RUNNER_TEMP\case\s.sch" "$env:RUNNER_TEMP\case\d.xml"
           if ($LASTEXITCODE -ne 1) { Write-Host "expected exit code 1, got $LASTEXITCODE"; exit 1 }
+          # the two layers (lxml, since there is no jing): 3, both broken
+          $all = Join-Path $env:LOCALAPPDATA "py-schematron\bin\py-schematron-all.cmd"
+          & $all "$env:RUNNER_TEMP\case\both.xml"
+          if ($LASTEXITCODE -ne 3) { Write-Host "two layers: expected 3, got $LASTEXITCODE"; exit 1 }
           $path = [Environment]::GetEnvironmentVariable("Path", "User")
           if ($path -notlike "*py-schematron\bin*") { Write-Host "not on the user's PATH"; exit 1 }
           powershell -ExecutionPolicy ByPass -File installers\install.ps1 --uninstall

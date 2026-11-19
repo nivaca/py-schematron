@@ -2,7 +2,7 @@
 
 *(English: [README.md](README.md))*
 
-**Versión 2.1** (`py-schematron.py --version`, `--about`)
+**Versión 2.2** (`py-schematron.py --version`, `--about`)
 
 Validador de la capa Schematron del proyecto SMTrad. Extrae las reglas ISO
 Schematron embebidas en el ODD (`smed-schema.xml`) y las ejecuta contra uno o
@@ -13,9 +13,10 @@ detallado, número de línea y `xml:id` de cada infractor.
 - **La línea de órdenes** (`py-schematron.py`) ejecuta las reglas Schematron del
   esquema de un documento (un ODD, un archivo ISO Schematron o un RelaxNG
   con las reglas embebidas), que encuentra por sí sola en el
-  `<?xml-model?>` del documento. **`py-schematron-all.sh`** añade la capa
-  estructural, RelaxNG con jing, y da un solo veredicto para las dos. Véase
-  [Uso](#3-uso).
+  `<?xml-model?>` del documento. **`py-schematron-all.py`** añade la capa
+  estructural, RelaxNG con jing, y da un solo veredicto para las dos (hasta
+  la 2.1 era un script de shell, `py-schematron-all.sh`; ese nombre sigue
+  funcionando). Véase [Uso](#3-uso).
 - **La extensión de VS Code**
   ([py-schematron-vscode](https://codeberg.org/nivaca/py-schematron-vscode)) muestra los mismos resultados en
   el editor, **mientras se escribe**: los errores subrayados en el texto,
@@ -45,11 +46,11 @@ y hace visibles los otros dos al dar siempre un recuento total verificable.
 
 ## Capturas de pantalla
 
-`py-schematron.py` y `py-schematron-all.sh` en el terminal, sobre el ejemplo de
+`py-schematron.py` y `py-schematron-all.py` en el terminal, sobre el ejemplo de
 [`docs/example/`](docs/example/) (un texto TEI breve con errores
 deliberados, y un esquema RelaxNG pequeño con reglas Schematron embebidas):
 
-![py-schematron.py y py-schematron-all.sh en el terminal](docs/img/cli.png)
+![py-schematron.py y py-schematron-all.py en el terminal](docs/img/cli.png)
 
 La extensión de VS Code (§3.2) sobre el mismo documento: los errores
 subrayados, el mensaje de uno de ellos, todos en el panel Problems con la
@@ -138,7 +139,7 @@ Al terminar, dice dónde dejó todo y cómo probarlo:
 ```sh
 py-schematron.py --about
 py-schematron.py documento.xml
-py-schematron-all.sh documento.xml
+py-schematron-all.py documento.xml
 ```
 
 Las órdenes van a `~/bin` si esa carpeta existe y, si no, a
@@ -164,9 +165,9 @@ py-schematron --about
 py-schematron documento.xml
 ```
 
-En Windows la orden es `py-schematron`, sin `.py`.
-`py-schematron-all.sh`, que es un script de shell, no funciona en Windows;
-para la estructura (RelaxNG), véase *jing* más abajo.
+En Windows las órdenes son `py-schematron` y `py-schematron-all`, sin
+`.py`. Para la estructura (RelaxNG), `py-schematron-all` usa jing si lo
+encuentra y, si no, lxml; véase *jing* más abajo.
 
 `-ExecutionPolicy ByPass` deja correr esa sola orden sin cambiar la
 configuración del sistema. Si la política de tu institución prohíbe del
@@ -187,9 +188,10 @@ descomprímelo y, en la carpeta que crea, ejecuta
      [TEIC/Stylesheets](https://github.com/TEIC/Stylesheets);
    - `venv/`: un entorno de Python con saxonche y lxml, instalados con pip.
 3. Crea las órdenes, que ejecutan el programa con ese entorno:
-   `py-schematron.py` y `py-schematron-all.sh` en `~/bin` o `~/.local/bin`
-   (Linux, macOS), o `py-schematron` en la carpeta `bin\` de su carpeta,
-   que añade a tu PATH (Windows).
+   `py-schematron.py` y `py-schematron-all.py` (y `py-schematron-all.sh`,
+   su nombre anterior) en `~/bin` o `~/.local/bin` (Linux, macOS), o
+   `py-schematron` y `py-schematron-all` en la carpeta `bin\` de su
+   carpeta, que añade a tu PATH (Windows).
 
 Una orden del mismo nombre que no creó el instalador, como un enlace hecho
 desde un clon con `py-schematron-install.py` (§2.2), se deja intacta; el
@@ -222,8 +224,9 @@ copia del repositorio, ejecuta directamente `sh installers/install.sh` o
 
 `py-schematron.py` comprueba las reglas Schematron. La estructura (RelaxNG)
 la comprueba [jing](https://relaxng.org/jclark/jing.html), que usan
-`py-schematron-all.sh` y los complementos de los editores si está
-instalado. El instalador avisa si falta:
+`py-schematron-all.py` y los complementos de los editores si está
+instalado; sin él, `py-schematron-all.py` usa lxml, más lento en esquemas
+grandes. El instalador avisa si falta jing:
 
 - **Linux:** `sudo dnf install jing` (Fedora) o `sudo apt install jing`
   (Debian, Ubuntu).
@@ -232,8 +235,9 @@ instalado. El instalador avisa si falta:
   (`winget install EclipseAdoptium.Temurin.21.JRE`) y `jing.jar`, que
   está en el zip de una
   [versión de jing-trang](https://github.com/relaxng/jing-trang/releases);
-  luego `java -jar C:\ruta\a\jing.jar esquema.rng documento.xml` comprueba
-  un documento.
+  luego pon en la variable `JING_JAR` la ruta de ese `jing.jar` (en
+  *Configuración › Sistema › Acerca de › Configuración avanzada del sistema
+  › Variables de entorno*), y `py-schematron-all` lo ejecuta con Java.
 
 #### Con los complementos de los editores
 
@@ -294,7 +298,8 @@ Disposición resultante:
 ```
 py-schematron/
 ├── py-schematron.py
-├── py-schematron-all.sh
+├── py-schematron-all.py
+├── py-schematron-all.sh        (el nombre anterior de py-schematron-all.py)
 ├── py-schematron-install.py
 ├── odds/
 │   └── extract-isosch.xsl
@@ -325,8 +330,9 @@ en `~/bin`:
 python3 py-schematron-install.py
 ```
 
-Crea dos enlaces simbólicos, `~/bin/py-schematron.py` y
-`~/bin/py-schematron-all.sh`, que apuntan a esta carpeta; así un `git pull`
+Crea enlaces simbólicos, `~/bin/py-schematron.py` y
+`~/bin/py-schematron-all.py` (y `~/bin/py-schematron-all.sh`, su nombre
+anterior), que apuntan a esta carpeta; así un `git pull`
 aquí actualiza las órdenes de inmediato. Si mueves la carpeta, vuelve a
 ejecutarlo. Un archivo u otro enlace con el mismo nombre no se toca
 (`--force` reemplaza otro enlace, nunca un archivo); `--uninstall` quita
@@ -343,7 +349,7 @@ entorno virtual, si su carpeta `bin/` va primero en el PATH.
 python3 -m unittest discover -s tests -v
 ```
 
-ejecuta las pruebas de `py-schematron.py`, `py-schematron-all.sh` y
+ejecuta las pruebas de `py-schematron.py`, `py-schematron-all.py` y
 `py-schematron-install.py` (`tests/test_py_schematron.py`), con el Python
 que las corre, que necesita saxonche y lxml; no hace falta nada más.
 Escriben documentos y esquemas pequeños para cada caso en una carpeta
@@ -354,7 +360,7 @@ documentos mal formados, las fuentes de las reglas (`-s`, `-r`,
 `<?xml-model?>`, `--as`), el caché, un esquema remoto servido por un pequeño
 servidor web local, con `--refresh`, el informe de texto y el instalador. La
 pruebas del ODD necesitan las hojas de estilo de TEI en `odds/` y `common/`, y
-las de `py-schematron-all.sh` necesitan jing; sin ellas se omiten. Las pruebas no leen tu propia `TEI_STYLESHEETS` ni la configuración de
+las de `py-schematron-all.py` necesitan jing; sin ellas se omiten. Las pruebas no leen tu propia `TEI_STYLESHEETS` ni la configuración de
 ODD2RNG.
 
 `tests/test_installers.py` prueba el instalador de §2.1 sin red ni pip:
@@ -460,12 +466,12 @@ jing smed-schema.rng ed_lat.xml && python3 py-schematron.py -r smed-schema.rng e
 # con veredicto compuesto: 0 limpio, 1 RelaxNG, 2 Schematron, 3 ambas,
 # 4 entorno o capa Schematron incompleta;
 # si jing no está instalado usa el RelaxNG de lxml como respaldo):
-./py-schematron-all.sh -v smed-schema.rng ed_lat.xml
+./py-schematron-all.py -v smed-schema.rng ed_lat.xml
 
 # Wrapper en modo auto (v1.2): sin esquema, lo detecta de la PI xml-model
 # del documento (clasificando el primer argumento por contenido, no por
 # extensión) y comparte el caché de descargas de py-schematron.py:
-./py-schematron-all.sh -v documento.xml
+./py-schematron-all.py -v documento.xml
 
 # En un Makefile o hook pre-commit (código de salida ≠ 0 si hay infracciones)
 python3 py-schematron.py -s smed-schema.sch ed_lat.xml || echo "hay pendientes"
@@ -820,7 +826,8 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **2.1** | 2026-11-19 | **Instaladores para Linux, macOS y Windows** (`installers/`, §2.1): una orden descarga la última versión y la instala en las carpetas del usuario, con un entorno de Python propio (saxonche, lxml), las dos hojas de estilo de TEI para `-o` y las órdenes en el PATH; vuelto a ejecutar, actualiza, y `--uninstall` lo quita. Instrucciones detalladas para cada sistema, en inglés y en español. `py-schematron-all.sh` toma su Python de `PY_SCHEMATRON_PYTHON`. 45 pruebas; GitHub, además, lo instala de verdad en los tres sistemas. La extensión de VS Code (0.11) y el paquete de Emacs (0.9) usan por sí solos el Python del instalador. La validación es la misma |
+| **2.2** | 2026-11-19 | **`py-schematron-all.py`**: las dos capas son ahora un programa en Python, así que funcionan también en Windows (los instaladores crean allí `py-schematron-all`); donde no hay orden `jing`, ejecuta con Java el `jing.jar` que indique `JING_JAR` y, si no, usa lxml. `py-schematron-all.sh`, su nombre anterior, sigue funcionando. **`tools/corpus-check.py`** compara la última versión publicada con esta sobre cada documento de un corpus (`--corpus`, `PY_SCHEMATRON_CORPUS`), y `tools/release.py` la ejecuta antes de publicar. 53 pruebas. La validación es la misma |
+| 2.1 | 2026-11-19 | **Instaladores para Linux, macOS y Windows** (`installers/`, §2.1): una orden descarga la última versión y la instala en las carpetas del usuario, con un entorno de Python propio (saxonche, lxml), las dos hojas de estilo de TEI para `-o` y las órdenes en el PATH; vuelto a ejecutar, actualiza, y `--uninstall` lo quita. Instrucciones detalladas para cada sistema, en inglés y en español. `py-schematron-all.sh` toma su Python de `PY_SCHEMATRON_PYTHON`. 45 pruebas; GitHub, además, lo instala de verdad en los tres sistemas. La extensión de VS Code (0.11) y el paquete de Emacs (0.9) usan por sí solos el Python del instalador. La validación es la misma |
 | 2.0 | 2026-11-19 | **El proyecto pasa a llamarse py-schematron** (era py-xmlvalidate): los scripts son `py-schematron.py`, `py-schematron-all.sh` y `py-schematron-install.py`; los repositorios, nivaca/py-schematron, nivaca/py-schematron.el (el paquete de Emacs) y nivaca/py-schematron-vscode (la extensión de VS Code, cuyo nombre no cambia), y el zip de cada versión, `py-schematron-v.X.Y.zip`. Las direcciones antiguas de los repositorios redirigen a las nuevas. Hay que ejecutar de nuevo `py-schematron-install.py`, que enlaza los nombres nuevos en `~/bin` y quita los enlaces antiguos. La validación es la misma |
 | 1.21 | 2026-11-19 | Con `--json`, los mensajes de progreso son también `events` del informe (descarga, caché, extracción, cosecha…), con tipos estables y sus datos, y un error fatal da JSON con su mensaje; los complementos leen esto en lugar de los mensajes en español de stderr. Cada infracción y cada error XPath dice dónde está su regla (`rule`: archivo y línea, en el ODD o el RelaxNG de origen), para que los complementos puedan saltar a ella. 35 pruebas, que corren también cada lunes. La validación es la misma |
 | 1.20 | 2026-11-18 | `-o` encuentra las TEI Stylesheets mediante `--stylesheets CARPETA`, `TEI_STYLESHEETS` o la configuración de ODD2RNG, antes que en `odds/` y `common/` junto al script; `--about` dice cuál usa. 33 pruebas, que corren en GitHub en cada *push*. `tools/release.py` publica una versión con una sola orden, aquí y en los complementos (§3.5). La validación es la misma |

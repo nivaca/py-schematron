@@ -5,11 +5,11 @@
 """Install the commands of py-schematron: python3 py-schematron-install.py
 [--bin FOLDER] [--force | --uninstall]
 
-Makes symbolic links in ~/bin (or FOLDER) to the two scripts in this
-folder, so they can be run from anywhere by their names:
+Makes symbolic links in ~/bin (or FOLDER) to the scripts in this folder,
+so they can be run from anywhere by their names:
 
     py-schematron.py document.xml
-    py-schematron-all.sh document.xml
+    py-schematron-all.py document.xml       (py-schematron-all.sh, its former name, too)
 
 The links point to this folder, so the scripts keep finding what lives
 next to them (odds/ and common/ for ODDs, and the .schema-cache/ of
@@ -41,7 +41,7 @@ import subprocess  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-SCRIPTS = ("py-schematron.py", "py-schematron-all.sh")
+SCRIPTS = ("py-schematron.py", "py-schematron-all.py", "py-schematron-all.sh")
 # The commands' names until 1.21, when the project was py-xmlvalidate: their
 # links are removed, since they point to scripts that no longer exist.
 OLD_SCRIPTS = ("py-xmlvalidate.py", "py-xmlvalidate-all.sh")
@@ -138,7 +138,7 @@ def check_python():
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="py-schematron-install.py",
-        description="Link the commands py-schematron.py and py-schematron-all.sh "
+        description="Link the commands py-schematron.py and py-schematron-all.py "
                     "into ~/bin (or another folder).")
     parser.add_argument("--bin", type=Path, default=Path.home() / "bin", metavar="FOLDER",
                         help="where to put the links (default: ~/bin)")

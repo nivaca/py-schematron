@@ -10,7 +10,7 @@ from an ODD, which carries them embedded; it finds the schema by itself
 in the document's `<?xml-model?>` instructions.  Its main program is
 py-schematron.py (called validate.py until version 1.11, xmlvalidate.py
 in 1.12, and py-xmlvalidate.py from 1.13 to 1.21, when the project was
-py-xmlvalidate); a companion script, py-schematron-all.sh, also
+py-xmlvalidate); a companion script, py-schematron-all.py, also
 checks the structure with RelaxNG, and an extension for Visual Studio
 Code shows the same results in the editor, underlined as you type.
 Nicolas Vaughan made it in 2026, for the editions of the SMTrad project.
@@ -70,10 +70,13 @@ The same version added `current()` (the TEI Guidelines' rules use it),
 guards against documents that are not well-formed and against schemas
 without rules (which would approve anything), an exit code of its own
 for problems of the environment, and a cache that is renewed when either
-the schema or the script changes.  py-schematron-all.sh runs the two
+the schema or the script changes.  py-schematron-all.py runs the two
 layers on the same RelaxNG file: the structure with jing (or lxml,
 without it), then the rules with py-schematron.py, and combines their
-verdicts in its exit code.
+verdicts in its exit code.  (It was a bash script, py-schematron-all.sh,
+until 2.1; version 2.2 rewrote it in Python, so that it runs on Windows
+too, where it can run jing with Java, and kept the old name as a
+wrapper.)
 
 3. Finding the schema
 ---------------------
@@ -83,7 +86,7 @@ py-schematron.py reads the document's `<?xml-model?>` instructions,
 prefers a Schematron one, then a RelaxNG one, and downloads a remote
 schema once, to a cache, until `--refresh` asks for it again.  What a
 file is (ODD, Schematron or RelaxNG) is decided by its content, not by
-its name.  py-schematron-all.sh gained the same detection.  Version 1.3
+its name.  py-schematron-all.py gained the same detection.  Version 1.3
 made the messages more useful: the `<value-of>`s inside them are
 evaluated for each offence, so a message names, for example, the exact
 sigla that are missing.
@@ -350,8 +353,8 @@ check took 2.6 seconds, nxml had the schema 0.7 seconds later and found
 no errors, and inside an `<rdg>` it offered the 123 elements the schema
 allows there.
 
-py-schematron.py has 45 tests (`python3 -m unittest discover -s
-tests`), which run it, py-schematron-all.sh and the installer on small
+py-schematron.py has 53 tests (`python3 -m unittest discover -s
+tests`), which run it, py-schematron-all.py and the installer on small
 documents and schemas made for each case, in a temporary folder: rules
 and messages, shadowing, `let`s at every level and `current()`, broken
 rules and the exit codes, malformed text, the sources of rules (`-s`,

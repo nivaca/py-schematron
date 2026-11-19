@@ -21,11 +21,11 @@ needs no administrator rights, and leaves the system's Python alone.
     TEIC/Stylesheets, unless --no-tei-stylesheets;
   - venv/: a Python environment with saxonche and lxml, from pip.
 * The commands, which run the program with that environment:
-  - Linux and macOS: py-schematron.py and py-schematron-all.sh, in ~/bin if
+  - Linux and macOS: py-schematron.py and py-schematron-all.py (and
+    py-schematron-all.sh, its former name), in ~/bin if
     it exists, or else in ~/.local/bin;
-  - Windows: py-schematron (py-schematron.cmd), in the folder's bin\\,
-    which is added to the user's PATH.  py-schematron-all.sh, a shell
-    script, does not run on Windows.
+  - Windows: py-schematron and py-schematron-all (.cmd files), in the
+    folder's bin\\, which is added to the user's PATH.
 
 An existing command of the same name that this installer did not make (a
 link made by py-schematron-install.py from a clone, say) is left alone,
@@ -53,7 +53,7 @@ GITHUB = "https://github.com/nivaca/py-schematron"
 CODEBERG = "https://codeberg.org/nivaca/py-schematron"
 AGENT = {"User-Agent": "py-schematron-installer"}
 # The program's files, in a release zip or a clone
-PROGRAM_FILES = ("py-schematron.py", "py-schematron-all.sh", "LICENSE",
+PROGRAM_FILES = ("py-schematron.py", "py-schematron-all.py", "py-schematron-all.sh", "LICENSE",
                  "README.md", "README_es.md")
 TEI = "https://raw.githubusercontent.com/TEIC/Stylesheets/dev/"
 TEI_FILES = ("odds/extract-isosch.xsl", "common/functions.xsl")
@@ -215,15 +215,14 @@ def install_libraries(python: Path) -> None:
 def commands(program: Path, python: Path) -> dict[str, str]:
     """The commands to write: {file name: text}."""
     if windows():
-        return {"py-schematron.cmd":
-                f'@echo off\r\nrem {MARK}\r\n"{python}" "{program / "py-schematron.py"}" %*\r\n'}
-    return {
-        "py-schematron.py":
-            f'#!/bin/sh\n# {MARK}\nexec "{python}" "{program / "py-schematron.py"}" "$@"\n',
-        "py-schematron-all.sh":
-            f'#!/bin/sh\n# {MARK}\nPY_SCHEMATRON_PYTHON="{python}" exec /bin/bash '
-            f'"{program / "py-schematron-all.sh"}" "$@"\n',
-    }
+        cmd = lambda script: (f'@echo off\r\nrem {MARK}\r\n'
+                              f'"{python}" "{program / script}" %*\r\n')
+        return {"py-schematron.cmd": cmd("py-schematron.py"),
+                "py-schematron-all.cmd": cmd("py-schematron-all.py")}
+    sh = lambda script: f'#!/bin/sh\n# {MARK}\nexec "{python}" "{program / script}" "$@"\n'
+    return {"py-schematron.py": sh("py-schematron.py"),
+            "py-schematron-all.py": sh("py-schematron-all.py"),
+            "py-schematron-all.sh": sh("py-schematron-all.py")}      # (its former name)
 
 
 def ours(path: Path) -> bool:
@@ -291,12 +290,12 @@ def remove_from_user_path(folder: str) -> None:
 
 
 def jing_hint() -> str | None:
-    """How to get jing, for py-schematron-all.sh and the plugins, if it is missing."""
+    """How to get jing, for py-schematron-all and the plugins, if it is missing."""
     if shutil.which("jing"):
         return None
     if windows():
-        return ("jing (optional: the RelaxNG layer of the VS Code extension and the Emacs "
-                "package) is not on the PATH; it needs Java and jing.jar, see the README.")
+        return ("jing (optional, for the RelaxNG layer) is not on the PATH: it needs Java and "
+                "jing.jar; py-schematron-all uses the jing.jar named by JING_JAR (see the README).")
     if sys.platform == "darwin":
         return "jing (optional, for the RelaxNG layer) is not installed: brew install jing-trang"
     return ("jing (optional, for the RelaxNG layer) is not installed: sudo dnf install jing, "
@@ -334,8 +333,6 @@ def install(args) -> None:
     if windows():
         if add_to_user_path(str(folder)):
             notes.append(f"{folder} was added to your PATH: open a new terminal to use py-schematron.")
-        else:
-            notes.append("Windows has no py-schematron-all.sh: run py-schematron, and jing apart.")
     elif not on_path(folder):
         notes.append(f'{folder} is not on your PATH: add it, for instance with the line '
                      f'export PATH="{folder}:$PATH" in ~/.profile (bash) or ~/.zshrc (zsh), '

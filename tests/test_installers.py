@@ -68,12 +68,13 @@ class TestPlaces(unittest.TestCase):
         program, python = Path("/p/program"), Path("/p/venv/bin/python")
         with mock.patch.object(sys, "platform", "linux"):
             texts = install.commands(program, python)
-        self.assertEqual(sorted(texts), ["py-schematron-all.sh", "py-schematron.py"])
+        self.assertEqual(sorted(texts), ["py-schematron-all.py", "py-schematron-all.sh", "py-schematron.py"])
         self.assertIn(f'exec "{python}" "{program / "py-schematron.py"}" "$@"', texts["py-schematron.py"])
-        self.assertIn(f'PY_SCHEMATRON_PYTHON="{python}"', texts["py-schematron-all.sh"])
+        for name in ("py-schematron-all.py", "py-schematron-all.sh"):          # (the same)
+            self.assertIn(f'exec "{python}" "{program / "py-schematron-all.py"}" "$@"', texts[name])
         with mock.patch.object(sys, "platform", "win32"):
             texts = install.commands(program, python)
-        self.assertEqual(list(texts), ["py-schematron.cmd"])
+        self.assertEqual(list(texts), ["py-schematron.cmd", "py-schematron-all.cmd"])
         self.assertIn("%*", texts["py-schematron.cmd"])
         for text in texts.values():
             self.assertIn(install.MARK, text)
@@ -118,10 +119,10 @@ class TestInstall(Base):
     def test_from_a_release_zip(self):
         archive = self.home / "py-schematron-v.9.9.zip"
         with zipfile.ZipFile(archive, "w") as z:
-            for name in ("py-schematron.py", "py-schematron-all.sh", "LICENSE"):
+            for name in ("py-schematron.py", "py-schematron-all.py", "py-schematron-all.sh", "LICENSE"):
                 z.write(REPO / name, f"py-schematron-v.9.9/{name}")
         self.run_installer("--from", str(archive))
-        self.assertTrue((install.home_of_app() / "program" / "py-schematron-all.sh").is_file())
+        self.assertTrue((install.home_of_app() / "program" / "py-schematron-all.py").is_file())
 
     def test_a_command_it_did_not_make_is_left_alone(self):
         (self.home / "bin").mkdir()

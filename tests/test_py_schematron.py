@@ -86,7 +86,8 @@ class Base(unittest.TestCase):
         cls.tmp = Path(tempfile.mkdtemp(prefix="pysch-tests-"))
         cls.bin = cls.tmp / "bin"
         cls.bin.mkdir()
-        for name in ("py-schematron.py", "py-schematron-all.sh", "py-schematron-install.py"):
+        for name in ("py-schematron.py", "py-schematron-all.py", "py-schematron-all.sh",
+                     "py-schematron-install.py"):
             shutil.copy2(REPO / name, cls.bin / name)
         cls.script = cls.bin / "py-schematron.py"
         # (the user's own settings must not change the results: no ODD2RNG
@@ -556,15 +557,20 @@ class TestRemote(Base):
 
 @unittest.skipUnless(JING, "jing not found")
 class TestAllLayers(Base):
-    """The two-layer wrapper: 0 clean, 1 RelaxNG, 2 Schematron, 3 both, 4 the
-    validation could not be completed."""
+    """The two layers, through py-schematron-all.sh (the former name, now a
+    wrapper of py-schematron-all.py): 0 clean, 1 RelaxNG, 2 Schematron, 3
+    both, 4 the validation could not be completed."""
 
-    def all(self, *args):
+    def command(self):
+        return [str(self.bin / "py-schematron-all.sh")]
+
+    def all(self, *args, path=None):
         # (the wrapper runs python3: the one running these tests comes first,
         # before jing's folder, which may hold another, as /usr/bin does)
-        env = dict(os.environ, PATH=os.pathsep.join(
-            [str(Path(sys.executable).parent), str(Path(JING).parent), os.environ.get("PATH", "")]))
-        p = subprocess.run([str(self.bin / "py-schematron-all.sh"), *map(str, args)],
+        env = {k: v for k, v in os.environ.items() if k not in ("JING", "JING_JAR")}
+        env["PATH"] = path or os.pathsep.join(
+            [str(Path(sys.executable).parent), str(Path(JING).parent), os.environ.get("PATH", "")])
+        p = subprocess.run([*self.command(), *map(str, args)],
                            capture_output=True, text=True, cwd=self.dir, env=env, timeout=120)
         return p.returncode, p.stdout + p.stderr
 
@@ -585,6 +591,38 @@ class TestAllLayers(Base):
         self.assertEqual(code, 4, out)
 
 
+class TestAllLayersPython(TestAllLayers):
+    """The same, through py-schematron-all.py itself; and what only it has:
+    auto-detection, the options, lxml when there is no jing."""
+
+    def command(self):
+        return [sys.executable, str(self.bin / "py-schematron-all.py")]
+
+    def test_auto_detection_and_options(self):
+        self.write("schema.rng", rng(2))
+        d = self.write("d.xml", RNG_PI.format(href="schema.rng") + tei("<p>a</p><p>b</p><p>c</p>"))
+        code, out = self.all("-v", "-m", "1", d)
+        self.assertEqual(code, 2, out)
+        self.assertIn("[auto] esquema RelaxNG:", out)
+        self.assertIn("=== VEREDICTO: infracciones Schematron ===", out)
+
+    def test_without_jing_lxml_checks_the_structure(self):
+        r = self.write("schema.rng", rng(2))
+        d = self.write("d.xml", tei("<p>a<bogus/></p>"))
+        code, out = self.all(r, d, path=str(Path(sys.executable).parent))
+        self.assertEqual(code, 1, out)
+        self.assertIn("jing no está instalado; uso el RelaxNG de lxml", out)
+
+    def test_usage_errors_are_4(self):
+        for args, message in ((["-x", "d.xml"], "Opción desconocida: -x"),
+                              ([], "Uso:"),
+                              (["missing.xml"], "No existe: missing.xml"),
+                              (["-m"], "La opción -m requiere un valor")):
+            code, out = self.all(*args)
+            self.assertEqual(code, 4, f"{args}: {out}")
+            self.assertIn(message, out)
+
+
 # ------------------------------------------------- py-schematron-install.py
 
 class TestInstaller(Base):
@@ -598,7 +636,7 @@ class TestInstaller(Base):
         target = self.dir / "mybin"
         code, out = self.install("--bin", target)
         self.assertEqual(code, 0, out)
-        for name in ("py-schematron.py", "py-schematron-all.sh"):
+        for name in ("py-schematron.py", "py-schematron-all.py", "py-schematron-all.sh"):
             link = target / name
             self.assertTrue(link.is_symlink())
             self.assertEqual(link.resolve(), (self.bin / name).resolve())
