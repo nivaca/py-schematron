@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 1.17** (`py-xmlvalidate.py --version`)
+**Version 1.18** (`py-xmlvalidate.py --version`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -140,6 +140,25 @@ command that installs them (`python3 -m pip install --user saxonche lxml`).
 A virtual environment works as well, if its `bin/` folder comes first on
 your PATH.
 
+### 2.2 Tests
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+runs the tests of `py-xmlvalidate.py`, `py-xmlvalidate-all.sh` and
+`py-xmlvalidate-install.py` (`tests/test_py_xmlvalidate.py`), with the
+Python that runs them, which needs saxonche and lxml; nothing else is
+needed. They write small documents and schemas for each case in a temporary
+folder, with their own copy of the scripts, so nothing lands in this one:
+rules and messages, first-match shadowing, `let`s at every level and
+`current()`, broken rules and the exit codes, malformed documents, the
+sources of rules (`-s`, `-r`, `<?xml-model?>`, `--as`), the cache, a remote
+schema served from a small local web server, with `--refresh`, the text
+report, and the installer. The ODD test needs the TEI stylesheets in
+`odds/` and `common/`, and the tests of `py-xmlvalidate-all.sh` need jing;
+without them they are skipped.
+
 ## 3. Usage
 
 ```
@@ -210,7 +229,8 @@ python3 py-xmlvalidate.py -r tei_all.rng -v document.xml
 jing smed-schema.rng ed_lat.xml && python3 py-xmlvalidate.py -r smed-schema.rng ed_lat.xml
 
 # Or with the two-layer wrapper (ALWAYS runs both layers, no short-circuit,
-# with a composite verdict: 0 clean, 1 RelaxNG, 2 Schematron, 3 both, 4 environment;
+# with a composite verdict: 0 clean, 1 RelaxNG, 2 Schematron, 3 both,
+# 4 environment error or incomplete Schematron check;
 # falls back to lxml's RelaxNG when jing is not installed):
 ./py-xmlvalidate-all.sh -v smed-schema.rng ed_lat.xml
 
@@ -230,7 +250,7 @@ python3 py-xmlvalidate.py -s smed-schema.sch ed_lat.xml || echo "pending issues"
 | 0 | no violations |
 | 1 | one or more violations |
 | 2 | invocation error (argparse) |
-| 3 | environment error (missing file, ODD/RNG without rules), with a message on stderr |
+| 3 | the validation could not be completed: a document that is not well-formed, a rule that could not be evaluated (an XPath error; the report lists it, and the other rules are still checked), or an environment error (missing file, ODD/RNG without rules), with a message on stderr |
 
 ### 3.2 VS Code extension
 
@@ -351,7 +371,11 @@ and released in each plugin, whose changelog says which version it carries.
 
 Covered — the exact subset the smed ODD uses:
 
-- `pattern`, `rule`, `assert`, `report`, `let`;
+- `pattern`, `rule`, `assert`, `report`, `let`. A `let` at schema or
+  pattern level is evaluated with the document's root as context, and a
+  rule's `let` with the rule's node, as the standard says (before 1.18 all of
+  them took the rule's node); pattern-level variables can also be used in
+  the rule's context;
 - `current()` (an XSLT function used by the P5 Guidelines rules): translated
   into a context-node binding (`let $VALIDATE_CTX := .`) with textual
   substitution, which reproduces its Schematron semantics exactly;
@@ -540,7 +564,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **1.17** | 2026-11-18 | The VS Code extension and the Emacs package move to repositories of their own, py-xmlvalidate-vscode and py-xmlvalidate-emacs, with their history; each carries a copy of `py-xmlvalidate.py`, which the new `tools/sync-plugins.py` keeps in step. Releases of py-xmlvalidate no longer attach the `.vsix`, and its zip no longer has `emacs/`; `tools/install-trang.py` moved to the Emacs package; `tools/screenshots.py` takes the extension from a clone next to this one (`--extension`). The script does not change |
+| **1.18** | 2026-11-18 | A test suite (`tests/`, 28 tests with `unittest`, §2.2). `let`s at schema and pattern level are evaluated with the document's root as context, as ISO Schematron says (they took each rule's node before), and can be used in a rule's context. A rule that cannot be evaluated (an XPath error) now makes the script exit 3, since the verdict is incomplete; `py-xmlvalidate-all.sh` reports that as its own verdict (exit 4). Results on the editions are unchanged |
+| 1.17 | 2026-11-18 | The VS Code extension and the Emacs package move to repositories of their own, py-xmlvalidate-vscode and py-xmlvalidate-emacs, with their history; each carries a copy of `py-xmlvalidate.py`, which the new `tools/sync-plugins.py` keeps in step. Releases of py-xmlvalidate no longer attach the `.vsix`, and its zip no longer has `emacs/`; `tools/install-trang.py` moved to the Emacs package; `tools/screenshots.py` takes the extension from a clone next to this one (`--extension`). The script does not change |
 | 1.16 | 2026-11-17 | Faster again: each rule is evaluated in one Saxon call for all its context nodes, instead of one call per node, which made Saxon compile the rule's expression once per node. The Latin edition went from 11.5 s to 1.9 s (measured back to back on a busy machine), with identical results on 39 documents; if the single call fails, the rule is evaluated node by node as before. Bundled in the VS Code extension 0.5.12 |
 | 1.15 | 2026-11-17 | Faster: all the tests of a rule are evaluated in one call per node, so the rule's `<let>` variables are computed once per node, not once per test. The Latin edition (about 26,000 lines) went from 13.9 s to 3.5 s, with identical results on 35 documents; if the combined call fails, the tests are evaluated one by one, so a broken test is still reported on its own |
 | 1.14 | 2026-11-17 | **py-xmlvalidate-install.py** links the two scripts into `~/bin` (§2.1), checking that `python3` has saxonche and lxml; `--uninstall` removes the links. py-xmlvalidate-all.sh finds py-xmlvalidate.py through a symbolic link, and py-xmlvalidate.py is executable. The validation is the same |

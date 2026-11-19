@@ -2,7 +2,7 @@
 
 *(English: [README.md](README.md))*
 
-**Versión 1.17** (`py-xmlvalidate.py --version`)
+**Versión 1.18** (`py-xmlvalidate.py --version`)
 
 Validador de la capa Schematron del proyecto SMTrad. Extrae las reglas ISO
 Schematron embebidas en el ODD (`smed-schema.xml`) y las ejecuta contra uno o
@@ -143,6 +143,25 @@ y lxml. El instalador lo comprueba y, si faltan, muestra la orden que los
 instala (`python3 -m pip install --user saxonche lxml`). También sirve un
 entorno virtual, si su carpeta `bin/` va primero en el PATH.
 
+### 2.2 Pruebas
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+ejecuta las pruebas de `py-xmlvalidate.py`, `py-xmlvalidate-all.sh` y
+`py-xmlvalidate-install.py` (`tests/test_py_xmlvalidate.py`), con el Python
+que las corre, que necesita saxonche y lxml; no hace falta nada más.
+Escriben documentos y esquemas pequeños para cada caso en una carpeta
+temporal, con su propia copia de los scripts, de modo que nada queda en
+esta: reglas y mensajes, el *first-match shadowing*, los `let` de todos los
+niveles y `current()`, las reglas rotas y los códigos de salida, los
+documentos mal formados, las fuentes de las reglas (`-s`, `-r`,
+`<?xml-model?>`, `--as`), el caché, un esquema remoto servido por un pequeño
+servidor web local, con `--refresh`, el informe de texto y el instalador. La
+prueba del ODD necesita las hojas de estilo de TEI en `odds/` y `common/`, y
+las de `py-xmlvalidate-all.sh` necesitan jing; sin ellas se omiten.
+
 ## 3. Uso
 
 ```
@@ -213,7 +232,8 @@ python3 py-xmlvalidate.py -r tei_all.rng -v documento.xml
 jing smed-schema.rng ed_lat.xml && python3 py-xmlvalidate.py -r smed-schema.rng ed_lat.xml
 
 # O con el wrapper bicapa (ejecuta ambas capas SIEMPRE, sin cortocircuito,
-# con veredicto compuesto: 0 limpio, 1 RelaxNG, 2 Schematron, 3 ambas, 4 entorno;
+# con veredicto compuesto: 0 limpio, 1 RelaxNG, 2 Schematron, 3 ambas,
+# 4 entorno o capa Schematron incompleta;
 # si jing no está instalado usa el RelaxNG de lxml como respaldo):
 ./py-xmlvalidate-all.sh -v smed-schema.rng ed_lat.xml
 
@@ -233,7 +253,7 @@ python3 py-xmlvalidate.py -s smed-schema.sch ed_lat.xml || echo "hay pendientes"
 | 0 | sin infracciones |
 | 1 | una o más infracciones |
 | 2 | error de invocación (argparse) |
-| 3 | error de entorno (archivo inexistente, XSLT ausente, ODD/RNG sin reglas), con mensaje por stderr |
+| 3 | la validación no pudo completarse: un documento mal formado, una regla que no se pudo evaluar (un error XPath; el informe la lista, y las demás reglas se comprueban igual) o un error de entorno (archivo inexistente, XSLT ausente, ODD/RNG sin reglas), con mensaje por stderr |
 
 ### 3.2 Extensión de VS Code
 
@@ -359,7 +379,11 @@ versión lleva.
 
 Cubierto — el subconjunto exacto que usa el ODD smed:
 
-- `pattern`, `rule`, `assert`, `report`, `let`;
+- `pattern`, `rule`, `assert`, `report`, `let`. Un `let` de schema o de
+  pattern se evalúa con la raíz del documento como contexto, y el de una
+  regla con el nodo de la regla, como dice el estándar (antes de la 1.18
+  todos tomaban el nodo de la regla); las variables de pattern pueden usarse
+  también en el contexto de la regla;
 - `current()` (función XSLT usada por las reglas de las Guidelines P5): se
   traduce a una ligadura del nodo de contexto (`let $VALIDATE_CTX := .`) con
   sustitución textual, que reproduce exactamente su semántica Schematron;
@@ -547,7 +571,8 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **1.17** | 2026-11-18 | La extensión de VS Code y el paquete de Emacs pasan a repositorios propios, py-xmlvalidate-vscode y py-xmlvalidate-emacs, con su historia; cada uno lleva una copia de `py-xmlvalidate.py`, que el nuevo `tools/sync-plugins.py` mantiene igual. Las versiones de py-xmlvalidate ya no adjuntan el `.vsix`, y su zip ya no tiene `emacs/`; `tools/install-trang.py` pasó al paquete de Emacs; `tools/screenshots.py` toma la extensión de un clon junto a este (`--extension`). El script no cambia |
+| **1.18** | 2026-11-18 | Un conjunto de pruebas (`tests/`, 28 pruebas con `unittest`, §2.2). Los `let` de schema y de pattern se evalúan con la raíz del documento como contexto, como dice ISO Schematron (antes tomaban el nodo de cada regla), y pueden usarse en el contexto de una regla. Una regla que no se puede evaluar (un error XPath) hace ahora que el script salga con 3, porque el veredicto está incompleto; `py-xmlvalidate-all.sh` lo informa como veredicto propio (salida 4). Los resultados en las ediciones no cambian |
+| 1.17 | 2026-11-18 | La extensión de VS Code y el paquete de Emacs pasan a repositorios propios, py-xmlvalidate-vscode y py-xmlvalidate-emacs, con su historia; cada uno lleva una copia de `py-xmlvalidate.py`, que el nuevo `tools/sync-plugins.py` mantiene igual. Las versiones de py-xmlvalidate ya no adjuntan el `.vsix`, y su zip ya no tiene `emacs/`; `tools/install-trang.py` pasó al paquete de Emacs; `tools/screenshots.py` toma la extensión de un clon junto a este (`--extension`). El script no cambia |
 | 1.16 | 2026-11-17 | Más rápido todavía: cada regla se evalúa en una sola llamada a Saxon para todos sus nodos de contexto, en lugar de una llamada por nodo, que obligaba a Saxon a compilar la expresión de la regla una vez por nodo. La edición latina pasó de 11,5 s a 1,9 s (medidas una tras otra en una máquina ocupada), con resultados idénticos en 39 documentos; si la llamada única falla, la regla se evalúa nodo a nodo como antes. Incluido en la extensión de VS Code 0.5.12 |
 | 1.15 | 2026-11-17 | Más rápido: todos los tests de una regla se evalúan en una sola llamada por nodo, de modo que las variables `<let>` de la regla se calculan una vez por nodo y no una vez por test. La edición latina (unas 26 000 líneas) pasó de 13,9 s a 3,5 s, con resultados idénticos en 35 documentos; si la llamada conjunta falla, los tests se evalúan uno a uno, y un test roto se sigue informando por separado |
 | 1.14 | 2026-11-17 | **py-xmlvalidate-install.py** enlaza los dos scripts en `~/bin` (§2.1) y comprueba que `python3` tenga saxonche y lxml; `--uninstall` quita los enlaces. py-xmlvalidate-all.sh encuentra py-xmlvalidate.py a través de un enlace simbólico, y py-xmlvalidate.py es ejecutable. La validación es la misma |

@@ -1,4 +1,4 @@
-# py-xmlvalidate 1.17: descripción
+# py-xmlvalidate 1.18: descripción
 
 ## Análisis
 
@@ -22,12 +22,15 @@ El paquete de Emacs tiene también su propio repositorio, py-xmlvalidate-emacs: 
 
 Hasta la versión 1.17 los dos complementos estaban en las carpetas `vscode/` y `emacs/` de este repositorio. Al pasar a repositorios propios se llevaron su historia, y cada uno guarda una copia del script en lugar de depender de este; `tools/sync-plugins.py` copia aquí cada versión nueva en los dos.
 
+La versión 1.18 hizo tres cosas pendientes. El programa tuvo por fin su propio conjunto de pruebas, con el unittest de Python: hasta entonces cada cambio se comprobaba a mano, comparando la salida antes y después en casos pequeños y en las ediciones. Los `let` de schema y de pattern se evalúan ahora con la raíz del documento como contexto, como dice ISO Schematron; antes se calculaban de nuevo en cada nodo, con el nodo como contexto, lo que es más lento y da otra respuesta para una variable escrita con una ruta relativa. Ninguno de mis esquemas declara variables en esos niveles, así que ningún resultado cambió. Y una regla que no se puede evaluar hace ahora que el script salga con 3, porque el veredicto está incompleto; la cuestión seguía abierta desde la versión 1.4, cuando esas reglas empezaron a informarse en lugar de fallar en silencio.
+
 Los archivos del proyecto son estos:
 
 - `py-xmlvalidate.py`: el validador (662 líneas).
 - `py-xmlvalidate-all.sh`: las dos capas, RelaxNG y Schematron (156 líneas).
 - `py-xmlvalidate-install.py`: enlaza los dos scripts en `~/bin`, para llamarlos por su nombre desde cualquier carpeta.
 - `tools/screenshots.py`: hace las capturas de los README.
+- `tests/`: las pruebas (`test_py_xmlvalidate.py`).
 - `tools/sync-plugins.py`: copia py-xmlvalidate.py en los clones de la extensión y del paquete de Emacs, o comprueba si sus copias son iguales.
 - `tools/bundle-zip.py`: hace el zip de cada versión en `dist/`, con py-xmlvalidate.py y su documentación.
 - `docs/`: las descripciones, las capturas (`img/`) y un ejemplo autónomo (`example/`): un texto TEI breve con errores deliberados y un esquema RelaxNG pequeño con reglas Schematron embebidas.
@@ -90,7 +93,7 @@ Las pruebas de los complementos están ahora en sus repositorios. La extensión 
 
 El paquete de Emacs tiene 31 pruebas de ERT, que corren en un Emacs sin pantalla. Ocho no necesitan Python: leen los informes de py-xmlvalidate.py y de jing, buscan el script (también a través de un enlace como los de Straight) y adaptan el esquema compacto para nxml. Las otras veintitrés ejecutan los programas reales sobre documentos hechos para cada caso. Mediante Flymake comprueban las líneas y los subrayados, el elemento mal escrito, el texto sin guardar, la comprobación cancelada por otra más nueva, el esquema remoto refrescado desde un pequeño servidor web, el archivo fuera de `trusted-content` (su aviso, las órdenes que se niegan, la nota al final de su informe y la confianza concedida a petición), el búfer del informe con sus enlaces, y que no quede ningún proceso ni copia temporal. Mediante Flycheck, cargado de mi propia instalación, comprueban las mismas líneas, capas y subrayados, el texto sin guardar, la regla de confianza y que al apagar el modo Flycheck quede como estaba. Con trang, comprueban que nxml recibe el esquema y ofrece sus elementos, acepta `ed="#U2"`, encuentra un elemento fuera de lugar, reutiliza la conversión guardada, nunca reemplaza un esquema elegido a mano y recupera su esquema vacío. El paquete se probó también instalándolo con `package-vc-install` y con Straight en perfiles vacíos, y sobre la edición latina: la comprobación de Flycheck tardó 2,6 segundos, nxml tuvo el esquema 0,7 segundos después y no encontró errores, y dentro de un `<rdg>` ofreció los 123 elementos que el esquema permite allí.
 
-py-xmlvalidate.py se comprueba con documentos y esquemas pequeños hechos para cada caso (*shadowing*, `let`s en cada nivel, espacios de nombres, atributos, texto mal formado, las tres fuentes de reglas), comparando el resultado antes y después de cada cambio, y con el ejemplo de `docs/example/`. Las capturas de los README se rehacen con `tools/screenshots.py` y se revisan a ojo, y el zip de cada versión se prueba descomprimiéndolo y ejecutándolo.
+py-xmlvalidate.py tiene 28 pruebas (`python3 -m unittest discover -s tests`), que lo ejecutan, junto con py-xmlvalidate-all.sh y el instalador, sobre documentos y esquemas pequeños hechos para cada caso, en una carpeta temporal: reglas y mensajes, *shadowing*, `let`s en cada nivel y `current()`, reglas rotas y códigos de salida, texto mal formado, las fuentes de las reglas (`-s`, `-r`, un ODD, `<?xml-model?>`, `--as`), el caché y una copia dañada en él, y un esquema remoto servido por un pequeño servidor web. Contra la versión 1.17 fallan exactamente las seis pruebas de lo que cambió en la 1.18. Cada cambio se compara además antes y después sobre las ediciones y sobre el ejemplo de `docs/example/`. Las capturas de los README se rehacen con `tools/screenshots.py` y se revisan a ojo, y el zip de cada versión se prueba descomprimiéndolo y ejecutándolo.
 
 ## Plataforma
 

@@ -24,7 +24,9 @@
 #   1  infracciones solo en la capa RelaxNG
 #   2  infracciones solo en la capa Schematron
 #   3  infracciones en ambas
-#   4  error de entorno o de uso (mensaje por stderr)
+#   4  error de entorno o de uso (mensaje por stderr), o validación
+#      Schematron incompleta: un documento mal formado, o reglas que no se
+#      pudieron evaluar (py-xmlvalidate.py terminó con 3)
 #
 # Ambas capas se ejecutan SIEMPRE (sin cortocircuito): en una campaña de
 # corrección conviene ver el panorama completo de una vez.
@@ -143,6 +145,9 @@ else
   python3 "$VALIDATE" -r "$RNG" $VERBOSE ${MAX:+--max "$MAX"} "$@"
 fi
 rc2=$?
+# 3: un documento mal formado o reglas que no se pudieron evaluar (el
+# veredicto Schematron está incompleto); otro código: error de uso o de entorno
+[ $rc2 -eq 3 ] && { echo "=== VEREDICTO: validación Schematron incompleta (documento mal formado o reglas que no se pudieron evaluar; véase arriba) ===" >&2; exit 4; }
 [ $rc2 -ge 2 ] && { echo "py-xmlvalidate.py terminó con error ($rc2)" >&2; exit 4; }
 
 # Síntesis y código de salida compuesto

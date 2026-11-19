@@ -269,6 +269,19 @@ says whether the copies are the same.  The Emacs recipes became simpler
 (no `:files`, no `:lisp-dir`), the trang installer went with the Emacs
 package, and the publishing workflow with the extension.
 
+Version 1.18 did three things that had waited.  The program got a test
+suite of its own, with Python's unittest: until then each change was
+checked by hand, by comparing the output before and after on small cases
+and on the editions.  `let`s at schema and pattern level are now
+evaluated with the document's root as context, as ISO Schematron says;
+they used to be computed again for each node, with the node as context,
+which is slower and gives a different answer for a variable written with
+a relative path.  None of my schemas declares variables at those levels,
+so no result changed.  And a rule that cannot be evaluated now makes the
+script exit 3, since the verdict is incomplete; the question had been
+open since version 1.4, when such rules started to be reported instead of
+failing silently.
+
 Testing
 -------
 
@@ -307,10 +320,16 @@ check took 2.6 seconds, nxml had the schema 0.7 seconds later and found
 no errors, and inside an `<rdg>` it offered the 123 elements the schema
 allows there.
 
-py-xmlvalidate.py is checked on small documents and schemas made for each
-case (shadowing, `let`s at every level, namespaces, attributes,
-malformed text, the three sources of rules), compared before and after
-each change, and on the example in `docs/example/`; the cache was
+py-xmlvalidate.py has 28 tests (`python3 -m unittest discover -s
+tests`), which run it, py-xmlvalidate-all.sh and the installer on small
+documents and schemas made for each case, in a temporary folder: rules
+and messages, shadowing, `let`s at every level and `current()`, broken
+rules and the exit codes, malformed text, the sources of rules (`-s`,
+`-r`, an ODD, `<?xml-model?>`, `--as`), the cache and a damaged cached
+copy, and a remote schema served by a small web server.  Run against
+version 1.17, exactly the six tests of what 1.18 changed fail.  Each
+change is also compared before and after on the editions and on the
+example in `docs/example/`; the cache was
 checked with the test of concurrent runs described above.  The zip of
 each release is tried by unzipping it and running it.  The program has
 now 12 files of code, around 2,450 lines.
