@@ -315,7 +315,7 @@ Testing
 -------
 
 The tests of the plugins now live in their repositories.  The extension
-has 11 automated tests (`npm test`), run with Node's own
+has 17 automated tests (`npm test`), run with Node's own
 test runner.  They check how the reports of py-schematron.py and of
 jing become diagnostics, the severities, where the underlines start and
 end, and the error messages; one of them runs py-schematron.py from
@@ -323,14 +323,15 @@ beginning to end.  Another test (`npm run test:integration`) runs the
 extension inside a real VS Code, without a screen and with a profile of
 its own: it checks that the errors land on the right lines and are
 visibly underlined, that a misspelt element is found, that unsaved
-changes are validated, and that *Refresh Schema* picks up a schema
-changed on a small web server.  The tests of the extension also run on
-GitHub Actions with each release tag.
+changes are validated, that *Refresh Schema* picks up a schema changed
+on a small web server, that *Go to Rule* opens the schema at the
+assert, and what *About* shows.  The unit tests also run on GitHub
+Actions at every push.
 
-The Emacs package has 31 ERT tests, run in a batch Emacs.  Eight need no
+The Emacs package has 44 ERT tests, run in a batch Emacs.  Some need no
 Python: they read the reports of py-schematron.py and jing, find the
-script (also through a link like Straight's), and adapt the compact
-schema for nxml.  The other twenty-three run the real programs on
+script (also through a link like Straight's), and check the mending of
+nxml's XSD datatypes in a fresh Emacs.  The others run the real programs on
 documents made for each case.  Through Flymake they check the lines and
 underlines, the typo, unsaved changes, a check cancelled by a newer one,
 a remote schema refreshed from a small web server, a file outside
@@ -360,5 +361,9 @@ version 1.17, exactly the six tests of what 1.18 changed fail.  Each
 change is also compared before and after on the editions and on the
 example in `docs/example/`; the cache was
 checked with the test of concurrent runs described above.  The zip of
-each release is tried by unzipping it and running it.  The program has
-now 12 files of code, around 2,450 lines.
+each release is tried by unzipping it and running it, and a job of the
+GitHub workflow installs the program with `installers/` and validates a
+document with the installed command, on Linux and Windows at every push
+and on macOS for each release.  The program has now around 2,700 lines
+of Python and shell; the extension, around 800 of TypeScript, and the
+Emacs package, around 1,550 of Emacs Lisp.
