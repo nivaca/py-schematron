@@ -131,6 +131,15 @@ class TestBasics(Base):
         self.assertEqual(code, 0)
         self.assertRegex(out, r"^py-xmlvalidate\.py \d+\.\d+")
 
+    def test_about(self):
+        code, out, _ = self.run_script("--about")
+        self.assertEqual(code, 0)
+        self.assertRegex(out.splitlines()[0], r"^py-xmlvalidate\.py \d+\.\d+$")
+        for expected in ("Nicolas Vaughan <nicolasvaughan@proton.me>", "GNU General Public License",
+                         "https://codeberg.org/nivaca/py-xmlvalidate", "Python:", "saxonche:", "lxml:",
+                         str(self.script.resolve())):
+            self.assertIn(expected, out)
+
     def test_valid_document_exits_0(self):
         s = self.write("s.sch", sch('<pattern><rule context="tei:p"><assert test="true()">never</assert></rule></pattern>'))
         d = self.write("d.xml", tei("<p>a</p>"))

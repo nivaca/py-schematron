@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 1.18** (`py-xmlvalidate.py --version`)
+**Version 1.19** (`py-xmlvalidate.py --version`, `--about`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -178,6 +178,7 @@ Since v1.2, the schema flags are **optional**: without them, the schema is
 | `--refresh` | With auto-detection: re-download a remote schema even if cached |
 | `--json` | Machine-readable report on stdout: every violation (pattern, context, assert/report, `role`, message, interpolated text, `fn:path`, line, `xml:id`), XPath errors per rule, and the schema source; ignores `-v`/`--max`. A malformed document becomes an `error` entry instead of aborting the run. Progress messages still go to stderr (used by the VS Code extension, §3.2) |
 | `--as PATH` | With a single document: treat it as if it were located at PATH, for resolving relative `xml-model` hrefs and for the name in the report. The VS Code extension uses it to validate unsaved text from a temporary copy |
+| `--about` | What this program is, who made it, its licence and where it lives, and what it runs with here: Python, saxonche, lxml, Saxon, the cache folder, and whether the TEI stylesheets for `-o` are present. With `--version`, the only options that need no document |
 
 The three explicit sources are mutually exclusive; when none is given,
 auto-detection takes over.
@@ -564,7 +565,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **1.18** | 2026-11-18 | A test suite (`tests/`, 28 tests with `unittest`, §2.2). `let`s at schema and pattern level are evaluated with the document's root as context, as ISO Schematron says (they took each rule's node before), and can be used in a rule's context. A rule that cannot be evaluated (an XPath error) now makes the script exit 3, since the verdict is incomplete; `py-xmlvalidate-all.sh` reports that as its own verdict (exit 4). Results on the editions are unchanged |
+| **1.19** | 2026-11-18 | `--about`: what the program is, its author, licence and repositories, and what it runs with here (Python, saxonche, lxml, Saxon, the cache, the TEI stylesheets for `-o`). The VS Code extension and the Emacs package have an *About* command of their own, which shows this too. The validation is the same |
+| 1.18 | 2026-11-18 | A test suite (`tests/`, 28 tests with `unittest`, §2.2). `let`s at schema and pattern level are evaluated with the document's root as context, as ISO Schematron says (they took each rule's node before), and can be used in a rule's context. A rule that cannot be evaluated (an XPath error) now makes the script exit 3, since the verdict is incomplete; `py-xmlvalidate-all.sh` reports that as its own verdict (exit 4). Results on the editions are unchanged |
 | 1.17 | 2026-11-18 | The VS Code extension and the Emacs package move to repositories of their own, py-xmlvalidate-vscode and py-xmlvalidate-emacs, with their history; each carries a copy of `py-xmlvalidate.py`, which the new `tools/sync-plugins.py` keeps in step. Releases of py-xmlvalidate no longer attach the `.vsix`, and its zip no longer has `emacs/`; `tools/install-trang.py` moved to the Emacs package; `tools/screenshots.py` takes the extension from a clone next to this one (`--extension`). The script does not change |
 | 1.16 | 2026-11-17 | Faster again: each rule is evaluated in one Saxon call for all its context nodes, instead of one call per node, which made Saxon compile the rule's expression once per node. The Latin edition went from 11.5 s to 1.9 s (measured back to back on a busy machine), with identical results on 39 documents; if the single call fails, the rule is evaluated node by node as before. Bundled in the VS Code extension 0.5.12 |
 | 1.15 | 2026-11-17 | Faster: all the tests of a rule are evaluated in one call per node, so the rule's `<let>` variables are computed once per node, not once per test. The Latin edition (about 26,000 lines) went from 13.9 s to 3.5 s, with identical results on 35 documents; if the combined call fails, the tests are evaluated one by one, so a broken test is still reported on its own |

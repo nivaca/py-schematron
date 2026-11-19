@@ -2,7 +2,7 @@
 
 *(English: [README.md](README.md))*
 
-**Versión 1.18** (`py-xmlvalidate.py --version`)
+**Versión 1.19** (`py-xmlvalidate.py --version`, `--about`)
 
 Validador de la capa Schematron del proyecto SMTrad. Extrae las reglas ISO
 Schematron embebidas en el ODD (`smed-schema.xml`) y las ejecuta contra uno o
@@ -183,6 +183,7 @@ esquema se **autodetecta** de las PIs `<?xml-model?>` del primer documento
 | `--refresh` | Con autodetección: volver a descargar un esquema remoto aunque esté en caché |
 | `--json` | Informe legible por máquina en stdout: todas las infracciones (pattern, contexto, assert/report, `role`, mensaje, texto interpolado, `fn:path`, línea, `xml:id`), errores XPath por regla y la fuente del esquema; ignora `-v`/`--max`. Un documento mal formado se convierte en una entrada `error` en lugar de abortar la corrida. Los mensajes de progreso siguen yendo a stderr (lo usa la extensión de VS Code, §3.2) |
 | `--as RUTA` | Con un único documento: tratarlo como si estuviera en RUTA, para resolver los hrefs relativos de `xml-model` y para el nombre en el informe. La extensión de VS Code lo usa para validar el texto sin guardar a partir de una copia temporal |
+| `--about` | Qué es este programa, quién lo hizo, su licencia y dónde está, y con qué corre aquí: Python, saxonche, lxml, Saxon, la carpeta del caché y si están las hojas de estilo de TEI para `-o`. Con `--version`, las únicas opciones que no necesitan documento |
 
 Las tres fuentes explícitas son mutuamente excluyentes; si no se da ninguna,
 opera la autodetección.
@@ -571,7 +572,8 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **1.18** | 2026-11-18 | Un conjunto de pruebas (`tests/`, 28 pruebas con `unittest`, §2.2). Los `let` de schema y de pattern se evalúan con la raíz del documento como contexto, como dice ISO Schematron (antes tomaban el nodo de cada regla), y pueden usarse en el contexto de una regla. Una regla que no se puede evaluar (un error XPath) hace ahora que el script salga con 3, porque el veredicto está incompleto; `py-xmlvalidate-all.sh` lo informa como veredicto propio (salida 4). Los resultados en las ediciones no cambian |
+| **1.19** | 2026-11-18 | `--about`: qué es el programa, su autor, licencia y repositorios, y con qué corre aquí (Python, saxonche, lxml, Saxon, el caché, las hojas de estilo de TEI para `-o`). La extensión de VS Code y el paquete de Emacs tienen una orden *About* propia, que muestra también esto. La validación es la misma |
+| 1.18 | 2026-11-18 | Un conjunto de pruebas (`tests/`, 28 pruebas con `unittest`, §2.2). Los `let` de schema y de pattern se evalúan con la raíz del documento como contexto, como dice ISO Schematron (antes tomaban el nodo de cada regla), y pueden usarse en el contexto de una regla. Una regla que no se puede evaluar (un error XPath) hace ahora que el script salga con 3, porque el veredicto está incompleto; `py-xmlvalidate-all.sh` lo informa como veredicto propio (salida 4). Los resultados en las ediciones no cambian |
 | 1.17 | 2026-11-18 | La extensión de VS Code y el paquete de Emacs pasan a repositorios propios, py-xmlvalidate-vscode y py-xmlvalidate-emacs, con su historia; cada uno lleva una copia de `py-xmlvalidate.py`, que el nuevo `tools/sync-plugins.py` mantiene igual. Las versiones de py-xmlvalidate ya no adjuntan el `.vsix`, y su zip ya no tiene `emacs/`; `tools/install-trang.py` pasó al paquete de Emacs; `tools/screenshots.py` toma la extensión de un clon junto a este (`--extension`). El script no cambia |
 | 1.16 | 2026-11-17 | Más rápido todavía: cada regla se evalúa en una sola llamada a Saxon para todos sus nodos de contexto, en lugar de una llamada por nodo, que obligaba a Saxon a compilar la expresión de la regla una vez por nodo. La edición latina pasó de 11,5 s a 1,9 s (medidas una tras otra en una máquina ocupada), con resultados idénticos en 39 documentos; si la llamada única falla, la regla se evalúa nodo a nodo como antes. Incluido en la extensión de VS Code 0.5.12 |
 | 1.15 | 2026-11-17 | Más rápido: todos los tests de una regla se evalúan en una sola llamada por nodo, de modo que las variables `<let>` de la regla se calculan una vez por nodo y no una vez por test. La edición latina (unas 26 000 líneas) pasó de 13,9 s a 3,5 s, con resultados idénticos en 35 documentos; si la llamada conjunta falla, los tests se evalúan uno a uno, y un test roto se sigue informando por separado |

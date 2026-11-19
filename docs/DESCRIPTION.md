@@ -280,7 +280,11 @@ a relative path.  None of my schemas declares variables at those levels,
 so no result changed.  And a rule that cannot be evaluated now makes the
 script exit 3, since the verdict is incomplete; the question had been
 open since version 1.4, when such rules started to be reported instead of
-failing silently.
+failing silently.  Version 1.19 added `--about`, which says what the
+program is, who made it, its licence and repositories, and what it runs
+with: Python, saxonche, lxml, Saxon, the cache.  The two plugins have an
+About command of their own, which shows that output too, so a bug report
+can say at once which versions were involved.
 
 Testing
 -------
@@ -320,7 +324,7 @@ check took 2.6 seconds, nxml had the schema 0.7 seconds later and found
 no errors, and inside an `<rdg>` it offered the 123 elements the schema
 allows there.
 
-py-xmlvalidate.py has 28 tests (`python3 -m unittest discover -s
+py-xmlvalidate.py has 29 tests (`python3 -m unittest discover -s
 tests`), which run it, py-xmlvalidate-all.sh and the installer on small
 documents and schemas made for each case, in a temporary folder: rules
 and messages, shadowing, `let`s at every level and `current()`, broken
