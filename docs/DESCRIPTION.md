@@ -289,7 +289,15 @@ requiring copies of two TEI stylesheets next to the script: it takes the
 folder of a full clone of the TEI Stylesheets from `--stylesheets`, from
 `TEI_STYLESHEETS`, or from the configuration of ODD2RNG, the companion
 script that makes the RelaxNG from an ODD, so that both programs use the
-same stylesheets.
+same stylesheets.  Version 1.21 made the JSON report the plugins' only
+source: the progress messages that went to stderr in Spanish are also
+events in the report, with stable English kinds, a fatal error gives
+JSON with its message, and each violation says where its assert or
+report is written.  That location is in the file one edits, the ODD or
+the RelaxNG, not in the `.sch` made from it: the program finds the n-th
+rule with the same test there, since extraction and harvest keep the
+order.  On the five schemas of the editions every rule was found.  Both
+plugins use it to jump from an error to its rule.
 
 Testing
 -------
