@@ -33,6 +33,18 @@ print(json.dumps({"version": "0", "schema": "", "source": {"path": "", "type": "
 """
 
 
+# An "old version" that gives the same results as the real one, at once: it
+# replays what the real one printed for each document, saved beforehand.
+SAME_BUT_FAST = """import json, sys
+from pathlib import Path
+answers = json.loads(Path(ANSWERS).read_text())
+original = sys.argv[sys.argv.index("--as") + 1]
+code, out = answers[original]
+print(out, end="")
+sys.exit(code)
+"""
+
+
 class TestCorpusCheck(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory(prefix="pysch-corpus-test-")
@@ -49,6 +61,14 @@ class TestCorpusCheck(unittest.TestCase):
         for name, text in self.docs.items():
             (corpus / "texts" / name).write_text(text, encoding="utf-8")
         self.corpus = corpus
+        # what the real program prints for each document, for SAME_BUT_FAST
+        answers = {}
+        for doc in (corpus / "texts").glob("*.xml"):
+            r = subprocess.run([sys.executable, str(REPO / "py-schematron.py"), "--json",
+                                "--as", str(doc.resolve()), str(doc)], capture_output=True, text=True)
+            answers[str(doc.resolve())] = [r.returncode, r.stdout]
+        import json
+        (self.dir / "answers.json").write_text(json.dumps(answers), encoding="utf-8")
         self.stamps = {p: (p.stat().st_mtime_ns, p.read_bytes()) for p in corpus.rglob("*.xml")}
 
     def tearDown(self):
@@ -79,6 +99,22 @@ class TestCorpusCheck(unittest.TestCase):
         self.assertIn("violations: 0 -> 1", out)
         self.assertIn("+ line 2: at most one p", out)        # (the TEI element)
         self.assertIn("1 of 2 documents give the same result; 1 changed.", out)
+
+    def test_a_slowdown_is_reported(self):
+        """A document the new version validates clearly slower is named, as
+        a warning: the exit code stays 0 when the results are the same."""
+        old = self.dir / "old.py"
+        old.write_text(SAME_BUT_FAST.replace("ANSWERS", repr(str(self.dir / "answers.json"))),
+                       encoding="utf-8")
+        code, out = self.run_tool("--corpus", self.corpus, "--old", old,
+                                  "--slower", "10", "--min-seconds", "0")
+        self.assertEqual(code, 0, out)
+        self.assertIn("SLOWER", out)
+        self.assertIn("validate clearly slower", out)
+        # with the defaults, the difference is too small to count
+        code, out = self.run_tool("--corpus", self.corpus, "--old", old)
+        self.assertEqual(code, 0, out)
+        self.assertNotIn("SLOWER", out)
 
     def test_no_corpus(self):
         code, out = self.run_tool("--old", REPO / "py-schematron.py",

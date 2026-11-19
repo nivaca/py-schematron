@@ -5,7 +5,7 @@
 """Compare two versions of py-schematron.py on a corpus of documents:
 
     python3 tools/corpus-check.py --corpus FOLDER [--against TAG | --old FILE]
-                                  [--jobs N] [--verbose]
+                                  [--jobs N] [--slower PERCENT] [--min-seconds S] [--verbose]
 
 Every XML document under the corpus folders (--corpus, repeatable, or
 $PY_SCHEMATRON_CORPUS, folders separated by the system's path separator)
@@ -23,6 +23,13 @@ messages are left out, since they always differ.  It prints the documents
 whose result changed and the total time of each version, and exits with
 1 if any result changed, 2 for a problem of its own (no documents, no
 tag), 0 otherwise.
+
+It also compares each document's time, and warns about those the new
+version validates clearly slower: by more than --slower PERCENT (50) and
+--min-seconds S (0.25) at once, so that the usual noise of timings does
+not count.  The documents are checked in parallel, so each one flagged is
+timed again on its own, both versions, and kept only if it is still
+slower.  A slowdown is a warning, not a failure.
 """
 
 import sys
@@ -148,6 +155,10 @@ def main(argv=None) -> int:
     which.add_argument("--against", metavar="TAG", help="the version to compare with (default: the newest v* tag)")
     which.add_argument("--old", type=Path, metavar="FILE", help="a py-schematron.py to compare with")
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 4, help="documents checked at once")
+    parser.add_argument("--slower", type=float, default=50, metavar="PERCENT",
+                        help="warn about documents this much slower (default 50)")
+    parser.add_argument("--min-seconds", type=float, default=0.25, metavar="S",
+                        help="... and at least this many seconds slower (default 0.25)")
     parser.add_argument("--verbose", action="store_true", help="list every document checked")
     args = parser.parse_args(argv)
 
@@ -199,6 +210,16 @@ def main(argv=None) -> int:
         with ThreadPoolExecutor(max_workers=max(1, args.jobs)) as pool:
             results += list(pool.map(check, pairs[1:]))
 
+        def slower(t_old, t_new):
+            return t_new - t_old >= args.min_seconds and t_new > t_old * (1 + args.slower / 100)
+        copies_of = dict(pairs)
+        slowdowns = []
+        for doc, old, new, t_old, t_new in results:
+            if old == new and slower(t_old, t_new):         # (timed again, alone)
+                _, _, _, t_old2, t_new2 = check((doc, copies_of[doc]))
+                if slower(t_old2, t_new2):
+                    slowdowns.append((doc, t_old2, t_new2))
+
     changed = 0
     total_old = total_new = 0.0
     for doc, old, new, t_old, t_new in results:
@@ -209,8 +230,14 @@ def main(argv=None) -> int:
             print(f"\nCHANGED  {doc}\n{describe(old, new)}")
         elif args.verbose:
             print(f"same     {doc}")
+    for doc, t_old, t_new in slowdowns:
+        print(f"\nSLOWER   {doc}\n{t_old:.2f} s -> {t_new:.2f} s "
+              f"({(t_new - t_old) / t_old * 100:+.0f}%)" if t_old else f"\nSLOWER   {doc}")
     print(f"\n{len(results) - changed} of {len(results)} documents give the same result; "
           f"{changed} changed.")
+    if slowdowns:
+        print(f"{len(slowdowns)} document(s) validate clearly slower with this version "
+              f"(over {args.slower:g}% and {args.min_seconds:g} s; see SLOWER above).")
     print(f"Time: {label} {total_old:.1f} s, this version {total_new:.1f} s "
           f"({(total_new - total_old) / total_old * 100:+.0f}%)." if total_old else "")
     return 1 if changed else 0

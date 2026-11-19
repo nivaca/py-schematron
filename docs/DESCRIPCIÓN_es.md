@@ -1,4 +1,4 @@
-# py-schematron 2.3: descripción
+# py-schematron 2.4: descripción
 
 ## Análisis
 
@@ -55,7 +55,7 @@ Cada complemento lleva su propia copia de py-schematron.py, y `tools/sync-plugin
 
 ## Validación
 
-py-schematron.py tiene 53 pruebas (`python3 -m unittest discover -s tests`), que lo ejecutan, junto con py-schematron-all.py y el instalador, sobre documentos y esquemas pequeños hechos para cada caso, en una carpeta temporal: reglas y mensajes, *shadowing*, `let`s en cada nivel y `current()`, reglas rotas y códigos de salida, texto mal formado, las fuentes de las reglas (`-s`, `-r`, un ODD, `<?xml-model?>`, `--as`), el caché y una copia dañada en él, y un esquema remoto servido por un pequeño servidor web. Cada cambio se compara además antes y después sobre las ediciones y sobre el ejemplo de `docs/example/`. Las capturas de los README se rehacen con `tools/screenshots.py` y se revisan a ojo, y el zip de cada versión se prueba descomprimiéndolo y ejecutándolo. Una tarea del flujo de GitHub instala el programa de verdad en Linux, macOS y Windows y valida un documento con la orden instalada.
+py-schematron.py tiene 54 pruebas (`python3 -m unittest discover -s tests`), que lo ejecutan, junto con py-schematron-all.py y el instalador, sobre documentos y esquemas pequeños hechos para cada caso, en una carpeta temporal: reglas y mensajes, *shadowing*, `let`s en cada nivel y `current()`, reglas rotas y códigos de salida, texto mal formado, las fuentes de las reglas (`-s`, `-r`, un ODD, `<?xml-model?>`, `--as`), el caché y una copia dañada en él, y un esquema remoto servido por un pequeño servidor web. Cada cambio se compara además antes y después sobre las ediciones y sobre el ejemplo de `docs/example/`. Las capturas de los README se rehacen con `tools/screenshots.py` y se revisan a ojo, y el zip de cada versión se prueba descomprimiéndolo y ejecutándolo. Una tarea del flujo de GitHub instala el programa de verdad en Linux, macOS y Windows y valida un documento con la orden instalada.
 
 Las pruebas de los complementos están en sus repositorios. La extensión tiene 17 pruebas automáticas (`npm test`), que corren con el ejecutor de pruebas de Node. Comprueban cómo los informes de py-schematron.py y de jing se convierten en diagnósticos, las gravedades, dónde empiezan y terminan los subrayados y los mensajes de error; una de ellas ejecuta py-schematron.py de principio a fin. Otra prueba (`npm run test:integration`) ejecuta la extensión dentro de un VS Code real, sin pantalla y con un perfil propio: comprueba que los errores caigan en las líneas correctas y se vean subrayados, que se encuentre un elemento mal escrito, que se valide el texto sin guardar y que *Refresh Schema* recoja un esquema cambiado en un pequeño servidor web. Las pruebas de la extensión corren también en GitHub Actions con cada cambio.
 
