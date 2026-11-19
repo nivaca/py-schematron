@@ -16,12 +16,12 @@ Every shot uses the example in docs/example/ (edition.xml, with deliberate
 mistakes, and schema.rng, a small RelaxNG with Schematron rules embedded),
 copied to a temporary folder; no other document is read or written.
 
-* The command line is a real session: py-xmlvalidate.py and py-xmlvalidate-all.sh are
+* The command line is a real session: py-schematron.py and py-schematron-all.sh are
   run on the example, and their output is drawn like a terminal (Konsole's
   Breeze colours, the Hack font) with Pillow.
 * VS Code runs on a hidden X display of its own (Xvfb), with a throwaway
   profile (settings, extensions) and the extension loaded from a clone of
-  py-xmlvalidate-vscode (--extension; by default ../py-xmlvalidate-vscode,
+  py-schematron-vscode (--extension; by default ../py-schematron-vscode,
   next to this repository), compiled first. Its
   src/test/screenshots/drive.ts opens the example,
   waits for the diagnostics, and shows the Problems panel and the hover of
@@ -29,7 +29,7 @@ copied to a temporary folder; no other document is read or written.
   on the screen, and the user's own VS Code settings are not touched.
 
 It needs Pillow (for this script), a Python with saxonche and lxml to run
-py-xmlvalidate.py (--python; by default the one running this script), jing for the
+py-schematron.py (--python; by default the one running this script), jing for the
 RelaxNG layer (--jing; optional), and, for VS Code: Xvfb, ImageMagick,
 Node.js with npm, and VS Code itself (--code).
 """
@@ -48,7 +48,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 EXAMPLE = ROOT / "docs" / "example"
-EXTENSION = ROOT.parent / "py-xmlvalidate-vscode"   # (--extension)
+EXTENSION = ROOT.parent / "py-schematron-vscode"   # (--extension)
 DRIVER = EXTENSION / "out" / "test" / "screenshots" / "drive.js"
 
 KINDS = ("cli", "vscode")
@@ -63,8 +63,8 @@ HOVER = "must not contain loose text"
 # The command-line session, run in a temporary folder holding the example
 # and the two programs (shown as typed; run with --python and --jing)
 SESSION = [
-    ["python3", "py-xmlvalidate.py", "-v", "edition.xml"],
-    ["./py-xmlvalidate-all.sh", "edition.xml"],
+    ["python3", "py-schematron.py", "-v", "edition.xml"],
+    ["./py-schematron-all.sh", "edition.xml"],
 ]
 
 # The terminal: Konsole's Breeze scheme
@@ -90,7 +90,7 @@ def need(program: str, why: str) -> str:
 
 
 def session_environment(python: str, jing: str | None) -> dict:
-    """python3 and jing, as py-xmlvalidate-all.sh calls them, are the chosen ones."""
+    """python3 and jing, as py-schematron-all.sh calls them, are the chosen ones."""
     bindir = Path(tempfile.mkdtemp(prefix="validate-shot-bin-"))
     for name, target in (("python3", python), ("jing", jing)):
         if target:  # (a wrapper, not a symlink: a venv's python must be started by its own path)
@@ -98,7 +98,7 @@ def session_environment(python: str, jing: str | None) -> dict:
             (bindir / name).chmod(0o755)
     env = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONDONTWRITEBYTECODE="1")
     env["PATH"] = f"{bindir}{os.pathsep}{env.get('PATH', '')}"
-    if not jing:  # (so that py-xmlvalidate-all.sh falls back to lxml)
+    if not jing:  # (so that py-schematron-all.sh falls back to lxml)
         env["PATH"] = os.pathsep.join(p for p in env["PATH"].split(os.pathsep)
                                       if not (Path(p) / "jing").exists())
     return env
@@ -111,9 +111,9 @@ def cli(out: Path, scale: float, python: str, jing: str | None):
     try:
         for f in ("edition.xml", "schema.rng"):
             shutil.copyfile(EXAMPLE / f, folder / f)
-        for f in ("py-xmlvalidate.py", "py-xmlvalidate-all.sh"):
+        for f in ("py-schematron.py", "py-schematron-all.sh"):
             shutil.copy2(ROOT / f, folder / f)
-        (folder / "py-xmlvalidate-all.sh").chmod(0o755)
+        (folder / "py-schematron-all.sh").chmod(0o755)
         lines: list[tuple[str, str]] = []  # (kind, text): prompt or output
         for args in SESSION:
             lines.append(("prompt", shlex.join(args)))
@@ -323,12 +323,12 @@ def main(argv=None):
                         help=f"the colours of the VS Code shots: {','.join(LOOKS)} (default: both)")
     parser.add_argument("--scale", type=float, default=SCALE, help="times the size on the screen (default: 2)")
     parser.add_argument("--python", default=sys.executable,
-                        help="a Python with saxonche and lxml, to run py-xmlvalidate.py (default: this one)")
+                        help="a Python with saxonche and lxml, to run py-schematron.py (default: this one)")
     parser.add_argument("--jing", default=shutil.which("jing"),
                         help="jing, for the RelaxNG layer (default: the one on the PATH; without it, none)")
     parser.add_argument("--code", help="VS Code (default: the 'code' command)")
     parser.add_argument("--extension", type=Path, default=EXTENSION, metavar="FOLDER",
-                        help="a clone of py-xmlvalidate-vscode (default: ../py-xmlvalidate-vscode)")
+                        help="a clone of py-schematron-vscode (default: ../py-schematron-vscode)")
     args = parser.parse_args(argv)
 
     kinds = [k for k in args.only.split(",") if k]
@@ -356,7 +356,7 @@ def main(argv=None):
         EXTENSION = args.extension.expanduser().resolve()
         DRIVER = EXTENSION / "out" / "test" / "screenshots" / "drive.js"
         if not (EXTENSION / "package.json").is_file():
-            raise SystemExit(f"No extension in {EXTENSION}: clone py-xmlvalidate-vscode there, "
+            raise SystemExit(f"No extension in {EXTENSION}: clone py-schematron-vscode there, "
                              f"or give its folder with --extension")
         code = vscode_binary(args.code)
         say("compiling the extension")

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
-# This file is part of py-xmlvalidate. See the LICENSE file for details.
-"""Install the commands of py-xmlvalidate: python3 py-xmlvalidate-install.py
+# This file is part of py-schematron. See the LICENSE file for details.
+"""Install the commands of py-schematron: python3 py-schematron-install.py
 [--bin FOLDER] [--force | --uninstall]
 
 Makes symbolic links in ~/bin (or FOLDER) to the two scripts in this
 folder, so they can be run from anywhere by their names:
 
-    py-xmlvalidate.py document.xml
-    py-xmlvalidate-all.sh document.xml
+    py-schematron.py document.xml
+    py-schematron-all.sh document.xml
 
 The links point to this folder, so the scripts keep finding what lives
 next to them (odds/ and common/ for ODDs, and the .schema-cache/ of
@@ -30,7 +30,7 @@ folders: no administrator rights are needed.
 import sys
 
 if sys.version_info < (3, 15):
-    sys.exit(f"py-xmlvalidate-install.py needs Python 3.15 or later; this is "
+    sys.exit(f"py-schematron-install.py needs Python 3.15 or later; this is "
              f"Python {sys.version.split()[0]}.")
 
 import argparse  # noqa: E402
@@ -41,7 +41,10 @@ import subprocess  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-SCRIPTS = ("py-xmlvalidate.py", "py-xmlvalidate-all.sh")
+SCRIPTS = ("py-schematron.py", "py-schematron-all.sh")
+# The commands' names until 1.21, when the project was py-xmlvalidate: their
+# links are removed, since they point to scripts that no longer exist.
+OLD_SCRIPTS = ("py-xmlvalidate.py", "py-xmlvalidate-all.sh")
 
 
 def say(text: str = ""):
@@ -58,8 +61,21 @@ def make_executable(path: Path):
     path.chmod(mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
+def remove_old_links(folder: Path):
+    """Remove the links of the commands' former names (OLD_SCRIPTS) that
+    pointed to this program: links to a script of that name that is gone,
+    or that is in this folder."""
+    for name in OLD_SCRIPTS:
+        link = folder / name
+        if link.is_symlink() and Path(os.readlink(link)).name == name and \
+                (not link.exists() or ours(link)):
+            link.unlink()
+            say(f"  removed {link} (the former name)")
+
+
 def install(folder: Path, force: bool) -> bool:
     folder.mkdir(parents=True, exist_ok=True)
+    remove_old_links(folder)
     ok = True
     for name in SCRIPTS:
         target, link = HERE / name, folder / name
@@ -80,6 +96,7 @@ def install(folder: Path, force: bool) -> bool:
 
 
 def uninstall(folder: Path):
+    remove_old_links(folder)
     for name in SCRIPTS:
         link = folder / name
         if ours(link):
@@ -120,8 +137,8 @@ def check_python():
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        prog="py-xmlvalidate-install.py",
-        description="Link the commands py-xmlvalidate.py and py-xmlvalidate-all.sh "
+        prog="py-schematron-install.py",
+        description="Link the commands py-schematron.py and py-schematron-all.sh "
                     "into ~/bin (or another folder).")
     parser.add_argument("--bin", type=Path, default=Path.home() / "bin", metavar="FOLDER",
                         help="where to put the links (default: ~/bin)")

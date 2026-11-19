@@ -1,8 +1,8 @@
-# py-xmlvalidate — Validación Schematron de documentos TEI, en el terminal, VS Code y Emacs
+# py-schematron — Validación Schematron de documentos TEI, en el terminal, VS Code y Emacs
 
 *(English: [README.md](README.md))*
 
-**Versión 1.21** (`py-xmlvalidate.py --version`, `--about`)
+**Versión 2.0** (`py-schematron.py --version`, `--about`)
 
 Validador de la capa Schematron del proyecto SMTrad. Extrae las reglas ISO
 Schematron embebidas en el ODD (`smed-schema.xml`) y las ejecuta contra uno o
@@ -10,28 +10,28 @@ más documentos TEI con Saxon (XPath 3.1), produciendo un informe completo —
 sin el tope de visualización de oXygen — con recuento por regla y, en modo
 detallado, número de línea y `xml:id` de cada infractor.
 
-- **La línea de órdenes** (`py-xmlvalidate.py`) ejecuta las reglas Schematron del
+- **La línea de órdenes** (`py-schematron.py`) ejecuta las reglas Schematron del
   esquema de un documento (un ODD, un archivo ISO Schematron o un RelaxNG
   con las reglas embebidas), que encuentra por sí sola en el
-  `<?xml-model?>` del documento. **`py-xmlvalidate-all.sh`** añade la capa
+  `<?xml-model?>` del documento. **`py-schematron-all.sh`** añade la capa
   estructural, RelaxNG con jing, y da un solo veredicto para las dos. Véase
   [Uso](#3-uso).
 - **La extensión de VS Code**
-  ([py-xmlvalidate-vscode](https://codeberg.org/nivaca/py-xmlvalidate-vscode)) muestra los mismos resultados en
+  ([py-schematron-vscode](https://codeberg.org/nivaca/py-schematron-vscode)) muestra los mismos resultados en
   el editor, **mientras se escribe**: los errores subrayados en el texto,
   sus mensajes al pasar el puntero, todos ellos en el panel Problemas
   (Schematron, RelaxNG y buena formación), y el recuento en la barra de
   estado. Está en el [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=NicolasVaughan.validate-schematron) como *Schematron
-  Validator (py-xmlvalidate)*. Véase
+  Validator (py-schematron)*. Véase
   [Extensión de VS Code](#32-extensión-de-vs-code).
-- **El paquete de Emacs** ([py-xmlvalidate-emacs](https://codeberg.org/nivaca/py-xmlvalidate-emacs), Emacs 31 o
+- **El paquete de Emacs** ([py-schematron.el](https://codeberg.org/nivaca/py-schematron.el), Emacs 31 o
   posterior) hace lo mismo con Flycheck o Flymake: los problemas subrayados
   mientras se escribe, el mensaje del que está bajo el cursor, todos en la
   lista del comprobador, y el completado según el esquema del documento.
   Véase [Paquete de Emacs](#33-paquete-de-emacs).
 
 Los dos complementos tienen repositorio propio; cada uno lleva una copia de
-`py-xmlvalidate.py`, que se mantiene igual a la de este (§3.4).
+`py-schematron.py`, que se mantiene igual a la de este (§3.4).
 
 Cómo se hizo se cuenta en [`docs/DESCRIPCIÓN_es.md`](docs/DESCRIPCIÓN_es.md).
 
@@ -45,11 +45,11 @@ y hace visibles los otros dos al dar siempre un recuento total verificable.
 
 ## Capturas de pantalla
 
-`py-xmlvalidate.py` y `py-xmlvalidate-all.sh` en el terminal, sobre el ejemplo de
+`py-schematron.py` y `py-schematron-all.sh` en el terminal, sobre el ejemplo de
 [`docs/example/`](docs/example/) (un texto TEI breve con errores
 deliberados, y un esquema RelaxNG pequeño con reglas Schematron embebidas):
 
-![py-xmlvalidate.py y py-xmlvalidate-all.sh en el terminal](docs/img/cli.png)
+![py-schematron.py y py-schematron-all.sh en el terminal](docs/img/cli.png)
 
 La extensión de VS Code (§3.2) sobre el mismo documento: los errores
 subrayados, el mensaje de uno de ellos, todos en el panel Problems con la
@@ -71,7 +71,7 @@ python3 tools/screenshots.py --python ~/.venvs/schematron/bin/python
 ```
 
 Las capturas de VS Code usan un clon de
-[py-xmlvalidate-vscode](https://codeberg.org/nivaca/py-xmlvalidate-vscode) junto a
+[py-schematron-vscode](https://codeberg.org/nivaca/py-schematron-vscode) junto a
 este repositorio (`--extension CARPETA` indica otro).
 
 ---
@@ -109,10 +109,10 @@ curl -sL -o common/functions.xsl \
 Disposición resultante:
 
 ```
-py-xmlvalidate/
-├── py-xmlvalidate.py
-├── py-xmlvalidate-all.sh
-├── py-xmlvalidate-install.py
+py-schematron/
+├── py-schematron.py
+├── py-schematron-all.sh
+├── py-schematron-install.py
 ├── odds/
 │   └── extract-isosch.xsl
 └── common/
@@ -130,7 +130,7 @@ este orden, en `--stylesheets CARPETA`, la variable de entorno
 `TEI_STYLESHEETS`, el ajuste `stylesheets` del archivo de configuración de
 [ODD2RNG](https://codeberg.org/nivaca/ODD2RNG)
 (`~/.config/odd2rng/config.toml`) y, por último, en `odds/` y `common/`
-junto al script. `py-xmlvalidate.py --about` dice qué carpeta usa.
+junto al script. `py-schematron.py --about` dice qué carpeta usa.
 
 ### 2.1 Las órdenes en `~/bin`
 
@@ -138,11 +138,11 @@ Para llamar a los scripts por su nombre desde cualquier carpeta, enlázalos
 en `~/bin`:
 
 ```sh
-python3 py-xmlvalidate-install.py
+python3 py-schematron-install.py
 ```
 
-Crea dos enlaces simbólicos, `~/bin/py-xmlvalidate.py` y
-`~/bin/py-xmlvalidate-all.sh`, que apuntan a esta carpeta; así un `git pull`
+Crea dos enlaces simbólicos, `~/bin/py-schematron.py` y
+`~/bin/py-schematron-all.sh`, que apuntan a esta carpeta; así un `git pull`
 aquí actualiza las órdenes de inmediato. Si mueves la carpeta, vuelve a
 ejecutarlo. Un archivo u otro enlace con el mismo nombre no se toca
 (`--force` reemplaza otro enlace, nunca un archivo); `--uninstall` quita
@@ -159,8 +159,8 @@ entorno virtual, si su carpeta `bin/` va primero en el PATH.
 python3 -m unittest discover -s tests -v
 ```
 
-ejecuta las pruebas de `py-xmlvalidate.py`, `py-xmlvalidate-all.sh` y
-`py-xmlvalidate-install.py` (`tests/test_py_xmlvalidate.py`), con el Python
+ejecuta las pruebas de `py-schematron.py`, `py-schematron-all.sh` y
+`py-schematron-install.py` (`tests/test_py_schematron.py`), con el Python
 que las corre, que necesita saxonche y lxml; no hace falta nada más.
 Escriben documentos y esquemas pequeños para cada caso en una carpeta
 temporal, con su propia copia de los scripts, de modo que nada queda en
@@ -170,7 +170,7 @@ documentos mal formados, las fuentes de las reglas (`-s`, `-r`,
 `<?xml-model?>`, `--as`), el caché, un esquema remoto servido por un pequeño
 servidor web local, con `--refresh`, el informe de texto y el instalador. La
 pruebas del ODD necesitan las hojas de estilo de TEI en `odds/` y `common/`, y
-las de `py-xmlvalidate-all.sh` necesitan jing; sin ellas se omiten. Las pruebas no leen tu propia `TEI_STYLESHEETS` ni la configuración de
+las de `py-schematron-all.sh` necesitan jing; sin ellas se omiten. Las pruebas no leen tu propia `TEI_STYLESHEETS` ni la configuración de
 ODD2RNG.
 
 En GitHub las pruebas corren en cada *push* (`.github/workflows/tests.yml`),
@@ -179,7 +179,7 @@ con jing y las dos hojas de estilo, de modo que ninguna se salta.
 ## 3. Uso
 
 ```
-python3 py-xmlvalidate.py [-o ODD | -s SCH | -r RNG] [-v] [--max N] [--refresh] [--json] [--as RUTA] DOC.xml [...]
+python3 py-schematron.py [-o ODD | -s SCH | -r RNG] [-v] [--max N] [--refresh] [--json] [--as RUTA] DOC.xml [...]
 ```
 
 Desde la v1.2, los flags de esquema son **opcionales**: sin ellos, el
@@ -225,41 +225,41 @@ Sin `-o/-s/-r`, el script lee las PIs `xml-model` del primer documento y:
 Con ello, la invocación mínima es simplemente:
 
 ```sh
-python3 py-xmlvalidate.py documento.xml
+python3 py-schematron.py documento.xml
 ```
 
 ### Recetas
 
 ```sh
 # Ciclo cotidiano: extraer si hace falta y validar
-python3 py-xmlvalidate.py -o ../smed-schema/smed-schema.xml ../salmarc_ed_lat.xml
+python3 py-schematron.py -o ../smed-schema/smed-schema.xml ../salmarc_ed_lat.xml
 
 # Informe completo para la campaña de corrección
-python3 py-xmlvalidate.py -o ../smed-schema/smed-schema.xml -v --max 999 \
+python3 py-schematron.py -o ../smed-schema/smed-schema.xml -v --max 999 \
     ../salmarc_ed_lat.xml > pendientes.txt
 
 # Varios documentos contra un .sch fijo
-python3 py-xmlvalidate.py -s smed-schema.sch -v ed_lat.xml ed_es.xml
+python3 py-schematron.py -s smed-schema.sch -v ed_lat.xml ed_es.xml
 
 # Contra el Schematron de las Guidelines, cosechado del RNG de tei_all (§7)
-python3 py-xmlvalidate.py -r tei_all.rng -v documento.xml
+python3 py-schematron.py -r tei_all.rng -v documento.xml
 
 # Un solo artefacto para las dos capas: estructura con Jing, reglas con -r
-jing smed-schema.rng ed_lat.xml && python3 py-xmlvalidate.py -r smed-schema.rng ed_lat.xml
+jing smed-schema.rng ed_lat.xml && python3 py-schematron.py -r smed-schema.rng ed_lat.xml
 
 # O con el wrapper bicapa (ejecuta ambas capas SIEMPRE, sin cortocircuito,
 # con veredicto compuesto: 0 limpio, 1 RelaxNG, 2 Schematron, 3 ambas,
 # 4 entorno o capa Schematron incompleta;
 # si jing no está instalado usa el RelaxNG de lxml como respaldo):
-./py-xmlvalidate-all.sh -v smed-schema.rng ed_lat.xml
+./py-schematron-all.sh -v smed-schema.rng ed_lat.xml
 
 # Wrapper en modo auto (v1.2): sin esquema, lo detecta de la PI xml-model
 # del documento (clasificando el primer argumento por contenido, no por
-# extensión) y comparte el caché de descargas de py-xmlvalidate.py:
-./py-xmlvalidate-all.sh -v documento.xml
+# extensión) y comparte el caché de descargas de py-schematron.py:
+./py-schematron-all.sh -v documento.xml
 
 # En un Makefile o hook pre-commit (código de salida ≠ 0 si hay infracciones)
-python3 py-xmlvalidate.py -s smed-schema.sch ed_lat.xml || echo "hay pendientes"
+python3 py-schematron.py -s smed-schema.sch ed_lat.xml || echo "hay pendientes"
 ```
 
 ### Códigos de salida
@@ -274,10 +274,10 @@ python3 py-xmlvalidate.py -s smed-schema.sch ed_lat.xml || echo "hay pendientes"
 ### 3.2 Extensión de VS Code
 
 La extensión para Visual Studio Code tiene su propio repositorio,
-[py-xmlvalidate-vscode](https://codeberg.org/nivaca/py-xmlvalidate-vscode) (también en
-[GitHub](https://github.com/nivaca/py-xmlvalidate-vscode)), y está en el
+[py-schematron-vscode](https://codeberg.org/nivaca/py-schematron-vscode) (también en
+[GitHub](https://github.com/nivaca/py-schematron-vscode)), y está en el
 [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=NicolasVaughan.validate-schematron) como *Schematron Validator
-(py-xmlvalidate)*. Ejecuta su copia de `py-xmlvalidate.py --json`, y jing
+(py-schematron)*. Ejecuta su copia de `py-schematron.py --json`, y jing
 cuando el esquema es RelaxNG, y muestra los resultados como diagnósticos en
 el editor y en el panel Problemas:
 
@@ -297,19 +297,19 @@ el editor y en el panel Problemas:
 
 **Instalación:** desde la vista de extensiones (busca "Schematron
 Validator"), o con el `.vsix` de una versión publicada de
-py-xmlvalidate-vscode y `code --install-extension validate-schematron-*.vsix`.
+py-schematron-vscode y `code --install-extension validate-schematron-*.vsix`.
 Luego indica en `schematron.pythonPath` un Python que tenga saxonche y lxml
 (la extensión ofrece elegirlo si hace falta). Ajustes, requisitos, cómo
 compilarla y otros detalles en su
-[README](https://codeberg.org/nivaca/py-xmlvalidate-vscode#schematron-validator-for-vs-code) (en inglés).
+[README](https://codeberg.org/nivaca/py-schematron-vscode#schematron-validator-for-vs-code) (en inglés).
 
 ### 3.3 Paquete de Emacs
 
 El paquete de Emacs tiene su propio repositorio,
-[py-xmlvalidate-emacs](https://codeberg.org/nivaca/py-xmlvalidate-emacs) (también en
-[GitHub](https://github.com/nivaca/py-xmlvalidate-emacs)). Es un comprobador
+[py-schematron.el](https://codeberg.org/nivaca/py-schematron.el) (también en
+[GitHub](https://github.com/nivaca/py-schematron.el)). Es un comprobador
 de Flycheck y un backend de Flymake para Emacs 31 o posterior, y usa
-Flycheck cuando está instalado. Ejecuta su copia de `py-xmlvalidate.py
+Flycheck cuando está instalado. Ejecuta su copia de `py-schematron.py
 --json` igual que la extensión de VS Code, con jing para los esquemas
 RelaxNG, y muestra los resultados en el búfer: cada problema subrayado, su
 mensaje cuando el cursor está encima, con su capa (Schematron, RelaxNG o
@@ -322,30 +322,30 @@ comprobación nueva cancela la que sigue en marcha.
 **Instalación**, con Straight:
 
 ```elisp
-(use-package py-xmlvalidate
-  :straight (:host codeberg :repo "nivaca/py-xmlvalidate-emacs")
-  :hook (nxml-mode . py-xmlvalidate-mode))
+(use-package py-schematron
+  :straight (:host codeberg :repo "nivaca/py-schematron.el")
+  :hook (nxml-mode . py-schematron-mode))
 (setopt trusted-content '("~/ruta/a/tus/ediciones/"))
 ```
 
-o con package-vc, `(package-vc-install '(py-xmlvalidate :url
-"https://codeberg.org/nivaca/py-xmlvalidate-emacs"))`. Flymake solo comprueba los archivos de
+o con package-vc, `(package-vc-install '(py-schematron :url
+"https://codeberg.org/nivaca/py-schematron.el"))`. Flymake solo comprueba los archivos de
 `trusted-content`, y el paquete respeta esa regla también con Flycheck:
 Saxon ejecuta el esquema que nombra el documento, y su XPath puede leer
 archivos y pedir URL. Hasta la versión 0.2.0 el paquete estaba en la
 carpeta `emacs/` de este repositorio; las recetas que apuntan aquí (con
 `:lisp-dir "emacs"` o `:files ("emacs/*.el")`) deben cambiarse por la de
 arriba. La configuración, las órdenes, trang y las pruebas están en su
-[README](https://codeberg.org/nivaca/py-xmlvalidate-emacs#py-xmlvalidate-for-emacs) (en inglés).
+[README](https://codeberg.org/nivaca/py-schematron.el#py-schematron-for-emacs) (en inglés).
 
-### 3.4 Las copias de py-xmlvalidate.py en los complementos
+### 3.4 Las copias de py-schematron.py en los complementos
 
-Cada complemento lleva su propia copia de `py-xmlvalidate.py`, en la raíz de
+Cada complemento lleva su propia copia de `py-schematron.py`, en la raíz de
 su repositorio, para poder instalarse solo. Después de cambiar el script
 aquí,
 
 ```sh
-python3 tools/sync-plugins.py           # la copia en ../py-xmlvalidate-emacs y ../py-xmlvalidate-vscode
+python3 tools/sync-plugins.py           # la copia en ../py-schematron.el y ../py-schematron-vscode
 python3 tools/sync-plugins.py --check   # solo dice si las copias son iguales (sale con 1 si no)
 ```
 
@@ -364,7 +364,7 @@ python3 tools/release.py --dry-run   # comprueba, prueba y construye; dice qué 
 python3 tools/release.py             # luego etiqueta, sube y publica
 ```
 
-publica la versión de `py-xmlvalidate.py`, con las notas de su fila en el
+publica la versión de `py-schematron.py`, con las notas de su fila en el
 historial de versiones (§11) o las de `--notes ARCHIVO`. Comprueba que todo
 esté guardado en git y que la etiqueta sea nueva, corre las pruebas, hace el
 zip (`tools/bundle-zip.py`), etiqueta el commit, sube `main` y la etiqueta a
@@ -372,7 +372,7 @@ Codeberg y a GitHub, crea la versión en ambos (con `tea` y `gh`), adjunta el
 zip y lo descarga de ambos para compararlo con el local. Un paso ya hecho se
 salta, así que tras un fallo basta con volver a correrlo. En cada
 complemento el mismo script publica el complemento, con las notas de su
-registro de cambios, y antes comprueba que su copia de `py-xmlvalidate.py`
+registro de cambios, y antes comprueba que su copia de `py-schematron.py`
 sea igual a esta.
 
 ## 4. Configuración y caché
@@ -380,7 +380,7 @@ sea igual a esta.
 - **Caché de extracción**: con `-o`, el `.sch` se escribe junto al ODD
   (mismo nombre, extensión `.sch`); con `-r`, junto al RNG (extensión
   `.harvested.sch`). Solo se regeneran si el mtime de la fuente **o del propio
-  script** es posterior — actualizar `py-xmlvalidate.py` invalida automáticamente
+  script** es posterior — actualizar `py-schematron.py` invalida automáticamente
   todos los derivados, de modo que un generador corregido nunca convive con
   derivados producidos por la versión defectuosa. El mensaje `[caché] ... está al día` lo indica. Para forzar la
   regeneración: `touch` a la fuente o borrar el derivado.
@@ -532,7 +532,7 @@ discrepancias entre capas por diferencia de versión de P5.
 **Receta bicapa completa contra el estándar:**
 
 ```sh
-jing tei_all.rng documento.xml && python3 py-xmlvalidate.py -r tei_all.rng documento.xml
+jing tei_all.rng documento.xml && python3 py-schematron.py -r tei_all.rng documento.xml
 ```
 
 El `&&` corta en la primera capa que falle; tras el runner, `$? -eq 1`
@@ -607,7 +607,8 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **1.21** | 2026-11-19 | Con `--json`, los mensajes de progreso son también `events` del informe (descarga, caché, extracción, cosecha…), con tipos estables y sus datos, y un error fatal da JSON con su mensaje; los complementos leen esto en lugar de los mensajes en español de stderr. Cada infracción y cada error XPath dice dónde está su regla (`rule`: archivo y línea, en el ODD o el RelaxNG de origen), para que los complementos puedan saltar a ella. 35 pruebas, que corren también cada lunes. La validación es la misma |
+| **2.0** | 2026-11-19 | **El proyecto pasa a llamarse py-schematron** (era py-xmlvalidate): los scripts son `py-schematron.py`, `py-schematron-all.sh` y `py-schematron-install.py`; los repositorios, nivaca/py-schematron, nivaca/py-schematron.el (el paquete de Emacs) y nivaca/py-schematron-vscode (la extensión de VS Code, cuyo nombre no cambia), y el zip de cada versión, `py-schematron-v.X.Y.zip`. Las direcciones antiguas de los repositorios redirigen a las nuevas. Hay que ejecutar de nuevo `py-schematron-install.py`, que enlaza los nombres nuevos en `~/bin` y quita los enlaces antiguos. La validación es la misma |
+| 1.21 | 2026-11-19 | Con `--json`, los mensajes de progreso son también `events` del informe (descarga, caché, extracción, cosecha…), con tipos estables y sus datos, y un error fatal da JSON con su mensaje; los complementos leen esto en lugar de los mensajes en español de stderr. Cada infracción y cada error XPath dice dónde está su regla (`rule`: archivo y línea, en el ODD o el RelaxNG de origen), para que los complementos puedan saltar a ella. 35 pruebas, que corren también cada lunes. La validación es la misma |
 | 1.20 | 2026-11-18 | `-o` encuentra las TEI Stylesheets mediante `--stylesheets CARPETA`, `TEI_STYLESHEETS` o la configuración de ODD2RNG, antes que en `odds/` y `common/` junto al script; `--about` dice cuál usa. 33 pruebas, que corren en GitHub en cada *push*. `tools/release.py` publica una versión con una sola orden, aquí y en los complementos (§3.5). La validación es la misma |
 | 1.19 | 2026-11-18 | `--about`: qué es el programa, su autor, licencia y repositorios, y con qué corre aquí (Python, saxonche, lxml, Saxon, el caché, las hojas de estilo de TEI para `-o`). La extensión de VS Code y el paquete de Emacs tienen una orden *About* propia, que muestra también esto. La validación es la misma |
 | 1.18 | 2026-11-18 | Un conjunto de pruebas (`tests/`, 28 pruebas con `unittest`, §2.2). Los `let` de schema y de pattern se evalúan con la raíz del documento como contexto, como dice ISO Schematron (antes tomaban el nodo de cada regla), y pueden usarse en el contexto de una regla. Una regla que no se puede evaluar (un error XPath) hace ahora que el script salga con 3, porque el veredicto está incompleto; `py-xmlvalidate-all.sh` lo informa como veredicto propio (salida 4). Los resultados en las ediciones no cambian |

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
-# This file is part of py-xmlvalidate. See the LICENSE file for details.
-"""Copy py-xmlvalidate.py and tools/release.py into the plugins:
+# This file is part of py-schematron. See the LICENSE file for details.
+"""Copy py-schematron.py and tools/release.py into the plugins:
 python3 tools/sync-plugins.py [--check] [--emacs FOLDER] [--vscode FOLDER]
 
-The VS Code extension (py-xmlvalidate-vscode) and the Emacs package
-(py-xmlvalidate-emacs) each carry their own copy of py-xmlvalidate.py, at
+The VS Code extension (py-schematron-vscode) and the Emacs package
+(py-schematron.el) each carry their own copy of py-schematron.py, at
 the top of their repositories, so that each installs on its own.  This
-script copies this repository's py-xmlvalidate.py there, by default into
-the clones next to this one (../py-xmlvalidate-emacs and
-../py-xmlvalidate-vscode), and says which copies changed and from which
+script copies this repository's py-schematron.py there, by default into
+the clones next to this one (../py-schematron.el and
+../py-schematron-vscode), and says which copies changed and from which
 version.  It copies tools/release.py too, the release script that the
 three repositories share.  It does not commit anything: after a copy, commit it in the
 plugin and say in its changelog which version it carries.
@@ -32,13 +32,13 @@ import shutil  # noqa: E402
 from pathlib import Path  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRIPT = ROOT / "py-xmlvalidate.py"
-FILES = ("py-xmlvalidate.py", "tools/release.py")    # (copied to the same place)
-PLUGINS = {"emacs": "py-xmlvalidate-emacs", "vscode": "py-xmlvalidate-vscode"}
+SCRIPT = ROOT / "py-schematron.py"
+FILES = ("py-schematron.py", "tools/release.py")    # (copied to the same place)
+PLUGINS = {"emacs": "py-schematron.el", "vscode": "py-schematron-vscode"}
 
 
 def version(path: Path) -> str:
-    """The __version__ of a py-xmlvalidate.py, read without importing it."""
+    """The __version__ of a py-schematron.py, read without importing it."""
     m = re.search(r'^__version__\s*=\s*"([^"]+)"', path.read_text(encoding="utf-8"), re.M)
     return m.group(1) if m else "?"
 
@@ -46,7 +46,7 @@ def version(path: Path) -> str:
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="tools/sync-plugins.py",
-        description="Copy py-xmlvalidate.py into the clones of the VS Code extension "
+        description="Copy py-schematron.py into the clones of the VS Code extension "
                     "and the Emacs package.")
     parser.add_argument("--check", action="store_true",
                         help="copy nothing; exit with 1 if a copy differs or is missing")
@@ -55,7 +55,7 @@ def main(argv=None):
                             help=f"the clone of {name} (default: ../{name})")
     args = parser.parse_args(argv)
 
-    print(f"py-xmlvalidate.py {version(SCRIPT)}")
+    print(f"py-schematron.py {version(SCRIPT)}")
     stale = 0
     for key, name in PLUGINS.items():
         folder = getattr(args, key).expanduser().resolve()
@@ -69,7 +69,7 @@ def main(argv=None):
             if target.is_file() and target.read_bytes() == ours:
                 print(f"  {name}/{rel}: up to date")
                 continue
-            before = (version(target) if rel == "py-xmlvalidate.py" else "an older copy") \
+            before = (version(target) if rel == "py-schematron.py" else "an older copy") \
                 if target.is_file() else "none"
             if args.check:
                 print(f"  {name}/{rel}: differs (it has {before})")
@@ -78,7 +78,7 @@ def main(argv=None):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, target)
             target.chmod(target.stat().st_mode | 0o111)      # (it can be run, as here)
-            after = version(SCRIPT) if rel == "py-xmlvalidate.py" else "this one"
+            after = version(SCRIPT) if rel == "py-schematron.py" else "this one"
             print(f"  {name}/{rel}: copied ({before} -> {after}); commit it there")
     if args.check and stale:
         sys.exit(1)

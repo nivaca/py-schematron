@@ -1,5 +1,5 @@
 [project]
-name = "py-xmlvalidate"
+name = "py-schematron"
 version = "0.1.0"
 description = "Schematron validation of TEI documents, in the terminal, VS Code and Emacs"
 readme = "README.md"
@@ -12,7 +12,7 @@ license-files = ["LICENSE"]
 dependencies = []
 
 [project.scripts]
-py-xmlvalidate = "py_xmlvalidate:main"
+py-schematron = "py_schematron:main"
 
 [build-system]
 requires = ["uv_build>=0.13.7,<0.14.0"]

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
-# This file is part of py-xmlvalidate. See the LICENSE file for details.
+# This file is part of py-schematron. See the LICENSE file for details.
 """Makes the release bundle in dist/: python3 tools/bundle-zip.py
 
-dist/py-xmlvalidate-v.VERSION.zip (the version of py-xmlvalidate.py), with
-the program in a folder of the same name: py-xmlvalidate.py,
-py-xmlvalidate-all.sh, py-xmlvalidate-install.py, the READMEs, the licence
+dist/py-schematron-v.VERSION.zip (the version of py-schematron.py), with
+the program in a folder of the same name: py-schematron.py,
+py-schematron-all.sh, py-schematron-install.py, the READMEs, the licence
 and docs/ (the descriptions, the screenshots and the example).  It is made
 from the files git tracks, so nothing that only lives in this folder gets
 in (the TEI stylesheets in odds/ and common/, schema caches, test
@@ -15,7 +15,7 @@ the program (tools/, with the scripts that make the bundle, the screenshots
 and the plugins' copies; src/ with pyproject.toml, the package scaffold,
 not yet in use) and hidden files.  The scripts keep their permission to
 run.  The VS Code extension and the Emacs package have repositories and
-releases of their own (py-xmlvalidate-vscode, py-xmlvalidate-emacs).
+releases of their own (py-schematron-vscode, py-schematron.el).
 
 dist is made in the program's folder if need be; --output gives another
 folder.  If any of the bundled files has changes not committed yet, it
@@ -31,24 +31,24 @@ import zipfile
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # (above tools/)
 DIST = os.path.join(HERE, "dist")
-NAME = "py-xmlvalidate"
+NAME = "py-schematron"
 
 #  What is in the repository but not part of the program
 NOT_PART = ("tools/", "src/", "pyproject.toml")
 
 
 def version() -> str:
-    """py-xmlvalidate.py's __version__, read without importing it (that would
+    """py-schematron.py's __version__, read without importing it (that would
     need saxonche and lxml)."""
-    with open(os.path.join(HERE, "py-xmlvalidate.py"), encoding="utf-8") as f:
+    with open(os.path.join(HERE, "py-schematron.py"), encoding="utf-8") as f:
         m = re.search(r'^__version__\s*=\s*"([^"]+)"', f.read(), re.M)
     if not m:
-        sys.exit("bundle-zip.py: no __version__ in py-xmlvalidate.py")
+        sys.exit("bundle-zip.py: no __version__ in py-schematron.py")
     return m.group(1)
 
 
 def name() -> str:
-    """The name of the zip, without .zip: py-xmlvalidate-v.1.12."""
+    """The name of the zip, without .zip: py-schematron-v.1.12."""
     return f"{NAME}-v.{version()}"
 
 
@@ -81,7 +81,7 @@ def bundle_zip(folder: str) -> str:
             src = os.path.join(HERE, f)
             info = zipfile.ZipInfo.from_file(src, name() + "/" + f)
             #  (ordinary permissions, whatever this folder has: rw-r--r--, or
-            #  rwxr-xr-x for what can be run, as py-xmlvalidate-all.sh)
+            #  rwxr-xr-x for what can be run, as py-schematron-all.sh)
             mode = 0o755 if os.access(src, os.X_OK) else 0o644
             info.external_attr = (0o100000 | mode) << 16
             info.compress_type = zipfile.ZIP_DEFLATED

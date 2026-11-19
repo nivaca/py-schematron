@@ -1,5 +1,5 @@
-# Runs the tests of py-xmlvalidate.py (tests/) on every push and pull
-# request: with jing, so that py-xmlvalidate-all.sh is tested too, and with
+# Runs the tests of py-schematron.py (tests/) on every push and pull
+# request: with jing, so that py-schematron-all.sh is tested too, and with
 # the two TEI stylesheets fetched as README §2 says, so that -o is tested.
 
 name: Tests

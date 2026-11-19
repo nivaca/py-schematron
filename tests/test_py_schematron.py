@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
-# This file is part of py-xmlvalidate. See the LICENSE file for details.
-"""Tests of py-xmlvalidate.py, py-xmlvalidate-all.sh and
-py-xmlvalidate-install.py.
+# This file is part of py-schematron. See the LICENSE file for details.
+"""Tests of py-schematron.py, py-schematron-all.sh and
+py-schematron-install.py.
 
     python3 -m unittest discover -s tests -v
 
@@ -11,8 +11,8 @@ case.  Each test class works in a temporary folder with its own copy of the
 scripts, so the download cache (.schema-cache/) and the harvested schemas
 never land in the repository.  They need the Python running them to have
 saxonche and lxml.  The ODD tests need the TEI stylesheets in odds/ and
-common/ next to py-xmlvalidate.py (they are skipped otherwise), and the tests
-of py-xmlvalidate-all.sh need jing (on the PATH, in ~/bin, or named by the
+common/ next to py-schematron.py (they are skipped otherwise), and the tests
+of py-schematron-all.sh need jing (on the PATH, in ~/bin, or named by the
 environment variable JING).
 """
 
@@ -83,12 +83,12 @@ class Base(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.tmp = Path(tempfile.mkdtemp(prefix="pyxv-tests-"))
+        cls.tmp = Path(tempfile.mkdtemp(prefix="pysch-tests-"))
         cls.bin = cls.tmp / "bin"
         cls.bin.mkdir()
-        for name in ("py-xmlvalidate.py", "py-xmlvalidate-all.sh", "py-xmlvalidate-install.py"):
+        for name in ("py-schematron.py", "py-schematron-all.sh", "py-schematron-install.py"):
             shutil.copy2(REPO / name, cls.bin / name)
-        cls.script = cls.bin / "py-xmlvalidate.py"
+        cls.script = cls.bin / "py-schematron.py"
         # (the user's own settings must not change the results: no ODD2RNG
         # configuration, no TEI_STYLESHEETS, unless a test sets them)
         (cls.tmp / "no-config").mkdir()
@@ -117,7 +117,7 @@ class Base(unittest.TestCase):
         return path
 
     def run_script(self, *args, cwd=None, env=None):
-        """Run py-xmlvalidate.py; return (exit code, stdout, stderr).
+        """Run py-schematron.py; return (exit code, stdout, stderr).
         ENV adds to (or, with None values, removes from) the environment."""
         environ = dict(self.env)
         for k, v in (env or {}).items():
@@ -150,15 +150,15 @@ class TestBasics(Base):
     def test_version(self):
         code, out, _ = self.run_script("--version")
         self.assertEqual(code, 0)
-        self.assertRegex(out, r"^py-xmlvalidate\.py \d+\.\d+")
+        self.assertRegex(out, r"^py-schematron\.py \d+\.\d+")
 
     def test_about(self):
         code, out, _ = self.run_script("--about")
         self.assertEqual(code, 0)
-        self.assertRegex(out.splitlines()[0], r"^py-xmlvalidate\.py \d+\.\d+$")
+        self.assertRegex(out.splitlines()[0], r"^py-schematron\.py \d+\.\d+$")
         self.assertIn("TEI Stylesheets para -o:", out)
         for expected in ("Nicolas Vaughan <nicolasvaughan@proton.me>", "GNU General Public License",
-                         "https://codeberg.org/nivaca/py-xmlvalidate", "Python:", "saxonche:", "lxml:",
+                         "https://codeberg.org/nivaca/py-schematron", "Python:", "saxonche:", "lxml:",
                          str(self.script.resolve())):
             self.assertIn(expected, out)
 
@@ -552,7 +552,7 @@ class TestRemote(Base):
         self.assertEqual(self.texts(report), ["A TEI may contain at most 1 p, found 2"])
 
 
-# ------------------------------------------------------ py-xmlvalidate-all.sh
+# ------------------------------------------------------ py-schematron-all.sh
 
 @unittest.skipUnless(JING, "jing not found")
 class TestAllLayers(Base):
@@ -564,7 +564,7 @@ class TestAllLayers(Base):
         # before jing's folder, which may hold another, as /usr/bin does)
         env = dict(os.environ, PATH=os.pathsep.join(
             [str(Path(sys.executable).parent), str(Path(JING).parent), os.environ.get("PATH", "")]))
-        p = subprocess.run([str(self.bin / "py-xmlvalidate-all.sh"), *map(str, args)],
+        p = subprocess.run([str(self.bin / "py-schematron-all.sh"), *map(str, args)],
                            capture_output=True, text=True, cwd=self.dir, env=env, timeout=120)
         return p.returncode, p.stdout + p.stderr
 
@@ -585,12 +585,12 @@ class TestAllLayers(Base):
         self.assertEqual(code, 4, out)
 
 
-# ------------------------------------------------- py-xmlvalidate-install.py
+# ------------------------------------------------- py-schematron-install.py
 
 class TestInstaller(Base):
 
     def install(self, *args):
-        p = subprocess.run([sys.executable, str(self.bin / "py-xmlvalidate-install.py"), *map(str, args)],
+        p = subprocess.run([sys.executable, str(self.bin / "py-schematron-install.py"), *map(str, args)],
                            capture_output=True, text=True, timeout=120)
         return p.returncode, p.stdout + p.stderr
 
@@ -598,7 +598,7 @@ class TestInstaller(Base):
         target = self.dir / "mybin"
         code, out = self.install("--bin", target)
         self.assertEqual(code, 0, out)
-        for name in ("py-xmlvalidate.py", "py-xmlvalidate-all.sh"):
+        for name in ("py-schematron.py", "py-schematron-all.sh"):
             link = target / name
             self.assertTrue(link.is_symlink())
             self.assertEqual(link.resolve(), (self.bin / name).resolve())
@@ -606,13 +606,29 @@ class TestInstaller(Base):
         self.assertEqual(code, 0, out)
         self.assertEqual(list(target.iterdir()), [])
 
+    def test_old_links_are_removed(self):
+        """The links of the former names (py-xmlvalidate, until 1.21) go: a
+        dangling one, as after the folder was renamed; a link of that name
+        to something else stays."""
+        target = self.dir / "bin"
+        target.mkdir()
+        (target / "py-xmlvalidate.py").symlink_to(self.dir / "gone" / "py-xmlvalidate.py")
+        other = self.write("other.sh", "#!/bin/sh\n")
+        (target / "py-xmlvalidate-all.sh").symlink_to(other)
+        code, out = self.install("--bin", target)
+        self.assertEqual(code, 0, out)
+        self.assertFalse((target / "py-xmlvalidate.py").is_symlink())
+        self.assertIn("the former name", out)
+        self.assertTrue((target / "py-xmlvalidate-all.sh").is_symlink())   # (not ours)
+        self.assertTrue((target / "py-schematron.py").is_symlink())
+
     def test_a_file_is_left_alone(self):
         target = self.dir / "mybin"
         target.mkdir()
-        (target / "py-xmlvalidate.py").write_text("mine")
+        (target / "py-schematron.py").write_text("mine")
         code, out = self.install("--bin", target, "--force")
         self.assertEqual(code, 1)
-        self.assertEqual((target / "py-xmlvalidate.py").read_text(), "mine")
+        self.assertEqual((target / "py-schematron.py").read_text(), "mine")
 
 
 if __name__ == "__main__":

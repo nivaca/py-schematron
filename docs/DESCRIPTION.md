@@ -1,15 +1,16 @@
-How py-xmlvalidate was made
+How py-schematron was made
 ===========================
 
-py-xmlvalidate checks TEI documents against the Schematron rules of
+py-schematron checks TEI documents against the Schematron rules of
 their schema, from the terminal, and reports every offence: how many
 times each rule is broken and, for each offence, the line and the
 `xml:id` of the nearest identifiable element.  It takes the rules from
 an ODD, from an ISO Schematron file, or from a RelaxNG schema generated
 from an ODD, which carries them embedded; it finds the schema by itself
 in the document's `<?xml-model?>` instructions.  Its main program is
-py-xmlvalidate.py (called validate.py until version 1.11, and
-xmlvalidate.py in 1.12); a companion script, py-xmlvalidate-all.sh, also
+py-schematron.py (called validate.py until version 1.11, xmlvalidate.py
+in 1.12, and py-xmlvalidate.py from 1.13 to 1.21, when the project was
+py-xmlvalidate); a companion script, py-schematron-all.sh, also
 checks the structure with RelaxNG, and an extension for Visual Studio
 Code shows the same results in the editor, underlined as you type.
 Nicolas Vaughan made it in 2026, for the editions of the SMTrad project.
@@ -19,7 +20,7 @@ It stands on four pieces of other people's work: Saxon, through saxonche
 (Saxon C), which evaluates the rules with XPath 3.1; lxml, which finds
 the lines and the `xml:id`s; jing, by James Clark, which checks the
 RelaxNG structure; and the stylesheet `extract-isosch.xsl` of the TEI
-Stylesheets, which extracts the Schematron of an ODD.  py-xmlvalidate is
+Stylesheets, which extracts the Schematron of an ODD.  py-schematron is
 free software, under the GNU General Public License, version 3 or later.
 
 Nicolas Vaughan is Associate Professor of Literature at the School of Arts
@@ -58,7 +59,7 @@ the same way.
 
 Version 1.1 (July 2026) added a second source of rules: a RelaxNG schema
 generated from an ODD carries the Schematron patterns embedded in it, the
-very rules that jing ignores.  py-xmlvalidate.py harvests them, without
+very rules that jing ignores.  py-schematron.py harvests them, without
 duplicates, into a Schematron file of its own.  Harvesting had a subtle
 bug: copied out of their context, the patterns could be written with
 the wrong namespace and come back as nothing.  The fix cleans up the
@@ -69,20 +70,20 @@ The same version added `current()` (the TEI Guidelines' rules use it),
 guards against documents that are not well-formed and against schemas
 without rules (which would approve anything), an exit code of its own
 for problems of the environment, and a cache that is renewed when either
-the schema or the script changes.  py-xmlvalidate-all.sh runs the two
+the schema or the script changes.  py-schematron-all.sh runs the two
 layers on the same RelaxNG file: the structure with jing (or lxml,
-without it), then the rules with py-xmlvalidate.py, and combines their
+without it), then the rules with py-schematron.py, and combines their
 verdicts in its exit code.
 
 3. Finding the schema
 ---------------------
 
 From version 1.2 (July 2026) no schema has to be given:
-py-xmlvalidate.py reads the document's `<?xml-model?>` instructions,
+py-schematron.py reads the document's `<?xml-model?>` instructions,
 prefers a Schematron one, then a RelaxNG one, and downloads a remote
 schema once, to a cache, until `--refresh` asks for it again.  What a
 file is (ODD, Schematron or RelaxNG) is decided by its content, not by
-its name.  py-xmlvalidate-all.sh gained the same detection.  Version 1.3
+its name.  py-schematron-all.sh gained the same detection.  Version 1.3
 made the messages more useful: the `<value-of>`s inside them are
 evaluated for each offence, so a message names, for example, the exact
 sigla that are missing.
@@ -108,14 +109,14 @@ changed.
 5. A Visual Studio Code extension
 ---------------------------------
 
-Version 1.5 gave py-xmlvalidate.py a `--json` report, with every
+Version 1.5 gave py-schematron.py a `--json` report, with every
 offence, its line, `xml:id`, pattern and `role`, and the rules that
 failed.  On it stands an extension for Visual Studio Code (`vscode/`),
-which runs py-xmlvalidate.py, and jing for RelaxNG schemas, when a
+which runs py-schematron.py, and jing for RelaxNG schemas, when a
 document is opened or saved, and shows the offences as diagnostics:
 underlined in the text, with the message on hover, and listed in the
 Problems panel.  The extension carries its own copy of
-py-xmlvalidate.py.
+py-schematron.py.
 
 The next versions made it easier to set up and to read.  When the Python
 it uses lacks saxonche, it says which Python it tried, and offers to
@@ -145,10 +146,10 @@ validated, the old version failed 88 times in 635; the new one, never.
 Version 0.4 of the extension validates the text being edited, unsaved
 changes included, once typing pauses (half a second by default, a
 setting).  The text is written to a private temporary folder, never next
-to the user's file, and py-xmlvalidate.py 1.8 has `--as`, which treats
+to the user's file, and py-schematron.py 1.8 has `--as`, which treats
 that copy as if it were the real file, so relative `<?xml-model?>` paths
 still work.  While a tag is half typed, the document is not well-formed
-for a moment; py-xmlvalidate.py now reports that as an ordinary error on
+for a moment; py-schematron.py now reports that as an ordinary error on
 its line, not as a failure.
 
 Testing the extension inside a real VS Code showed two problems that
@@ -177,12 +178,12 @@ mistakes and a small RelaxNG schema with Schematron rules embedded in it.
 Last, the project changed from the MIT licence to the GPL, version 3 or
 later (0.5.2), like my other projects.  Each release now carries two
 files, which `tools/bundle-zip.py` makes in `dist/`: a zip of
-py-xmlvalidate.py with its documentation, made from the files that git
+py-schematron.py with its documentation, made from the files that git
 tracks, and the extension's package.  The extension has a changelog, and
 a GitHub workflow tests and packages it with each release tag and can
 publish it in the Visual Studio Marketplace with Trusted Publishing,
 without storing any key (0.5.3).  The repositories are now called
-py-xmlvalidate.
+py-schematron.
 
 Version 1.15 made the checks faster.  Each test of a rule used to be
 evaluated on its own, computing the rule's `<let>` variables again every
@@ -202,7 +203,7 @@ the Latin edition went from 11.5 to 1.9 seconds, and 39 documents gave
 identical results.  A rule whose single call fails is evaluated node by
 node, as before.
 
-Then came an Emacs package, `emacs/py-xmlvalidate.el`, for Emacs 31.  I
+Then came an Emacs package, `emacs/py-schematron.el`, for Emacs 31.  I
 weighed four designs: a Flymake backend, a Flycheck checker, a language
 server used through Eglot, and a mere report command.  Flymake won
 because it is part of Emacs and asks for nothing else.  Speed was not an
@@ -210,14 +211,14 @@ argument for a server: Python with its libraries starts in about 15 ms,
 and the seconds a large edition takes go into the rules themselves,
 which is what version 1.15 had just reduced.  The backend works like
 the extension: it writes the buffer to a private temporary copy, runs
-py-xmlvalidate.py with `--json` and `--as`, and jing for RelaxNG
+py-schematron.py with `--json` and `--as`, and jing for RelaxNG
 schemas, and turns both reports into Flymake diagnostics with their
 layer and pattern; a new check kills the one still running.  Emacs 31
 lets Flymake run only on files listed in `trusted-content`, and the
 package keeps that rule: a document's `<?xml-model?>` chooses the
 schema, and Saxon runs the schema's XPath, which can read files and
 fetch URLs.  The package installs from the repository with
-`package-vc-install` and uses the repository's own py-xmlvalidate.py.
+`package-vc-install` and uses the repository's own py-schematron.py.
 Version 0.1.1 added Straight, which builds a package from links to its
 clone; the package now follows the link to its own file to find the
 script.  In real use, a document opened from the downloads folder was
@@ -226,7 +227,7 @@ errors: the file was not trusted, and the package said so in a passing
 message that nobody reads.  Version 0.1.2 makes this hard to miss: a
 warning in the `*Warnings*` buffer, once per file, with the line to add
 to the init file; commands that explain why they cannot run; a note at
-the end of the report; and `M-x py-xmlvalidate-trust-file`, which trusts
+the end of the report; and `M-x py-schematron-trust-file`, which trusts
 the file or its folder after asking.
 
 Version 0.2.0 added two things, after looking at how I actually use
@@ -254,16 +255,16 @@ schema its output is identical to that of the copy inside oXygen.
 
 Version 1.17 moved the two plugins out.  They had lived in the `vscode/`
 and `emacs/` folders of this repository, and both depended on it: the
-extension copied `../py-xmlvalidate.py` when it was packaged, and the
+extension copied `../py-schematron.py` when it was packaged, and the
 Emacs package ran the copy in the folder above its own.  Each now has a
-repository of its own, py-xmlvalidate-vscode and py-xmlvalidate-emacs, on
+repository of its own, py-schematron-vscode and py-schematron.el, on
 GitHub and Codeberg, with its history extracted from this one and its
 tags renamed (`vscode-v0.5.9` became `v0.5.9`; the extension versions
-released only inside py-xmlvalidate releases got tags of their own).  I
+released only inside py-schematron releases got tags of their own).  I
 weighed git submodules and chose against them: the dependency runs from
 the plugins to the script, not the other way, and submodules would have
 cost two commits for every change and broken the Emacs install.  Instead
-each plugin carries a copy of `py-xmlvalidate.py` at the top of its
+each plugin carries a copy of `py-schematron.py` at the top of its
 repository, and `tools/sync-plugins.py` copies each new version there, or
 says whether the copies are the same.  The Emacs recipes became simpler
 (no `:files`, no `:lisp-dir`), the trang installer went with the Emacs
@@ -304,9 +305,9 @@ Testing
 
 The tests of the plugins now live in their repositories.  The extension
 has 11 automated tests (`npm test`), run with Node's own
-test runner.  They check how the reports of py-xmlvalidate.py and of
+test runner.  They check how the reports of py-schematron.py and of
 jing become diagnostics, the severities, where the underlines start and
-end, and the error messages; one of them runs py-xmlvalidate.py from
+end, and the error messages; one of them runs py-schematron.py from
 beginning to end.  Another test (`npm run test:integration`) runs the
 extension inside a real VS Code, without a screen and with a profile of
 its own: it checks that the errors land on the right lines and are
@@ -316,7 +317,7 @@ changed on a small web server.  The tests of the extension also run on
 GitHub Actions with each release tag.
 
 The Emacs package has 31 ERT tests, run in a batch Emacs.  Eight need no
-Python: they read the reports of py-xmlvalidate.py and jing, find the
+Python: they read the reports of py-schematron.py and jing, find the
 script (also through a link like Straight's), and adapt the compact
 schema for nxml.  The other twenty-three run the real programs on
 documents made for each case.  Through Flymake they check the lines and
@@ -337,8 +338,8 @@ check took 2.6 seconds, nxml had the schema 0.7 seconds later and found
 no errors, and inside an `<rdg>` it offered the 123 elements the schema
 allows there.
 
-py-xmlvalidate.py has 35 tests (`python3 -m unittest discover -s
-tests`), which run it, py-xmlvalidate-all.sh and the installer on small
+py-schematron.py has 35 tests (`python3 -m unittest discover -s
+tests`), which run it, py-schematron-all.sh and the installer on small
 documents and schemas made for each case, in a temporary folder: rules
 and messages, shadowing, `let`s at every level and `current()`, broken
 rules and the exit codes, malformed text, the sources of rules (`-s`,
