@@ -19,7 +19,11 @@ foreach ($Candidate in $Candidates) {
     $Exe = $Candidate[0]
     if (-not (Get-Command $Exe -ErrorAction SilentlyContinue)) { continue }
     $Rest = @($Candidate | Select-Object -Skip 1)
-    & $Exe @Rest -c "import sys; sys.exit(sys.version_info < (3, 15))" 2>$null | Out-Null
+    # (the py launcher says "No suitable Python runtime found" on stderr for a
+    # version it lacks, which Windows PowerShell turns into an error: next)
+    try {
+        & $Exe @Rest -c "import sys; sys.exit(sys.version_info < (3, 15))" 2>$null | Out-Null
+    } catch { continue }
     if ($LASTEXITCODE -eq 0) { $Python = $Candidate; break }
 }
 if (-not $Python) {
