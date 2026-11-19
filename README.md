@@ -359,8 +359,10 @@ keeps the cache, a command it did not make, and the removal.
 On GitHub the tests run at every push and every Monday
 (`.github/workflows/tests.yml`), with jing and the two stylesheets, so that
 none is skipped. Another job installs py-schematron for real with
-`installers/` on Linux, macOS and Windows, as a user would, then runs the
-command, validates a document and uninstalls it.
+`installers/` on Linux and Windows, as a user would, then runs the
+command, validates a document and uninstalls it; on macOS too for release
+tags, the Monday run and runs started by hand, since GitHub often has no
+Mac free.
 
 ## 3. Usage
 

@@ -364,8 +364,10 @@ que conserva el caché, una orden que no creó él y la desinstalación.
 En GitHub las pruebas corren en cada *push* y cada lunes
 (`.github/workflows/tests.yml`), con jing y las dos hojas de estilo, de
 modo que ninguna se salta. Otra tarea instala py-schematron de verdad con
-`installers/` en Linux, macOS y Windows, como lo haría un usuario, y luego
-ejecuta la orden, valida un documento y lo desinstala.
+`installers/` en Linux y Windows, como lo haría un usuario, y luego
+ejecuta la orden, valida un documento y lo desinstala; también en macOS
+para las etiquetas de cada versión, la corrida de los lunes y las que se
+lanzan a mano, porque GitHub a menudo no tiene un Mac libre.
 
 ## 3. Uso
 
