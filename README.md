@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 2.2** (`py-schematron.py --version`, `--about`)
+**Version 2.3** (`py-schematron.py --version`, `--about`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -815,7 +815,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **2.2** | 2026-11-19 | **`py-schematron-all.py`**: the two layers are now a Python program, so they run on Windows too (the installers make `py-schematron-all` there); where there is no `jing` command, it runs the `jing.jar` named by `JING_JAR` with Java, and otherwise lxml. `py-schematron-all.sh`, its former name, still works. **`tools/corpus-check.py`** compares the last release with this version on every document of a corpus (`--corpus`, `PY_SCHEMATRON_CORPUS`), and `tools/release.py` runs it before a release. 53 tests. The validation is the same |
+| **2.3** | 2026-11-19 | `pyproject.toml` and `src/py_schematron/`, a package scaffold never used (its `py-schematron` command only printed a greeting), are removed: the program is its scripts, installed with `installers/` or from a clone (§2). The validation is the same |
+| 2.2 | 2026-11-19 | **`py-schematron-all.py`**: the two layers are now a Python program, so they run on Windows too (the installers make `py-schematron-all` there); where there is no `jing` command, it runs the `jing.jar` named by `JING_JAR` with Java, and otherwise lxml. `py-schematron-all.sh`, its former name, still works. **`tools/corpus-check.py`** compares the last release with this version on every document of a corpus (`--corpus`, `PY_SCHEMATRON_CORPUS`), and `tools/release.py` runs it before a release. 53 tests. The validation is the same |
 | 2.1 | 2026-11-19 | **Installers for Linux, macOS and Windows** (`installers/`, §2.1): one command downloads the latest release and sets it up in the user's folders, with a Python environment of its own (saxonche, lxml), the two TEI stylesheets for `-o`, and the commands on the PATH; run again, it updates, and `--uninstall` removes it. Detailed instructions for each system, in English and Spanish. `py-schematron-all.sh` takes its Python from `PY_SCHEMATRON_PYTHON`. 45 tests; GitHub also installs it for real on the three systems. The VS Code extension (0.11) and the Emacs package (0.9) use the installer's Python by themselves. The validation is the same |
 | 2.0 | 2026-11-19 | **The project is renamed py-schematron** (it was py-xmlvalidate): the scripts are `py-schematron.py`, `py-schematron-all.sh` and `py-schematron-install.py`, the repositories nivaca/py-schematron, nivaca/py-schematron.el (the Emacs package) and nivaca/py-schematron-vscode (the VS Code extension, whose name does not change), and the release zip `py-schematron-v.X.Y.zip`. The old repository addresses redirect to the new ones. Run `py-schematron-install.py` again: it links the new names into `~/bin` and removes the old links. The validation is the same |
 | 1.21 | 2026-11-19 | With `--json`, the progress messages are also `events` in the report (download, cache, extraction, harvest…), with stable kinds and their data, and a fatal error gives JSON with its message; the plugins read these instead of the Spanish messages on stderr. Each violation and XPath error says where its rule is (`rule`: file and line, in the ODD or RelaxNG it came from), so that the plugins can jump to it. 35 tests, which run every Monday too. The validation is the same |

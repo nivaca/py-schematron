@@ -1,4 +1,4 @@
-# py-schematron 2.2: descripción
+# py-schematron 2.3: descripción
 
 ## Análisis
 

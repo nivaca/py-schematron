@@ -2,7 +2,7 @@
 
 *(English: [README.md](README.md))*
 
-**Versión 2.2** (`py-schematron.py --version`, `--about`)
+**Versión 2.3** (`py-schematron.py --version`, `--about`)
 
 Validador de la capa Schematron del proyecto SMTrad. Extrae las reglas ISO
 Schematron embebidas en el ODD (`smed-schema.xml`) y las ejecuta contra uno o
@@ -826,7 +826,8 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **2.2** | 2026-11-19 | **`py-schematron-all.py`**: las dos capas son ahora un programa en Python, así que funcionan también en Windows (los instaladores crean allí `py-schematron-all`); donde no hay orden `jing`, ejecuta con Java el `jing.jar` que indique `JING_JAR` y, si no, usa lxml. `py-schematron-all.sh`, su nombre anterior, sigue funcionando. **`tools/corpus-check.py`** compara la última versión publicada con esta sobre cada documento de un corpus (`--corpus`, `PY_SCHEMATRON_CORPUS`), y `tools/release.py` la ejecuta antes de publicar. 53 pruebas. La validación es la misma |
+| **2.3** | 2026-11-19 | Se quitan `pyproject.toml` y `src/py_schematron/`, un andamiaje de paquete que nunca se usó (su orden `py-schematron` solo imprimía un saludo): el programa son sus scripts, que se instalan con `installers/` o desde un clon (§2). La validación es la misma |
+| 2.2 | 2026-11-19 | **`py-schematron-all.py`**: las dos capas son ahora un programa en Python, así que funcionan también en Windows (los instaladores crean allí `py-schematron-all`); donde no hay orden `jing`, ejecuta con Java el `jing.jar` que indique `JING_JAR` y, si no, usa lxml. `py-schematron-all.sh`, su nombre anterior, sigue funcionando. **`tools/corpus-check.py`** compara la última versión publicada con esta sobre cada documento de un corpus (`--corpus`, `PY_SCHEMATRON_CORPUS`), y `tools/release.py` la ejecuta antes de publicar. 53 pruebas. La validación es la misma |
 | 2.1 | 2026-11-19 | **Instaladores para Linux, macOS y Windows** (`installers/`, §2.1): una orden descarga la última versión y la instala en las carpetas del usuario, con un entorno de Python propio (saxonche, lxml), las dos hojas de estilo de TEI para `-o` y las órdenes en el PATH; vuelto a ejecutar, actualiza, y `--uninstall` lo quita. Instrucciones detalladas para cada sistema, en inglés y en español. `py-schematron-all.sh` toma su Python de `PY_SCHEMATRON_PYTHON`. 45 pruebas; GitHub, además, lo instala de verdad en los tres sistemas. La extensión de VS Code (0.11) y el paquete de Emacs (0.9) usan por sí solos el Python del instalador. La validación es la misma |
 | 2.0 | 2026-11-19 | **El proyecto pasa a llamarse py-schematron** (era py-xmlvalidate): los scripts son `py-schematron.py`, `py-schematron-all.sh` y `py-schematron-install.py`; los repositorios, nivaca/py-schematron, nivaca/py-schematron.el (el paquete de Emacs) y nivaca/py-schematron-vscode (la extensión de VS Code, cuyo nombre no cambia), y el zip de cada versión, `py-schematron-v.X.Y.zip`. Las direcciones antiguas de los repositorios redirigen a las nuevas. Hay que ejecutar de nuevo `py-schematron-install.py`, que enlaza los nombres nuevos en `~/bin` y quita los enlaces antiguos. La validación es la misma |
 | 1.21 | 2026-11-19 | Con `--json`, los mensajes de progreso son también `events` del informe (descarga, caché, extracción, cosecha…), con tipos estables y sus datos, y un error fatal da JSON con su mensaje; los complementos leen esto en lugar de los mensajes en español de stderr. Cada infracción y cada error XPath dice dónde está su regla (`rule`: archivo y línea, en el ODD o el RelaxNG de origen), para que los complementos puedan saltar a ella. 35 pruebas, que corren también cada lunes. La validación es la misma |
