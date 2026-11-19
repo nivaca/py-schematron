@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 1.19** (`py-xmlvalidate.py --version`, `--about`)
+**Version 1.20** (`py-xmlvalidate.py --version`, `--about`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -92,9 +92,9 @@ rules' `<let>` elements evaluate identically in both environments.
 # 1. Python dependencies
 pip install saxonche lxml
 
-# 2. TEI stylesheets (only needed for extraction with -o).
-#    The folder layout below must be preserved next to the script,
-#    because extract-isosch.xsl imports ../common/functions.xsl:
+# 2. TEI stylesheets (only needed for extraction with -o), if you have no
+#    clone of TEIC/Stylesheets (see below). The folder layout must be
+#    preserved, because extract-isosch.xsl imports ../common/functions.xsl:
 mkdir -p odds common
 curl -sL -o odds/extract-isosch.xsl \
   https://raw.githubusercontent.com/TEIC/Stylesheets/dev/odds/extract-isosch.xsl
@@ -118,6 +118,15 @@ py-xmlvalidate/
 Paths to `odds/` and `common/` are resolved relative to the script
 (`Path(__file__).parent`), not to the working directory: you can invoke it
 from anywhere.
+
+If you already have the TEI Stylesheets (a clone of
+[TEIC/Stylesheets](https://github.com/TEIC/Stylesheets), or oXygen's copy),
+`-o` can use them instead of copies next to the script. It looks, in this
+order, at `--stylesheets DIR`, the environment variable `TEI_STYLESHEETS`,
+the `stylesheets` setting of
+[ODD2RNG](https://codeberg.org/nivaca/ODD2RNG)'s configuration file
+(`~/.config/odd2rng/config.toml`), and last `odds/` and `common/` next to
+the script. `py-xmlvalidate.py --about` says which folder it uses.
 
 ### 2.1 The commands in `~/bin`
 
@@ -155,9 +164,13 @@ rules and messages, first-match shadowing, `let`s at every level and
 `current()`, broken rules and the exit codes, malformed documents, the
 sources of rules (`-s`, `-r`, `<?xml-model?>`, `--as`), the cache, a remote
 schema served from a small local web server, with `--refresh`, the text
-report, and the installer. The ODD test needs the TEI stylesheets in
+report, and the installer. The ODD tests need the TEI stylesheets in
 `odds/` and `common/`, and the tests of `py-xmlvalidate-all.sh` need jing;
-without them they are skipped.
+without them they are skipped. The tests do not read your own
+`TEI_STYLESHEETS` or ODD2RNG configuration.
+
+On GitHub the tests run at every push (`.github/workflows/tests.yml`), with
+jing and the two stylesheets, so that none is skipped.
 
 ## 3. Usage
 
@@ -178,6 +191,7 @@ Since v1.2, the schema flags are **optional**: without them, the schema is
 | `--refresh` | With auto-detection: re-download a remote schema even if cached |
 | `--json` | Machine-readable report on stdout: every violation (pattern, context, assert/report, `role`, message, interpolated text, `fn:path`, line, `xml:id`), XPath errors per rule, and the schema source; ignores `-v`/`--max`. A malformed document becomes an `error` entry instead of aborting the run. Progress messages still go to stderr (used by the VS Code extension, §3.2) |
 | `--as PATH` | With a single document: treat it as if it were located at PATH, for resolving relative `xml-model` hrefs and for the name in the report. The VS Code extension uses it to validate unsaved text from a temporary copy |
+| `--stylesheets DIR` | The TEI Stylesheets for `-o`, instead of `TEI_STYLESHEETS`, ODD2RNG's configuration or `odds/` next to the script (§2) |
 | `--about` | What this program is, who made it, its licence and where it lives, and what it runs with here: Python, saxonche, lxml, Saxon, the cache folder, and whether the TEI stylesheets for `-o` are present. With `--version`, the only options that need no document |
 
 The three explicit sources are mutually exclusive; when none is given,
@@ -331,6 +345,26 @@ copies it into the clones of the two plugins next to this repository
 (`--emacs FOLDER` and `--vscode FOLDER` give others) and says which copies
 changed, from which version. It commits nothing: the copy is then committed
 and released in each plugin, whose changelog says which version it carries.
+It copies `tools/release.py` too, the release script the three repositories
+share.
+
+### 3.5 Releases
+
+```sh
+python3 tools/release.py --dry-run   # check, test and build; say what would follow
+python3 tools/release.py             # then tag, push and release
+```
+
+releases the version in `py-xmlvalidate.py`, with the notes of its row in
+the version history (§11) or those of `--notes FILE`. It checks that the
+tree is committed and the tag new, runs the tests, makes the zip
+(`tools/bundle-zip.py`), tags the commit, pushes `main` and the tag to
+Codeberg and GitHub, makes the release on both (with `tea` and `gh`),
+attaches the zip, and downloads it from both to compare it with the local
+one. A step already done is skipped, so after a failure it can be run again.
+In each plugin the same script releases the plugin, with the notes of its
+changelog, and first checks that its copy of `py-xmlvalidate.py` is the
+same as this one.
 
 ## 4. Configuration and caching
 
@@ -565,7 +599,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **1.19** | 2026-11-18 | `--about`: what the program is, its author, licence and repositories, and what it runs with here (Python, saxonche, lxml, Saxon, the cache, the TEI stylesheets for `-o`). The VS Code extension and the Emacs package have an *About* command of their own, which shows this too. The validation is the same |
+| **1.20** | 2026-11-18 | `-o` finds the TEI Stylesheets through `--stylesheets DIR`, `TEI_STYLESHEETS` or ODD2RNG's configuration, before `odds/` and `common/` next to the script; `--about` says which it uses. 33 tests, run on GitHub at every push. `tools/release.py` makes a release in one command, here and in the plugins (§3.5). The validation is the same |
+| 1.19 | 2026-11-18 | `--about`: what the program is, its author, licence and repositories, and what it runs with here (Python, saxonche, lxml, Saxon, the cache, the TEI stylesheets for `-o`). The VS Code extension and the Emacs package have an *About* command of their own, which shows this too. The validation is the same |
 | 1.18 | 2026-11-18 | A test suite (`tests/`, 28 tests with `unittest`, §2.2). `let`s at schema and pattern level are evaluated with the document's root as context, as ISO Schematron says (they took each rule's node before), and can be used in a rule's context. A rule that cannot be evaluated (an XPath error) now makes the script exit 3, since the verdict is incomplete; `py-xmlvalidate-all.sh` reports that as its own verdict (exit 4). Results on the editions are unchanged |
 | 1.17 | 2026-11-18 | The VS Code extension and the Emacs package move to repositories of their own, py-xmlvalidate-vscode and py-xmlvalidate-emacs, with their history; each carries a copy of `py-xmlvalidate.py`, which the new `tools/sync-plugins.py` keeps in step. Releases of py-xmlvalidate no longer attach the `.vsix`, and its zip no longer has `emacs/`; `tools/install-trang.py` moved to the Emacs package; `tools/screenshots.py` takes the extension from a clone next to this one (`--extension`). The script does not change |
 | 1.16 | 2026-11-17 | Faster again: each rule is evaluated in one Saxon call for all its context nodes, instead of one call per node, which made Saxon compile the rule's expression once per node. The Latin edition went from 11.5 s to 1.9 s (measured back to back on a busy machine), with identical results on 39 documents; if the single call fails, the rule is evaluated node by node as before. Bundled in the VS Code extension 0.5.12 |

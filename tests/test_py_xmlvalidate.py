@@ -89,6 +89,11 @@ class Base(unittest.TestCase):
         for name in ("py-xmlvalidate.py", "py-xmlvalidate-all.sh", "py-xmlvalidate-install.py"):
             shutil.copy2(REPO / name, cls.bin / name)
         cls.script = cls.bin / "py-xmlvalidate.py"
+        # (the user's own settings must not change the results: no ODD2RNG
+        # configuration, no TEI_STYLESHEETS, unless a test sets them)
+        (cls.tmp / "no-config").mkdir()
+        cls.env = {k: v for k, v in os.environ.items() if k != "TEI_STYLESHEETS"}
+        cls.env["ODD2RNG_CONFIG"] = str(cls.tmp / "no-config")
 
     @classmethod
     def tearDownClass(cls):
@@ -103,15 +108,23 @@ class Base(unittest.TestCase):
         path.write_text(text, encoding="utf-8")
         return path
 
-    def run_script(self, *args, cwd=None):
-        """Run py-xmlvalidate.py; return (exit code, stdout, stderr)."""
+    def run_script(self, *args, cwd=None, env=None):
+        """Run py-xmlvalidate.py; return (exit code, stdout, stderr).
+        ENV adds to (or, with None values, removes from) the environment."""
+        environ = dict(self.env)
+        for k, v in (env or {}).items():
+            if v is None:
+                environ.pop(k, None)
+            else:
+                environ[k] = v
         p = subprocess.run([sys.executable, str(self.script), *map(str, args)],
-                           capture_output=True, text=True, cwd=cwd or self.dir, timeout=120)
+                           capture_output=True, text=True, cwd=cwd or self.dir, timeout=120,
+                           env=environ)
         return p.returncode, p.stdout, p.stderr
 
-    def check(self, *args, cwd=None):
+    def check(self, *args, cwd=None, env=None):
         """Run with --json; return (exit code, the report, stderr)."""
-        code, out, err = self.run_script("--json", *args, cwd=cwd)
+        code, out, err = self.run_script("--json", *args, cwd=cwd, env=env)
         self.assertTrue(out.strip().startswith("{"), f"no JSON (exit {code}):\n{err}")
         return code, json.loads(out), err
 
@@ -135,6 +148,7 @@ class TestBasics(Base):
         code, out, _ = self.run_script("--about")
         self.assertEqual(code, 0)
         self.assertRegex(out.splitlines()[0], r"^py-xmlvalidate\.py \d+\.\d+$")
+        self.assertIn("TEI Stylesheets para -o:", out)
         for expected in ("Nicolas Vaughan <nicolasvaughan@proton.me>", "GNU General Public License",
                          "https://codeberg.org/nivaca/py-xmlvalidate", "Python:", "saxonche:", "lxml:",
                          str(self.script.resolve())):
@@ -354,25 +368,60 @@ class TestSources(Base):
         self.assertEqual(code, 1)
         self.assertEqual(Path(self.doc(report)["file"]), real)
 
-    def test_odd(self):
-        odds = REPO / "odds" / "extract-isosch.xsl"
-        if not (odds.is_file() and (REPO / "common" / "functions.xsl").is_file()):
-            self.skipTest("the TEI stylesheets are not in odds/ and common/")
-        for folder in ("odds", "common"):
-            if not (self.bin / folder).exists():
-                shutil.copytree(REPO / folder, self.bin / folder)
-        o = self.write("o.odd", f'''<TEI xmlns="{TEI}" xmlns:sch="{SCH}" xml:lang="en">
+    ODD = f'''<TEI xmlns="{TEI}" xmlns:sch="{SCH}" xml:lang="en">
 <teiHeader><fileDesc><titleStmt><title>t</title></titleStmt><publicationStmt><p>p</p></publicationStmt><sourceDesc><p>s</p></sourceDesc></fileDesc></teiHeader>
 <text><body><schemaSpec ident="t" start="TEI">
   <constraintSpec ident="short-p" scheme="schematron">
     <constraint><sch:rule context="tei:p"><sch:assert test="string-length(.) lt 3">p too long</sch:assert></sch:rule></constraint>
   </constraintSpec>
 </schemaSpec></body></text></TEI>
-''')
+'''
+
+    def odd_case(self, *args, env=None):
+        """Check a document against a small ODD; return (code, report, stderr)."""
+        if not (REPO / "odds" / "extract-isosch.xsl").is_file():
+            self.skipTest("the TEI stylesheets are not in odds/ and common/")
+        o = self.write("o.odd", self.ODD)
         d = self.write("d.xml", tei("<p>ok</p>\n<p>too long</p>"))
-        code, report, err = self.check("-o", o, d)
+        return self.check("-o", o, d, *args, env=env)
+
+    def assert_odd_ok(self, result, origin):
+        code, report, err = result
         self.assertEqual(code, 1, err)
         self.assertEqual(self.texts(report), ["p too long"])
+        self.assertIn(origin, err)
+
+    def test_odd_with_stylesheets_option(self):
+        self.assert_odd_ok(self.odd_case("--stylesheets", REPO), "(--stylesheets)")
+
+    def test_odd_with_environment_variable(self):
+        self.assert_odd_ok(self.odd_case(env={"TEI_STYLESHEETS": str(REPO)}), "(TEI_STYLESHEETS)")
+
+    def test_odd_with_odd2rng_configuration(self):
+        conf = self.dir / "conf"
+        conf.mkdir()
+        (conf / "config.toml").write_text(f'stylesheets = "{REPO}"\n', encoding="utf-8")
+        self.assert_odd_ok(self.odd_case(env={"ODD2RNG_CONFIG": str(conf)}), "config.toml")
+
+    def test_odd_with_stylesheets_next_to_the_script(self):
+        for folder in ("odds", "common"):
+            if (REPO / folder).is_dir() and not (self.bin / folder).exists():
+                shutil.copytree(REPO / folder, self.bin / folder)
+        try:
+            self.assert_odd_ok(self.odd_case(), "(junto al script)")
+        finally:
+            for folder in ("odds", "common"):
+                shutil.rmtree(self.bin / folder, ignore_errors=True)
+
+    def test_odd_without_stylesheets_exits_3(self):
+        o = self.write("o.odd", self.ODD)
+        d = self.write("d.xml", tei("<p>ok</p>"))
+        code, _, err = self.run_script("-o", o, d)
+        self.assertEqual(code, 3)
+        self.assertIn("No encuentro las TEI Stylesheets", err)
+        code, _, err = self.run_script("-o", o, d, "--stylesheets", self.dir)
+        self.assertEqual(code, 3)
+        self.assertIn("no tiene odds/extract-isosch.xsl", err)
 
 
 # ------------------------------------------------------------------ the cache

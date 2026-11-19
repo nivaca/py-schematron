@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
 # This file is part of py-xmlvalidate. See the LICENSE file for details.
-"""Copy py-xmlvalidate.py into the plugins: python3 tools/sync-plugins.py
-[--check] [--emacs FOLDER] [--vscode FOLDER]
+"""Copy py-xmlvalidate.py and tools/release.py into the plugins:
+python3 tools/sync-plugins.py [--check] [--emacs FOLDER] [--vscode FOLDER]
 
 The VS Code extension (py-xmlvalidate-vscode) and the Emacs package
 (py-xmlvalidate-emacs) each carry their own copy of py-xmlvalidate.py, at
@@ -11,7 +11,8 @@ the top of their repositories, so that each installs on its own.  This
 script copies this repository's py-xmlvalidate.py there, by default into
 the clones next to this one (../py-xmlvalidate-emacs and
 ../py-xmlvalidate-vscode), and says which copies changed and from which
-version.  It does not commit anything: after a copy, commit it in the
+version.  It copies tools/release.py too, the release script that the
+three repositories share.  It does not commit anything: after a copy, commit it in the
 plugin and say in its changelog which version it carries.
 
 --check copies nothing: it only says whether the copies are the same as
@@ -32,6 +33,7 @@ from pathlib import Path  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "py-xmlvalidate.py"
+FILES = ("py-xmlvalidate.py", "tools/release.py")    # (copied to the same place)
 PLUGINS = {"emacs": "py-xmlvalidate-emacs", "vscode": "py-xmlvalidate-vscode"}
 
 
@@ -53,28 +55,31 @@ def main(argv=None):
                             help=f"the clone of {name} (default: ../{name})")
     args = parser.parse_args(argv)
 
-    ours = SCRIPT.read_bytes()
     print(f"py-xmlvalidate.py {version(SCRIPT)}")
     stale = 0
     for key, name in PLUGINS.items():
         folder = getattr(args, key).expanduser().resolve()
-        target = folder / "py-xmlvalidate.py"
         if not (folder / ".git").exists():
             print(f"  {name}: no clone in {folder} (skipped)")
             stale += 1
             continue
-        if target.is_file() and target.read_bytes() == ours:
-            print(f"  {name}: up to date")
-            continue
-        before = version(target) if target.is_file() else "none"
-        if args.check:
-            print(f"  {name}: differs (it has {before})")
-            stale += 1
-            continue
-        shutil.copyfile(SCRIPT, target)
-        mode = target.stat().st_mode
-        target.chmod(mode | 0o111)                       # (it can be run, as here)
-        print(f"  {name}: copied ({before} -> {version(SCRIPT)}); commit it there")
+        for rel in FILES:
+            source, target = ROOT / rel, folder / rel
+            ours = source.read_bytes()
+            if target.is_file() and target.read_bytes() == ours:
+                print(f"  {name}/{rel}: up to date")
+                continue
+            before = (version(target) if rel == "py-xmlvalidate.py" else "an older copy") \
+                if target.is_file() else "none"
+            if args.check:
+                print(f"  {name}/{rel}: differs (it has {before})")
+                stale += 1
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+            target.chmod(target.stat().st_mode | 0o111)      # (it can be run, as here)
+            after = version(SCRIPT) if rel == "py-xmlvalidate.py" else "this one"
+            print(f"  {name}/{rel}: copied ({before} -> {after}); commit it there")
     if args.check and stale:
         sys.exit(1)
 

@@ -1,0 +1,40 @@
+# Runs the tests of py-xmlvalidate.py (tests/) on every push and pull
+# request: with jing, so that py-xmlvalidate-all.sh is tested too, and with
+# the two TEI stylesheets fetched as README §2 says, so that -o is tested.
+
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.15"
+
+      - name: Install saxonche, lxml and jing
+        run: |
+          python -m pip install saxonche lxml
+          sudo apt-get update -q
+          sudo apt-get install -y -q jing
+
+      - name: Fetch the TEI stylesheets for -o (README §2)
+        run: |
+          mkdir -p odds common
+          curl -sfL -o odds/extract-isosch.xsl \
+            https://raw.githubusercontent.com/TEIC/Stylesheets/dev/odds/extract-isosch.xsl
+          curl -sfL -o common/functions.xsl \
+            https://raw.githubusercontent.com/TEIC/Stylesheets/dev/common/functions.xsl
+
+      - name: Test
+        run: python -m unittest discover -s tests -v

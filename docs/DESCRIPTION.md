@@ -284,7 +284,12 @@ failing silently.  Version 1.19 added `--about`, which says what the
 program is, who made it, its licence and repositories, and what it runs
 with: Python, saxonche, lxml, Saxon, the cache.  The two plugins have an
 About command of their own, which shows that output too, so a bug report
-can say at once which versions were involved.
+can say at once which versions were involved.  In 1.20, `-o` stopped
+requiring copies of two TEI stylesheets next to the script: it takes the
+folder of a full clone of the TEI Stylesheets from `--stylesheets`, from
+`TEI_STYLESHEETS`, or from the configuration of ODD2RNG, the companion
+script that makes the RelaxNG from an ODD, so that both programs use the
+same stylesheets.
 
 Testing
 -------
@@ -324,7 +329,7 @@ check took 2.6 seconds, nxml had the schema 0.7 seconds later and found
 no errors, and inside an `<rdg>` it offered the 123 elements the schema
 allows there.
 
-py-xmlvalidate.py has 29 tests (`python3 -m unittest discover -s
+py-xmlvalidate.py has 33 tests (`python3 -m unittest discover -s
 tests`), which run it, py-xmlvalidate-all.sh and the installer on small
 documents and schemas made for each case, in a temporary folder: rules
 and messages, shadowing, `let`s at every level and `current()`, broken
