@@ -512,7 +512,8 @@ class TestRemote(Base):
         cls.served = cls.tmp / "served"
         cls.served.mkdir()
         (cls.served / "remote.rng").write_text(rng(2), encoding="utf-8")
-        handler = lambda *a, **kw: http.server.SimpleHTTPRequestHandler(*a, directory=str(cls.served), **kw)
+        def handler(*a, **kw):
+            return http.server.SimpleHTTPRequestHandler(*a, directory=str(cls.served), **kw)
         http.server.SimpleHTTPRequestHandler.log_message = lambda *a: None
         cls.server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
         threading.Thread(target=cls.server.serve_forever, daemon=True).start()

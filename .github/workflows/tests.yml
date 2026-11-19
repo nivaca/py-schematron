@@ -40,6 +40,11 @@ jobs:
           curl -sfL -o common/functions.xsl \
             https://raw.githubusercontent.com/TEIC/Stylesheets/dev/common/functions.xsl
 
+      - name: Static checks (ruff, with ruff.toml)
+        run: |
+          python -m pip install ruff
+          ruff check .
+
       - name: Test
         run: python -m unittest discover -s tests -v
 

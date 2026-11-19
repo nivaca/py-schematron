@@ -215,11 +215,13 @@ def install_libraries(python: Path) -> None:
 def commands(program: Path, python: Path) -> dict[str, str]:
     """The commands to write: {file name: text}."""
     if windows():
-        cmd = lambda script: (f'@echo off\r\nrem {MARK}\r\n'
-                              f'"{python}" "{program / script}" %*\r\n')
+        def cmd(script):
+            return f'@echo off\r\nrem {MARK}\r\n"{python}" "{program / script}" %*\r\n'
         return {"py-schematron.cmd": cmd("py-schematron.py"),
                 "py-schematron-all.cmd": cmd("py-schematron-all.py")}
-    sh = lambda script: f'#!/bin/sh\n# {MARK}\nexec "{python}" "{program / script}" "$@"\n'
+
+    def sh(script):
+        return f'#!/bin/sh\n# {MARK}\nexec "{python}" "{program / script}" "$@"\n'
     return {"py-schematron.py": sh("py-schematron.py"),
             "py-schematron-all.py": sh("py-schematron-all.py"),
             "py-schematron-all.sh": sh("py-schematron-all.py")}      # (its former name)
@@ -256,7 +258,8 @@ def write_commands(folder: Path, texts: dict[str, str], force: bool) -> list[str
 
 
 def on_path(folder: Path) -> bool:
-    norm = lambda p: os.path.normcase(os.path.realpath(p)).rstrip("\\/")
+    def norm(p):
+        return os.path.normcase(os.path.realpath(p)).rstrip("\\/")
     return any(norm(p) == norm(folder) for p in os.environ.get("PATH", "").split(os.pathsep) if p)
 
 

@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 2.4** (`py-schematron.py --version`, `--about`)
+**Version 2.5** (`py-schematron.py --version`, `--about`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -381,7 +381,10 @@ originals are only read. Its own tests are in `tests/test_corpus_check.py`.
 
 On GitHub the tests run at every push and every Monday
 (`.github/workflows/tests.yml`), with jing and the two stylesheets, so that
-none is skipped. Another job installs py-schematron for real with
+none is skipped, after a static check of the Python code with
+[ruff](https://docs.astral.sh/ruff/) (its rules are in `ruff.toml`: errors
+such as undefined names or unused imports, not style; run it here with
+`ruff check .`). Another job installs py-schematron for real with
 `installers/` on Linux and Windows, as a user would, then runs the
 command, validates a document and uninstalls it; on macOS too for release
 tags, the Monday run and runs started by hand, since GitHub often has no
@@ -817,7 +820,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **2.4** | 2026-11-19 | `tools/corpus-check.py` also compares each document's time, and warns about those the new version validates clearly slower (by over 50% and 0.25 s, confirmed by timing them again alone), so that a slowdown is seen before a release. 54 tests. The validation is the same |
+| **2.5** | 2026-11-19 | The Python code is checked with ruff on GitHub before the tests (`ruff.toml`: real errors, not style); the six things it found, all small (lambdas given names, two variables called `l`), are fixed. The validation is the same |
+| 2.4 | 2026-11-19 | `tools/corpus-check.py` also compares each document's time, and warns about those the new version validates clearly slower (by over 50% and 0.25 s, confirmed by timing them again alone), so that a slowdown is seen before a release. 54 tests. The validation is the same |
 | 2.3 | 2026-11-19 | `pyproject.toml` and `src/py_schematron/`, a package scaffold never used (its `py-schematron` command only printed a greeting), are removed: the program is its scripts, installed with `installers/` or from a clone (§2). The validation is the same |
 | 2.2 | 2026-11-19 | **`py-schematron-all.py`**: the two layers are now a Python program, so they run on Windows too (the installers make `py-schematron-all` there); where there is no `jing` command, it runs the `jing.jar` named by `JING_JAR` with Java, and otherwise lxml. `py-schematron-all.sh`, its former name, still works. **`tools/corpus-check.py`** compares the last release with this version on every document of a corpus (`--corpus`, `PY_SCHEMATRON_CORPUS`), and `tools/release.py` runs it before a release. 53 tests. The validation is the same |
 | 2.1 | 2026-11-19 | **Installers for Linux, macOS and Windows** (`installers/`, §2.1): one command downloads the latest release and sets it up in the user's folders, with a Python environment of its own (saxonche, lxml), the two TEI stylesheets for `-o`, and the commands on the PATH; run again, it updates, and `--uninstall` removes it. Detailed instructions for each system, in English and Spanish. `py-schematron-all.sh` takes its Python from `PY_SCHEMATRON_PYTHON`. 45 tests; GitHub also installs it for real on the three systems. The VS Code extension (0.11) and the Emacs package (0.9) use the installer's Python by themselves. The validation is the same |
