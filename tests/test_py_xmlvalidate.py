@@ -102,6 +102,14 @@ class Base(unittest.TestCase):
     def setUp(self):
         self.dir = Path(tempfile.mkdtemp(prefix="case-", dir=self.tmp))
 
+    @staticmethod
+    def line_of(path, text):
+        '''The number of the first line of PATH that contains TEXT.'''
+        for n, line in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
+            if text in line:
+                return n
+        raise AssertionError(f"{text!r} is not in {path}")
+
     def write(self, name, text):
         path = self.dir / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -390,6 +398,10 @@ class TestSources(Base):
         self.assertEqual(code, 1, err)
         self.assertEqual(self.texts(report), ["p too long"])
         self.assertIn(origin, err)
+        # the rule's location is in the ODD, the file one edits
+        rule = report["documents"][0]["violations"][0]["rule"]
+        self.assertEqual(rule, {"file": str((self.dir / "o.odd").resolve()),
+                                "line": self.line_of(self.dir / "o.odd", "<sch:assert")})
 
     def test_odd_with_stylesheets_option(self):
         self.assert_odd_ok(self.odd_case("--stylesheets", REPO), "(--stylesheets)")
@@ -427,6 +439,31 @@ class TestSources(Base):
         # without --json, nothing on stdout
         code, out, _ = self.run_script(d)
         self.assertEqual((code, out), (3, ""))
+
+    def test_rule_locations(self):
+        '''Each violation and XPath error says where its assert or report is:
+        in the .sch with -s, in the RelaxNG (not the harvested .sch) with -r.'''
+        d = self.write("d.xml", tei("<p>a</p>\n<p>b</p>\n<p>c</p>"))
+        s = self.write("s.sch", sch('''  <pattern>
+    <rule context="tei:TEI">
+      <assert test="count(tei:p) le 1">one p</assert>
+      <report test="tei:p[3]">a third p</report>
+      <assert test="tei:p[xs:integer(.)]">broken</assert>
+    </rule>
+  </pattern>'''))
+        code, report, _ = self.check("-s", s, d)
+        self.assertEqual(code, 3)
+        doc = report["documents"][0]
+        where = {v["message"]: v["rule"] for v in doc["violations"]}
+        for message, start in (("one p", '<assert test="count'), ("a third p", "<report")):
+            self.assertEqual(where[message], {"file": str(s.resolve()), "line": self.line_of(s, start)})
+        self.assertEqual(doc["xpath_errors"][0]["rule"],
+                         {"file": str(s.resolve()), "line": self.line_of(s, "broken")})
+        r = self.write("s.rng", rng(1))
+        code, report, _ = self.check("-r", r, d)
+        self.assertEqual(code, 1)
+        self.assertEqual(report["documents"][0]["violations"][0]["rule"],
+                         {"file": str(r.resolve()), "line": self.line_of(r, "<sch:assert")})
 
     def test_odd_without_stylesheets_exits_3(self):
         o = self.write("o.odd", self.ODD)

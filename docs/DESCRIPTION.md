@@ -329,7 +329,7 @@ check took 2.6 seconds, nxml had the schema 0.7 seconds later and found
 no errors, and inside an `<rdg>` it offered the 123 elements the schema
 allows there.
 
-py-xmlvalidate.py has 33 tests (`python3 -m unittest discover -s
+py-xmlvalidate.py has 35 tests (`python3 -m unittest discover -s
 tests`), which run it, py-xmlvalidate-all.sh and the installer on small
 documents and schemas made for each case, in a temporary folder: rules
 and messages, shadowing, `let`s at every level and `current()`, broken
