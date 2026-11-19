@@ -356,6 +356,21 @@ without them they are skipped. The tests do not read your own
 pip: the folders of each system, the commands it writes, an update that
 keeps the cache, a command it did not make, and the removal.
 
+The tests use small documents; the real ones are checked with
+
+```sh
+python3 tools/corpus-check.py --corpus ~/editions     # or set PY_SCHEMATRON_CORPUS
+```
+
+which validates every document with an `<?xml-model?>` under the folder
+with two versions of the program, the last release (or `--against TAG`,
+or `--old FILE`) and this folder's, and lists the documents whose result
+changed: the violations, the rules that could not be evaluated, a
+malformed document, the exit code. It also gives each version's total
+time. The documents are copied to a temporary folder and validated there
+(with `--as`, so their relative schema references still work); the
+originals are only read. Its own tests are in `tests/test_corpus_check.py`.
+
 On GitHub the tests run at every push and every Monday
 (`.github/workflows/tests.yml`), with jing and the two stylesheets, so that
 none is skipped. Another job installs py-schematron for real with
@@ -554,7 +569,10 @@ tree is committed and the tag new, runs the tests, makes the zip
 Codeberg and GitHub, makes the release on both (with `tea` and `gh`),
 attaches the zip, and downloads it from both to compare it with the local
 one. A step already done is skipped, so after a failure it can be run again.
-In each plugin the same script releases the plugin, with the notes of its
+When `PY_SCHEMATRON_CORPUS` names your documents, it also runs the corpus
+check (§2.3) after the tests, and stops if any result changed;
+`--accept-corpus-changes` lets it go on when the change is meant. In each
+plugin the same script releases the plugin, with the notes of its
 changelog, and first checks that its copy of `py-schematron.py` is the
 same as this one.
 

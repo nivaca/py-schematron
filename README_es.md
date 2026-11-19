@@ -361,6 +361,22 @@ ODD2RNG.
 las carpetas de cada sistema, las órdenes que escribe, una actualización
 que conserva el caché, una orden que no creó él y la desinstalación.
 
+Las pruebas usan documentos pequeños; los reales se comprueban con
+
+```sh
+python3 tools/corpus-check.py --corpus ~/ediciones     # o con PY_SCHEMATRON_CORPUS
+```
+
+que valida cada documento con `<?xml-model?>` de la carpeta con dos
+versiones del programa, la última publicada (o `--against ETIQUETA`, o
+`--old ARCHIVO`) y la de esta carpeta, y lista los documentos cuyo
+resultado cambió: las infracciones, las reglas que no se pudieron evaluar,
+un documento mal formado, el código de salida. Da también el tiempo total
+de cada versión. Los documentos se copian a una carpeta temporal y se
+validan allí (con `--as`, para que sus referencias relativas al esquema
+sigan funcionando); los originales solo se leen. Sus propias pruebas están
+en `tests/test_corpus_check.py`.
+
 En GitHub las pruebas corren en cada *push* y cada lunes
 (`.github/workflows/tests.yml`), con jing y las dos hojas de estilo, de
 modo que ninguna se salta. Otra tarea instala py-schematron de verdad con
@@ -563,7 +579,11 @@ esté guardado en git y que la etiqueta sea nueva, corre las pruebas, hace el
 zip (`tools/bundle-zip.py`), etiqueta el commit, sube `main` y la etiqueta a
 Codeberg y a GitHub, crea la versión en ambos (con `tea` y `gh`), adjunta el
 zip y lo descarga de ambos para compararlo con el local. Un paso ya hecho se
-salta, así que tras un fallo basta con volver a correrlo. En cada
+salta, así que tras un fallo basta con volver a correrlo. Si
+`PY_SCHEMATRON_CORPUS` indica tus documentos, corre además la comprobación
+del corpus (§2.3) después de las pruebas, y se detiene si algún resultado
+cambió; `--accept-corpus-changes` lo deja seguir cuando el cambio es
+buscado. En cada
 complemento el mismo script publica el complemento, con las notas de su
 registro de cambios, y antes comprueba que su copia de `py-schematron.py`
 sea igual a esta.
