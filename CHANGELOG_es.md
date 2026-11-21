@@ -17,9 +17,15 @@ El programa principal se llamó `validate.py` hasta la 1.11,
 `py-schematron.py` desde la 2.0. Cada entrada usa los nombres de su
 momento.
 
-## Sin publicar
+## 2.7 — 2026-11-21
 
+- **`docs/THIRD-PARTY_es.md`** (y `docs/THIRD-PARTY.md`, en inglés): el
+  software libre que usa py-schematron, y la licencia de cada uno: aquello
+  con lo que corre (Python, saxonche, lxml, jing, las TEI Stylesheets) y
+  lo que se usa para desarrollarlo y probarlo. Nada de eso se distribuye
+  con el programa.
 - Las descripciones de `docs/` se ponen al día con la 2.6.
+- La validación es la misma.
 
 ## 2.6 — 2026-11-19
 

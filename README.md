@@ -2,7 +2,7 @@
 
 *(Español: [README_es.md](README_es.md))*
 
-**Version 2.6** (`py-schematron.py --version`, `--about`)
+**Version 2.7** (`py-schematron.py --version`, `--about`)
 
 Schematron-layer validator for the SMTrad project. It extracts the ISO
 Schematron rules embedded in the ODD (`smed-schema.xml`) and runs them
@@ -821,7 +821,8 @@ Decisions best not re-litigated without rereading the project's history:
 
 | Version | Date | Changes |
 |---|---|---|
-| **2.6** | 2026-11-19 | **`--jobs N`**: with several documents, validate N at a time in separate processes, each with its own Saxon and the rules already read (`0`: one per processor); the results and the report are the same, in the same order. On 32 editions, 0.28 s instead of 0.65 s with eight. 56 tests. The validation is the same |
+| **2.7** | 2026-11-21 | `docs/THIRD-PARTY.md` and `docs/THIRD-PARTY_es.md`: the open-source software the program uses, and the licence of each, from what it runs with (Python, saxonche, lxml, jing, the TEI Stylesheets) to the tools used to develop and test it. The descriptions are up to date with 2.6. The validation is the same |
+| 2.6 | 2026-11-19 | **`--jobs N`**: with several documents, validate N at a time in separate processes, each with its own Saxon and the rules already read (`0`: one per processor); the results and the report are the same, in the same order. On 32 editions, 0.28 s instead of 0.65 s with eight. 56 tests. The validation is the same |
 | 2.5 | 2026-11-19 | The Python code is checked with ruff on GitHub before the tests (`ruff.toml`: real errors, not style); the six things it found, all small (lambdas given names, two variables called `l`), are fixed. The validation is the same |
 | 2.4 | 2026-11-19 | `tools/corpus-check.py` also compares each document's time, and warns about those the new version validates clearly slower (by over 50% and 0.25 s, confirmed by timing them again alone), so that a slowdown is seen before a release. 54 tests. The validation is the same |
 | 2.3 | 2026-11-19 | `pyproject.toml` and `src/py_schematron/`, a package scaffold never used (its `py-schematron` command only printed a greeting), are removed: the program is its scripts, installed with `installers/` or from a clone (§2). The validation is the same |

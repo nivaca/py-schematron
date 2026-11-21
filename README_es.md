@@ -2,7 +2,7 @@
 
 *(English: [README.md](README.md))*
 
-**Versión 2.6** (`py-schematron.py --version`, `--about`)
+**Versión 2.7** (`py-schematron.py --version`, `--about`)
 
 Validador de la capa Schematron del proyecto SMTrad. Extrae las reglas ISO
 Schematron embebidas en el ODD (`smed-schema.xml`) y las ejecuta contra uno o
@@ -833,7 +833,8 @@ Decisiones que conviene no re-litigar sin releer la historia del proyecto:
 
 | Versión | Fecha | Cambios |
 |---|---|---|
-| **2.6** | 2026-11-19 | **`--jobs N`**: con varios documentos, validar N a la vez en procesos aparte, cada uno con su propio Saxon y las reglas ya leídas (`0`: uno por procesador); los resultados y el informe son los mismos, en el mismo orden. Sobre 32 ediciones, 0,28 s en lugar de 0,65 s con ocho. 56 pruebas. La validación es la misma |
+| **2.7** | 2026-11-21 | `docs/THIRD-PARTY.md` y `docs/THIRD-PARTY_es.md`: el software libre que usa el programa, y la licencia de cada uno, desde aquello con lo que corre (Python, saxonche, lxml, jing, las TEI Stylesheets) hasta las herramientas con que se desarrolla y se prueba. Las descripciones están al día con la 2.6. La validación es la misma |
+| 2.6 | 2026-11-19 | **`--jobs N`**: con varios documentos, validar N a la vez en procesos aparte, cada uno con su propio Saxon y las reglas ya leídas (`0`: uno por procesador); los resultados y el informe son los mismos, en el mismo orden. Sobre 32 ediciones, 0,28 s en lugar de 0,65 s con ocho. 56 pruebas. La validación es la misma |
 | 2.5 | 2026-11-19 | El código en Python se revisa con ruff en GitHub antes de las pruebas (`ruff.toml`: errores reales, no el estilo); las seis cosas que encontró, todas menores (lambdas con nombre, dos variables llamadas `l`), quedan corregidas. La validación es la misma |
 | 2.4 | 2026-11-19 | `tools/corpus-check.py` compara también el tiempo de cada documento, y avisa de los que la versión nueva valida claramente más despacio (más de un 50 % y de 0,25 s, confirmado midiéndolos otra vez a solas), para ver una lentitud antes de publicar. 54 pruebas. La validación es la misma |
 | 2.3 | 2026-11-19 | Se quitan `pyproject.toml` y `src/py_schematron/`, un andamiaje de paquete que nunca se usó (su orden `py-schematron` solo imprimía un saludo): el programa son sus scripts, que se instalan con `installers/` o desde un clon (§2). La validación es la misma |

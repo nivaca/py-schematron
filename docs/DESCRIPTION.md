@@ -21,7 +21,9 @@ It stands on four pieces of other people's work: Saxon, through saxonche
 the lines and the `xml:id`s; jing, by James Clark, which checks the
 RelaxNG structure; and the stylesheet `extract-isosch.xsl` of the TEI
 Stylesheets, which extracts the Schematron of an ODD.  py-schematron is
-free software, under the GNU General Public License, version 3 or later.
+free software, under the GNU General Public License, version 3 or later;
+the software it uses, and the licence of each, are listed in
+`docs/THIRD-PARTY.md`.
 
 Nicolas Vaughan is Associate Professor of Literature at the School of Arts
 and Humanities of the Universidad de los Andes, Bogotá, Colombia.

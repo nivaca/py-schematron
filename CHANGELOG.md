@@ -16,9 +16,15 @@ The main program was called `validate.py` until 1.11, `xmlvalidate.py`
 in 1.12, `py-xmlvalidate.py` from 1.13 to 1.21, and `py-schematron.py`
 since 2.0. Each entry uses the names of its time.
 
-## Unreleased
+## 2.7 — 2026-11-21
 
+- **`docs/THIRD-PARTY.md`** (and `docs/THIRD-PARTY_es.md`, in Spanish):
+  the open-source software py-schematron uses, and the licence of each:
+  what it runs with (Python, saxonche, lxml, jing, the TEI Stylesheets)
+  and what is used to develop and test it. None of it is distributed
+  with the program.
 - The descriptions in `docs/` are brought up to date with 2.6.
+- The validation is the same.
 
 ## 2.6 — 2026-11-19
 
