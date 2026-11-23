@@ -12,7 +12,8 @@ from the files git tracks, so nothing that only lives in this folder gets
 in (the TEI stylesheets in odds/ and common/, schema caches, test
 documents, editor lock files ...).  Left out as well: what is not part of
 the program (tools/, with the scripts that make the bundle, the screenshots
-and the plugins' copies) and hidden files.  The scripts keep their permission to
+and the plugins' copies; packaging/, with the public key that signs the
+releases) and hidden files.  The scripts keep their permission to
 run.  The VS Code extension and the Emacs package have repositories and
 releases of their own (py-schematron-vscode, py-schematron.el).
 
@@ -33,7 +34,7 @@ DIST = os.path.join(HERE, "dist")
 NAME = "py-schematron"
 
 #  What is in the repository but not part of the program
-NOT_PART = ("tools/",)
+NOT_PART = ("tools/", "packaging/")
 
 
 def version() -> str:
