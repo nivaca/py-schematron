@@ -17,6 +17,20 @@ El programa principal se llamó `validate.py` hasta la 1.11,
 `py-schematron.py` desde la 2.0. Cada entrada usa los nombres de su
 momento.
 
+## Sin publicar
+
+- `tools/zenodo.py` prepara el depósito de una versión en Zenodo. `collect`
+  deja en `dist/zenodo/` el árbol de la etiqueta como
+  `py-schematron-VERSIÓN-source.tar.gz`, con su firma, un `SHA256SUMS` del
+  depósito, firmado, y la clave pública, y comprueba cada firma con solo esa
+  clave (`--packages` añade los archivos de la versión). `upload` lo sube a
+  Zenodo como borrador, versión nueva del depósito si ya lo hay, y nunca lo
+  publica. `tools/release.py` reúne ahora el depósito después de la etiqueta
+  y lo sube como borrador, salvo con `--no-zenodo`. Los metadatos están en
+  `.zenodo.json`.
+- `tools/sync-plugins.py` copia también `tools/zenodo.py` en los
+  complementos, con `tools/release.py`.
+
 ## 2.7 — 2026-11-21
 
 - **`docs/THIRD-PARTY_es.md`** (y `docs/THIRD-PARTY.md`, en inglés): el

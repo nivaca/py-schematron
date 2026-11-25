@@ -11,8 +11,8 @@ the top of their repositories, so that each installs on its own.  This
 script copies this repository's py-schematron.py there, by default into
 the clones next to this one (../py-schematron.el and
 ../py-schematron-vscode), and says which copies changed and from which
-version.  It copies tools/release.py too, the release script that the
-three repositories share.  It does not commit anything: after a copy, commit it in the
+version.  It copies tools/release.py and tools/zenodo.py too, the release
+script and the Zenodo tool that the three repositories share.  It does not commit anything: after a copy, commit it in the
 plugin and say in its changelog which version it carries.
 
 --check copies nothing: it only says whether the copies are the same as
@@ -33,7 +33,7 @@ from pathlib import Path  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "py-schematron.py"
-FILES = ("py-schematron.py", "tools/release.py")    # (copied to the same place)
+FILES = ("py-schematron.py", "tools/release.py", "tools/zenodo.py")    # (copied to the same place)
 PLUGINS = {"emacs": "py-schematron.el", "vscode": "py-schematron-vscode"}
 
 
