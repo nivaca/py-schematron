@@ -39,6 +39,9 @@ momento.
   `.zenodo.json`.
 - `tools/sync-plugins.py` copia también `tools/zenodo.py` en los
   complementos, con `tools/release.py`.
+- `tools/zenodo.py`: la descripción del depósito deja fuera la línea que
+  lleva a los README en otras lenguas y la sección Screenshots, cuyas
+  imágenes Zenodo no muestra.
 
 ## 2.7 — 2026-11-21
 

@@ -38,6 +38,9 @@ since 2.0. Each entry uses the names of its time.
   metadata are in `.zenodo.json`.
 - `tools/sync-plugins.py` copies `tools/zenodo.py` into the plugins too,
   with `tools/release.py`.
+- `tools/zenodo.py`: the description of the deposit leaves out the line
+  that points to the README in other languages and the Screenshots section,
+  whose images Zenodo does not show.
 
 ## 2.7 — 2026-11-21
 
