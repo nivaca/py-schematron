@@ -29,7 +29,7 @@ momento.
   `$ZENODO_TOKEN`; `tools/zenodo.py check-token` dice si hay uno.
 
 - `tools/zenodo.py` prepara el depósito de una versión en Zenodo. `collect`
-  deja en `dist/zenodo/` el árbol de la etiqueta como
+  deja en `build/zenodo/` el árbol de la etiqueta como
   `py-schematron-VERSIÓN-source.tar.gz`, con su firma, un `SHA256SUMS` del
   depósito, firmado, y la clave pública, y comprueba cada firma con solo esa
   clave (`--packages` añade los archivos de la versión). `upload` lo sube a
@@ -50,6 +50,10 @@ momento.
 - `tools/test.py` corre las pruebas a la vez, cada archivo de `tests/` en
   un proceso propio, tantos a la vez como procesadores haya (`-j N`), los
   más lentos primero; así las corre `tools/release.py`.
+- `tools/release.py` hace el zip, su firma y `SHA256SUMS` en
+  `build/release/` (también allí lo deja `tools/bundle-zip.py`), y
+  `tools/zenodo.py` el depósito en `build/zenodo/`; se publican desde allí y
+  se borran al final, así que ya nada queda en `dist/`.
 
 ## 2.7 — 2026-11-21
 

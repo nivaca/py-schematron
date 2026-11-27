@@ -590,7 +590,10 @@ check (§2.3) after the tests, and stops if any result changed;
 `--accept-corpus-changes` lets it go on when the change is meant. In each
 plugin the same script releases the plugin, with the notes of its
 changelog, and first checks that its copy of `py-schematron.py` is the
-same as this one.
+same as this one. The zip, its signature and `SHA256SUMS` are made in
+`build/release/`, and the deposit for Zenodo in `build/zenodo/`; both are
+deleted at the end, once everything is published, so nothing is kept in
+`dist/`.
 
 ## 4. Configuration and caching
 

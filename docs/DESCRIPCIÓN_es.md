@@ -30,7 +30,7 @@ Los archivos del proyecto son estos:
 - `installers/`: los instaladores para Linux, macOS y Windows.
 - `tests/`: las pruebas (`test_py_schematron.py`).
 - `tools/sync-plugins.py`: copia py-schematron.py en los clones de la extensión y del paquete de Emacs, o comprueba si sus copias son iguales.
-- `tools/bundle-zip.py` y `tools/screenshots.py`: el zip de cada versión en `dist/` y las capturas de los README.
+- `tools/bundle-zip.py` y `tools/screenshots.py`: el zip de cada versión en `build/release/` y las capturas de los README.
 - `docs/`: las descripciones, las capturas y un ejemplo autónomo (`example/`): un texto TEI breve con errores deliberados y un esquema RelaxNG pequeño con reglas Schematron embebidas.
 
 Con varios documentos, `--jobs N` los reparte entre N procesos, cada uno con su propio Saxon (un PySaxonProcessor no se comparte entre hilos) y las reglas ya leídas; los resultados vuelven en el orden de los documentos, así que el informe es el mismo que con uno.

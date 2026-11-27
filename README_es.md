@@ -603,7 +603,10 @@ cambió; `--accept-corpus-changes` lo deja seguir cuando el cambio es
 buscado. En cada
 complemento el mismo script publica el complemento, con las notas de su
 registro de cambios, y antes comprueba que su copia de `py-schematron.py`
-sea igual a esta.
+sea igual a esta. El zip, su firma y `SHA256SUMS` se hacen en
+`build/release/`, y el depósito para Zenodo en `build/zenodo/`; las dos
+carpetas se borran al final, cuando todo está publicado, así que nada queda
+en `dist/`.
 
 ## 4. Configuración y caché
 

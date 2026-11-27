@@ -28,7 +28,7 @@ since 2.0. Each entry uses the names of its time.
   check-token` says whether there is one.
 
 - `tools/zenodo.py` prepares the deposit of a release for Zenodo. `collect`
-  puts in `dist/zenodo/` the tree of the tag as
+  puts in `build/zenodo/` the tree of the tag as
   `py-schematron-VERSION-source.tar.gz`, with its signature, a signed
   `SHA256SUMS` of the deposit and the public key, and checks every signature
   with only that key (`--packages` adds the files of the release). `upload`
@@ -48,6 +48,11 @@ since 2.0. Each entry uses the names of its time.
 - `tools/test.py` runs the tests at once, each file of `tests/` in a
   process of its own, as many at a time as there are processors (`-j N`),
   the slowest first; `tools/release.py` runs them so.
+- `tools/release.py` makes the zip, its signature and `SHA256SUMS` in
+  `build/release/` (`tools/bundle-zip.py` puts it there too), and
+  `tools/zenodo.py` the deposit in `build/zenodo/`; both are published from
+  there and deleted at the end of the release, so nothing is kept in `dist/`
+  any more.
 
 ## 2.7 — 2026-11-21
 
