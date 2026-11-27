@@ -45,6 +45,9 @@ since 2.0. Each entry uses the names of its time.
   (`tools/zenodo.py upload --publish`), instead of leaving a draft;
   `--zenodo-draft` still leaves one. `tools/zenodo.py publish` publishes a
   draft already there (by default the one waiting with the project's title).
+- `tools/test.py` runs the tests at once, each file of `tests/` in a
+  process of its own, as many at a time as there are processors (`-j N`),
+  the slowest first; `tools/release.py` runs them so.
 
 ## 2.7 — 2026-11-21
 

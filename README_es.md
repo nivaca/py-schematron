@@ -346,12 +346,16 @@ entorno virtual, si su carpeta `bin/` va primero en el PATH.
 ### 2.3 Pruebas
 
 ```sh
-python3 -m unittest discover -s tests -v
+python3 tools/test.py
 ```
 
-ejecuta las pruebas de `py-schematron.py`, `py-schematron-all.py` y
-`py-schematron-install.py` (`tests/test_py_schematron.py`), con el Python
-que las corre, que necesita saxonche y lxml; no hace falta nada más.
+ejecuta las pruebas a la vez, cada archivo en un proceso propio, tantos a
+la vez como procesadores haya (`-j N` lo cambia; `-v` muestra cada
+archivo a medida que termina); `python3 -m unittest discover -s tests -v`
+las corre una tras otra. En los dos casos son las pruebas de
+`py-schematron.py`, `py-schematron-all.py` y `py-schematron-install.py`
+(`tests/test_py_schematron.py`), con el Python que las corre, que
+necesita saxonche y lxml; no hace falta nada más.
 Escriben documentos y esquemas pequeños para cada caso en una carpeta
 temporal, con su propia copia de los scripts, de modo que nada queda en
 esta: reglas y mensajes, el *first-match shadowing*, los `let` de todos los

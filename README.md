@@ -341,14 +341,18 @@ your PATH.
 ### 2.3 Tests
 
 ```sh
-python3 -m unittest discover -s tests -v
+python3 tools/test.py
 ```
 
-runs the tests of `py-schematron.py`, `py-schematron-all.py` and
-`py-schematron-install.py` (`tests/test_py_schematron.py`), with the
-Python that runs them, which needs saxonche and lxml; nothing else is
-needed. They write small documents and schemas for each case in a temporary
-folder, with their own copy of the scripts, so nothing lands in this one:
+runs the tests at once, each file in a process of its own, as many at a
+time as there are processors (`-j N` changes it; `-v` shows each file as
+it ends); `python3 -m unittest discover -s tests -v` runs them one after
+the other. Either way, they are the tests of `py-schematron.py`,
+`py-schematron-all.py` and `py-schematron-install.py`
+(`tests/test_py_schematron.py`), run with the Python that runs them,
+which needs saxonche and lxml; nothing else is needed. They write small
+documents and schemas for each case in a temporary folder, with their own
+copy of the scripts, so nothing lands in this one:
 rules and messages, first-match shadowing, `let`s at every level and
 `current()`, broken rules and the exit codes, malformed documents, the
 sources of rules (`-s`, `-r`, `<?xml-model?>`, `--as`), the cache, a remote
