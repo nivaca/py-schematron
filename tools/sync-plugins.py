@@ -2,22 +2,23 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
 # This file is part of py-schematron. See the LICENSE file for details.
-"""Copy py-schematron.py and tools/release.py into the plugins:
+"""Copia py-schematron.py y tools/release.py en los complementos:
 python3 tools/sync-plugins.py [--check] [--emacs FOLDER] [--vscode FOLDER]
 
-The VS Code extension (py-schematron-vscode) and the Emacs package
-(py-schematron.el) each carry their own copy of py-schematron.py, at
-the top of their repositories, so that each installs on its own.  This
-script copies this repository's py-schematron.py there, by default into
-the clones next to this one (../py-schematron.el and
-../py-schematron-vscode), and says which copies changed and from which
-version.  It copies tools/release.py and tools/zenodo.py too, the release
-script and the Zenodo tool that the three repositories share.  It does not commit anything: after a copy, commit it in the
-plugin and say in its changelog which version it carries.
+La extensión de VS Code (py-schematron-vscode) y el paquete de Emacs
+(py-schematron.el) llevan cada uno su propia copia de py-schematron.py, en la
+raíz de su repositorio, para que cada uno se instale por sí solo.  Este script
+copia allí el py-schematron.py de este repositorio, por omisión en los clones
+vecinos de este (../py-schematron.el y ../py-schematron-vscode), y dice qué
+copias cambiaron y desde qué versión.  Copia también tools/release.py y
+tools/zenodo.py, el script de publicación y la herramienta de Zenodo que
+comparten los tres repositorios.  No hace ningún commit: después de una copia,
+hay que hacerlo en el complemento y decir en su registro de cambios qué versión
+lleva.
 
---check copies nothing: it only says whether the copies are the same as
-this one, and exits with 1 if any is not (or is missing), for use before
-a release.  A plugin folder that does not exist is reported and skipped.
+--check no copia nada: solo dice si las copias son iguales a la de aquí, y sale
+con 1 si alguna no lo es (o falta), para usarlo antes de publicar una versión.
+Si la carpeta de un complemento no existe, lo dice y la salta.
 """
 
 import sys

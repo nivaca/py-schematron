@@ -2,34 +2,34 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
 # This file is part of py-schematron. See the LICENSE file for details.
-"""Compare two versions of py-schematron.py on a corpus of documents:
+"""Compara dos versiones de py-schematron.py sobre un corpus de documentos:
 
     python3 tools/corpus-check.py --corpus FOLDER [--against TAG | --old FILE]
                                   [--jobs N] [--slower PERCENT] [--min-seconds S] [--verbose]
 
-Every XML document under the corpus folders (--corpus, repeatable, or
-$PY_SCHEMATRON_CORPUS, folders separated by the system's path separator)
-that has an <?xml-model?> instruction is validated with --json by two
-versions of the program: the one of the last release (the newest v* tag,
-or --against TAG, or --old FILE) and this folder's py-schematron.py.  The
-documents are copied to a temporary folder first and validated there
-with --as, so their relative schema references still resolve and the
-originals are only read, never written.
+Cada documento XML de las carpetas del corpus (--corpus, que se puede repetir, o
+$PY_SCHEMATRON_CORPUS, con las carpetas separadas por el separador de rutas del
+sistema) que tenga una instrucción <?xml-model?> se valida con --json en dos
+versiones del programa: la de la última versión publicada (la etiqueta v* más
+reciente, o --against TAG, o --old FILE) y el py-schematron.py de esta carpeta.
+Antes, los documentos se copian a una carpeta temporal y se validan allí con
+--as, de modo que sus referencias relativas a los esquemas siguen resolviéndose
+y los originales solo se leen, nunca se escriben.
 
-For each document the two results are compared: the violations (pattern,
-type, text, line, xml:id), the rules that could not be evaluated, a
-malformed document's error, and the exit code; the times and the progress
-messages are left out, since they always differ.  It prints the documents
-whose result changed and the total time of each version, and exits with
-1 if any result changed, 2 for a problem of its own (no documents, no
-tag), 0 otherwise.
+De cada documento se comparan los dos resultados: las violaciones (patrón,
+tipo, texto, línea, xml:id), las reglas que no se pudieron evaluar, el error de
+un documento mal formado y el código de salida; los tiempos y los mensajes de
+progreso quedan fuera, porque siempre difieren.  Escribe los documentos cuyo
+resultado cambió y el tiempo total de cada versión, y sale con 1 si cambió
+algún resultado, con 2 si el problema es suyo (no hay documentos, no hay
+etiqueta) y con 0 en otro caso.
 
-It also compares each document's time, and warns about those the new
-version validates clearly slower: by more than --slower PERCENT (50) and
---min-seconds S (0.25) at once, so that the usual noise of timings does
-not count.  The documents are checked in parallel, so each one flagged is
-timed again on its own, both versions, and kept only if it is still
-slower.  A slowdown is a warning, not a failure.
+Compara también el tiempo de cada documento, y avisa de los que la versión
+nueva valida claramente más despacio: más de --slower PERCENT (50) y de
+--min-seconds S (0.25) a la vez, para que no cuente el ruido habitual de las
+mediciones.  Los documentos se revisan en paralelo, así que cada uno señalado
+se vuelve a medir solo, con las dos versiones, y se mantiene únicamente si
+sigue siendo más lento.  Una lentitud es un aviso, no un fallo.
 """
 
 import sys

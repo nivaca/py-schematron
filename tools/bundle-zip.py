@@ -2,26 +2,25 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Nicolas Vaughan <nicolasvaughan@proton.me>
 # This file is part of py-schematron. See the LICENSE file for details.
-"""Makes the release bundle in build/release/: python3 tools/bundle-zip.py
+"""Hace el zip de la versión en build/release/: python3 tools/bundle-zip.py
 
-build/release/py-schematron-v.VERSION.zip (the version of py-schematron.py), with
-the program in a folder of the same name: py-schematron.py,
-py-schematron-all.sh, py-schematron-install.py, the READMEs, the licence
-and docs/ (the descriptions, the screenshots and the example).  It is made
-from the files git tracks, so nothing that only lives in this folder gets
-in (the TEI stylesheets in odds/ and common/, schema caches, test
-documents, editor lock files ...).  Left out as well: what is not part of
-the program (tools/, with the scripts that make the bundle, the screenshots
-and the plugins' copies; packaging/, with the public key that signs the
-releases) and hidden files.  The scripts keep their permission to
-run.  The VS Code extension and the Emacs package have repositories and
-releases of their own (py-schematron-vscode, py-schematron.el).
+build/release/py-schematron-v.VERSION.zip (la versión de py-schematron.py), con
+el programa en una carpeta del mismo nombre: py-schematron.py,
+py-schematron-all.sh, py-schematron-install.py, los README, la licencia
+y docs/ (las descripciones, las capturas y el ejemplo).  Se hace con los
+archivos que git sigue, así que no entra nada que solo exista en esta carpeta
+(las hojas de estilo de TEI en odds/ y common/, las cachés de esquemas, los
+documentos de prueba, los archivos de bloqueo del editor...).  Quedan fuera
+también lo que no es parte del programa (tools/, con los scripts que hacen el
+zip, las capturas y las copias de los complementos; packaging/, con la clave
+pública que firma las versiones) y los archivos ocultos.  Los scripts conservan
+su permiso de ejecución.  La extensión de VS Code y el paquete de Emacs tienen
+repositorios y versiones propios (py-schematron-vscode, py-schematron.el).
 
-build/release is made in the program's folder if need be (tools/release.py
-publishes it from there, and deletes it at the end; dist/ is not used);
---output gives another folder.  If any of the bundled files has changes
-not committed yet, it says so, since the zip takes the files as they are
-now.
+build/release se crea en la carpeta del programa si hace falta (tools/release.py
+lo publica desde allí y lo borra al final; dist/ no se usa); --output da otra
+carpeta.  Si alguno de los archivos del zip tiene cambios que aún no están en un
+commit, lo advierte, porque el zip toma los archivos tal como están ahora.
 """
 
 import argparse

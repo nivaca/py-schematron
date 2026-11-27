@@ -1,37 +1,38 @@
 #!/usr/bin/env python3
-"""Take the screenshots of the READMEs: the command line, and the VS Code
-extension at work (in dark and light colours).
+"""Toma las capturas de los README: la línea de órdenes y la extensión de VS
+Code en funcionamiento (en colores oscuros y claros).
 
     python3 tools/screenshots.py [-o FOLDER] [--only cli,vscode]
                                  [--looks dark,light] [--scale 2]
                                  [--python PYTHON] [--jing JING] [--code CODE]
                                  [--extension FOLDER]
 
-It writes FOLDER/cli.png and FOLDER/vscode_LOOK.png (by default in
-docs/img/, where README.md, README_es.md and the extension's README take
-them from), at SCALE times the size on the screen (2 by default, sharp on screens
-of high resolution).
+Escribe FOLDER/cli.png y FOLDER/vscode_LOOK.png (por omisión en docs/img/,
+de donde las toman README.md, README_es.md y el README de la extensión), a
+SCALE veces el tamaño en pantalla (2 por omisión, nítidas en pantallas de
+alta resolución).
 
-Every shot uses the example in docs/example/ (edition.xml, with deliberate
-mistakes, and schema.rng, a small RelaxNG with Schematron rules embedded),
-copied to a temporary folder; no other document is read or written.
+Todas las capturas usan el ejemplo de docs/example/ (edition.xml, con errores
+puestos a propósito, y schema.rng, un RelaxNG pequeño con reglas de Schematron
+incrustadas), copiado a una carpeta temporal; no se lee ni se escribe ningún
+otro documento.
 
-* The command line is a real session: py-schematron.py and py-schematron-all.sh are
-  run on the example, and their output is drawn like a terminal (Konsole's
-  Breeze colours, the Hack font) with Pillow.
-* VS Code runs on a hidden X display of its own (Xvfb), with a throwaway
-  profile (settings, extensions) and the extension loaded from a clone of
-  py-schematron-vscode (--extension; by default ../py-schematron-vscode,
-  next to this repository), compiled first. Its
-  src/test/screenshots/drive.ts opens the example,
-  waits for the diagnostics, and shows the Problems panel and the hover of
-  one error; then ImageMagick's import takes the display. Nothing appears
-  on the screen, and the user's own VS Code settings are not touched.
+* La línea de órdenes es una sesión real: py-schematron.py y py-schematron-all.sh
+  corren sobre el ejemplo, y su salida se dibuja como una terminal (los colores
+  Breeze de Konsole, la fuente Hack) con Pillow.
+* VS Code corre en una pantalla X oculta propia (Xvfb), con un perfil
+  desechable (ajustes, extensiones) y la extensión cargada de un clon de
+  py-schematron-vscode (--extension; por omisión ../py-schematron-vscode,
+  junto a este repositorio), compilado antes.  Su
+  src/test/screenshots/drive.ts abre el ejemplo, espera los diagnósticos y
+  muestra el panel Problems y el texto flotante de un error; luego import, de
+  ImageMagick, toma la pantalla.  Nada aparece en la pantalla, y los ajustes
+  de VS Code del usuario no se tocan.
 
-It needs Pillow (for this script), a Python with saxonche and lxml to run
-py-schematron.py (--python; by default the one running this script), jing for the
-RelaxNG layer (--jing; optional), and, for VS Code: Xvfb, ImageMagick,
-Node.js with npm, and VS Code itself (--code).
+Necesita Pillow (para este script), un Python con saxonche y lxml para correr
+py-schematron.py (--python; por omisión el que corre este script), jing para la
+capa de RelaxNG (--jing; opcional) y, para VS Code: Xvfb, ImageMagick, Node.js
+con npm y el propio VS Code (--code).
 """
 
 from __future__ import annotations
